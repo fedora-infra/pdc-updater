@@ -7,3 +7,4 @@ dist
 *.key
 *.gpg
 fedmsg.d/pdcupdater.py
+pdcupdater/tests/vcr-request-data
