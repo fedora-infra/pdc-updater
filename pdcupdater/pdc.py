@@ -1,5 +1,8 @@
 import abc
 
+import logging
+log = logging.getLogger(__name__)
+
 
 def PDC(config):
     """ Initialize our PDC controller from config. """
@@ -31,15 +34,21 @@ class PDCProxy(PDCBase):
 class MockedMethod(object):
     calls = []
     return_value = None
+
+    def __init__(self, method):
+        self.method = method.__name__
+
     def __call__(self, *args, **kwargs):
         # Leave a note that we were called.
         self.calls.append((args, kwargs,))
+        # Tell the world
+        log.info("Called %s with (%r, %r)" % (self.method, args, kwargs))
         # And don't even bother calling the actual method.
         return self.return_value
 
 
 def mocked(method):
-    return MockedMethod()
+    return MockedMethod(method)
 
 
 class PDCMock(PDCBase):
