@@ -1,0 +1,61 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.8.1]
+    method: GET
+    uri: https://apps.fedoraproject.org/datagrepper/id?id=2015-6c98c8e3-0dcb-497d-a0d8-0b3d026a4cfb
+  response:
+    body:
+      string: !!binary |
+        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
+        uf1tknCVl0ffx3y93MWnuJWjb38A3MQe5S8LAAA=
+    headers:
+      appserver: [proxy12.fedoraproject.org]
+      apptime: [D=141937]
+      connection: [Keep-Alive]
+      content-encoding: [gzip]
+      content-length: ['1910']
+      content-type: ['*/*']
+      date: ['Wed, 18 Nov 2015 21:05:05 GMT']
+      keep-alive: ['timeout=15, max=500']
+      server: [Apache/2.4.6 (Red Hat Enterprise Linux) mod_wsgi/3.4 Python/2.7.5]
+      strict-transport-security: [max-age=15768000; includeSubDomains; preload]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+version: 1

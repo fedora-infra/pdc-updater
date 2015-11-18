@@ -1,0 +1,9 @@
+*.pyc
+*.egg-info
+*.egg*
+development.ini
+dist
+*.crt
+*.key
+*.gpg
+fedmsg.d/pdcupdater.py
