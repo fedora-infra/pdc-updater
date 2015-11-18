@@ -1,5 +1,6 @@
 from os.path import dirname
 import unittest
+import logging
 
 import requests
 import vcr
@@ -11,6 +12,9 @@ from nose.tools import raises
 import pdcupdater.pdc
 
 
+log = logging.getLogger(__name__)
+
+
 cassette_dir = dirname(dirname(__file__)) + '/vcr-request-data/'
 
 class BaseHandlerTest(unittest.TestCase):
@@ -19,16 +23,16 @@ class BaseHandlerTest(unittest.TestCase):
 
     def setUp(self):
         if not self.handler_path:
-            print "!! Warning - no handler path declared by base class."
+            log.info("!! Warning - no handler path declared by base class.")
 
         config = self.config
         if self.handler_path:
-            print "Initializing handler %s(%r)" % (self.handler_path, config)
+            log.info("Initializing handler %s(%r)", self.handler_path, config)
             self.handler = fedmsg.utils.load_class(self.handler_path)(config)
 
         self.pdc = pdcupdater.pdc.PDCMock(config)
 
-        print "Setting up vcr cassette in ", cassette_dir
+        log.info("Setting up vcr cassette in %s", cassette_dir)
         self.vcr = vcr.use_cassette(cassette_dir + self.id())
         self.vcr.__enter__()
 
