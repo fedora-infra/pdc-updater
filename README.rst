@@ -28,6 +28,30 @@ Check test suite coverage::
     $ pip install coverage
     $ nosetests --with-coverage --cover-package=pdcupdater
 
+
+Getting an authentication token
+-------------------------------
+
+...from https://pdc.fedorainfracloud.org/
+
+- go to https://pdc.fedorainfracloud.org/ in your browser and login.
+- go to https://pdc.fedorainfracloud.org/rest_api/v1/auth/token/obtain/
+- open up the devtools console in your browser, and find the request for the current page.
+- right click to open a context menu and select 'copy as cURL'
+- paste that into a terminal.  It should have your saml cookie.
+- before hitting enter, edit the command to add the following two options:
+
+  - ``-H 'Accept: application/json'``, to tell the API you want data
+  - ``--insecure``, because we have a self-signed cert
+
+- the command should print out your token.
+
+Copy ``fedmsg.d/pdcupdater-example.py`` to ``fedmsg.d/pdcupdater.py`` and fill
+in your token there.
+
+Running the fedmsg-hub
+----------------------
+
 Run it for real::
 
     $ fedmsg-hub
