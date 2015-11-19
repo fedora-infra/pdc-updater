@@ -11,6 +11,7 @@ config = {
     # and off individually in production if one is causing an issue.
     'pdcupdater.handlers': [
         'pdcupdater.handlers.pkgdb:NewPackageHandler',
+        'pdcupdater.handlers.pkgdb:NewPackageBranchHandler',
         #'pdcupdater.handlers.compose:NewComposeHandler',
         #'pdcupdater.handlers.buildsys:ImageBuildHandler',
         #'pdcupdater.handlers.buildsys:RawhideRPMBuildHandler',
