@@ -9,13 +9,14 @@ import fedmsg.utils
 
 from nose.tools import raises
 
-import pdcupdater.pdc
+import pdcupdater.tests.pdc
 
 
 log = logging.getLogger(__name__)
 
 
 cassette_dir = dirname(dirname(__file__)) + '/vcr-request-data/'
+
 
 class BaseHandlerTest(unittest.TestCase):
     handler_path = None
@@ -30,7 +31,7 @@ class BaseHandlerTest(unittest.TestCase):
             log.info("Initializing handler %s(%r)", self.handler_path, config)
             self.handler = fedmsg.utils.load_class(self.handler_path)(config)
 
-        self.pdc = pdcupdater.pdc.PDCMock(config)
+        self.pdc = pdcupdater.tests.pdc.PDCMock(config)
 
         log.info("Setting up vcr cassette in %s", cassette_dir)
         self.vcr = vcr.use_cassette(cassette_dir + self.id())
