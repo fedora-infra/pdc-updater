@@ -23,6 +23,11 @@ Try running the test suite::
     $ pip install -r test-requirements.txt
     $ nosetests
 
+Check test suite coverage::
+
+    $ pip install coverage
+    $ nosetests --with-coverage --cover-package=pdcupdater
+
 Run it for real::
 
     $ fedmsg-hub
