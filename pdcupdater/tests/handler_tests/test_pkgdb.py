@@ -37,6 +37,7 @@ class TestNewPackage(BaseHandlerTest):
         args, kwargs = calls[0]
         self.assertEquals(args, tuple())
         self.assertDictEqual(kwargs, dict(
+            msg_id=idx,
             name='perl-Lingua-Translit',
             branch='f23',
             # TODO - we may want to send more initial info to PDC
@@ -69,6 +70,7 @@ class TestNewBranch(BaseHandlerTest):
         args, kwargs = calls[0]
         self.assertEquals(args, tuple())
         self.assertDictEqual(kwargs, dict(
+            msg_id=idx,
             name='perl-Lingua-Translit',
             branch='master',
             # TODO - we may want to send more initial info to PDC

@@ -5,14 +5,20 @@ log = logging.getLogger(__name__)
 
 
 class AbstractPDCBase(object):
-    """ An abstract base class that we use to construct a Mock for testing. """
+    """ An abstract base class that we use to construct a Mock for testing.
+
+    Every method here should accept a fedmsg msg_id as the first argument.
+    We'll use that to attach a PDC-Change-Comment header to every PDC request
+    with a link to the originating event in datagrepper.  We can use that to
+    build an audit trail to figure out what changed where and why.
+    """
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, config):
         self.config = config
 
     @abc.abstractmethod
-    def add_new_package(self, name, branch):
+    def add_new_package(self, msg_id, name, branch):
         pass
 
 

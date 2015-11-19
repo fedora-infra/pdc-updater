@@ -8,6 +8,7 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
 
     def handle(self, pdc, msg):
         pdc.add_new_package(
+            msg_id=msg['msg_id'],
             name=msg['msg']['package_name'],
             branch=msg['msg']['package_listing']['collection']['branchname'],
         )
@@ -27,6 +28,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
 
     def handle(self, pdc, msg):
         pdc.add_new_package(
+            msg_id=msg['msg_id'],
             name=msg['msg']['package_listing']['package']['name'],
             branch=msg['msg']['package_listing']['collection']['branchname'],
         )
