@@ -42,6 +42,10 @@ class PDC(AbstractPDCBase):
         self.client = pdc_client.PDCClient(**config)
 
     def add_new_package(self, msg_id, name, branch):
+
+        # XXX - check out this example:
+        # https://github.com/product-definition-center/product-definition-center/blob/master/pdc/scripts/create_release_components.py
+
         # TODO - find the release
         # TODO - add a global component first
         global_component = 'does this need to be an id?  or a string?'
