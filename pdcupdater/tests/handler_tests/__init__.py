@@ -1,4 +1,5 @@
 from os.path import dirname
+import functools
 import unittest
 import logging
 
@@ -9,8 +10,7 @@ import fedmsg.utils
 
 from nose.tools import raises
 
-import pdcupdater.tests.pdc
-
+import pdc_client.test_helpers
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +18,18 @@ log = logging.getLogger(__name__)
 cassette_dir = dirname(dirname(__file__)) + '/vcr-request-data/'
 
 
+def mock_pdc(function):
+    @functools.wraps(function)
+    @pdc_client.test_helpers.mock_api
+    def wrapper(self, pdc):
+        pdc.add_endpoint('global-components', 'POST', 'wat')
+        pdc.add_endpoint('release-components', 'POST', 'wat')
+        return function(self, pdc)
+    return wrapper
+
+
 class BaseHandlerTest(unittest.TestCase):
+    maxDiff = None
     handler_path = None
     config = {}
 
@@ -31,11 +42,10 @@ class BaseHandlerTest(unittest.TestCase):
             log.info("Initializing handler %s(%r)", self.handler_path, config)
             self.handler = fedmsg.utils.load_class(self.handler_path)(config)
 
-        self.pdc = pdcupdater.tests.pdc.PDCMock(config)
-
         log.info("Setting up vcr cassette in %s", cassette_dir)
         self.vcr = vcr.use_cassette(cassette_dir + self.id())
         self.vcr.__enter__()
+
 
     def tearDown(self):
         self.vcr.__exit__()

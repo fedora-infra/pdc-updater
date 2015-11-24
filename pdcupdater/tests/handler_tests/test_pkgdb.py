@@ -1,4 +1,7 @@
-from pdcupdater.tests.handler_tests import BaseHandlerTest
+from pdcupdater.tests.handler_tests import (
+    BaseHandlerTest, mock_pdc
+)
+
 
 class TestNewPackage(BaseHandlerTest):
     handler_path = 'pdcupdater.handlers.pkgdb:NewPackageHandler'
@@ -28,21 +31,28 @@ class TestNewPackage(BaseHandlerTest):
         result = self.handler.can_handle(msg)
         self.assertEquals(result, True)
 
-    def test_handle_new_package(self):
+    @mock_pdc
+    def test_handle_new_package(self, pdc):
         idx = '2015-5affaacc-1539-4e4f-9a5c-5b3f5c7caccf'
         msg = self.get_fedmsg(idx)
-        self.handler.handle(self.pdc, msg)
-        calls = self.pdc.add_new_package.calls
-        self.assertEquals(len(calls), 1)
-        args, kwargs = calls[0]
-        self.assertEquals(args, tuple())
-        self.assertDictEqual(kwargs, dict(
-            msg_id=idx,
-            name='perl-Lingua-Translit',
-            branch='f23',
-            # TODO - we may want to send more initial info to PDC
-            # ... add it here.
-        ))
+        self.handler.handle(pdc, msg)
+        self.assertDictEqual(pdc.calls, {
+            'global-components': [
+                ('POST', dict(name=u'perl-Lingua-Translit')),
+            ],
+            'release-components': [
+                ('POST', dict(
+                    name=u'perl-Lingua-Translit',
+                    global_component=u'perl-Lingua-Translit',
+                    bugzilla_component=u'perl-Lingua-Translit',
+                    brew_package=u'perl-Lingua-Translit',
+                    release=u'f23',
+                    dist_git_branch=u'f23',
+                    type='srpm',
+                    active=True,
+                )),
+            ],
+        })
 
 
 class TestNewBranch(BaseHandlerTest):
@@ -61,18 +71,22 @@ class TestNewBranch(BaseHandlerTest):
         result = self.handler.can_handle(msg)
         self.assertEquals(result, False)
 
-    def test_handle_new_package_branch(self):
+    @mock_pdc
+    def test_handle_new_package_branch(self, pdc):
         idx = '2015-fc7a1d4f-56d8-45d6-a780-b317f0033a16'
         msg = self.get_fedmsg(idx)
-        self.handler.handle(self.pdc, msg)
-        calls = self.pdc.add_new_package.calls
-        self.assertEquals(len(calls), 1)
-        args, kwargs = calls[0]
-        self.assertEquals(args, tuple())
-        self.assertDictEqual(kwargs, dict(
-            msg_id=idx,
-            name='perl-Lingua-Translit',
-            branch='master',
-            # TODO - we may want to send more initial info to PDC
-            # ... add it here.
-        ))
+        self.handler.handle(pdc, msg)
+        self.assertDictEqual(pdc.calls, {
+            'release-components': [
+                ('POST', dict(
+                    name=u'perl-Lingua-Translit',
+                    global_component=u'perl-Lingua-Translit',
+                    bugzilla_component=u'perl-Lingua-Translit',
+                    brew_package=u'perl-Lingua-Translit',
+                    release=u'rawhide',
+                    dist_git_branch=u'master',
+                    type='srpm',
+                    active=True,
+                )),
+            ],
+        })

@@ -7,11 +7,24 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
         return msg['topic'].endswith('pkgdb.package.new')
 
     def handle(self, pdc, msg):
-        pdc.add_new_package(
-            msg_id=msg['msg_id'],
-            name=msg['msg']['package_name'],
-            branch=msg['msg']['package_listing']['collection']['branchname'],
+        name = msg['msg']['package_name']
+        branch = msg['msg']['package_listing']['collection']['branchname']
+        release = msg['msg']['package_listing']['collection']['koji_name']
+        global_component = name
+        data = dict(
+            name=name,
+            release=release,
+            global_component=global_component,
+            dist_git_branch=branch,
+            bugzilla_component=name,
+            brew_package=name,
+            active=True,
+            type='srpm',
         )
+        # https://pdc.fedorainfracloud.org/rest_api/v1/global-components/
+        pdc['global-components']._(dict(name=name))
+        # https://pdc.fedorainfracloud.org/rest_api/v1/release-components/
+        pdc['release-components']._(data)
 
     def audit(self):
         raise NotImplementedError()
@@ -27,11 +40,22 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         return msg['topic'].endswith('pkgdb.package.branch.new')
 
     def handle(self, pdc, msg):
-        pdc.add_new_package(
-            msg_id=msg['msg_id'],
-            name=msg['msg']['package_listing']['package']['name'],
-            branch=msg['msg']['package_listing']['collection']['branchname'],
+        name = msg['msg']['package_listing']['package']['name']
+        branch = msg['msg']['package_listing']['collection']['branchname']
+        release = msg['msg']['package_listing']['collection']['koji_name']
+        global_component = name
+        data = dict(
+            name=name,
+            release=release,
+            global_component=global_component,
+            dist_git_branch=branch,
+            bugzilla_component=name,
+            brew_package=name,
+            active=True,
+            type='srpm',
         )
+        # https://pdc.fedorainfracloud.org/rest_api/v1/release-components/
+        pdc['release-components']._(data)
 
     def audit(self):
         raise NotImplementedError()
