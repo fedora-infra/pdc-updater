@@ -22,7 +22,6 @@ Authors:    Ralph Bean <rbean@redhat.com>
 import contextlib
 import fedmsg.consumers
 
-import pdcupdater.pdc
 import pdcupdater.handlers
 
 import logging
