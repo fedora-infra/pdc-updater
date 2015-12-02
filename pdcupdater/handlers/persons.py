@@ -12,8 +12,8 @@ class NewPersonHandler(pdcupdater.handlers.BaseHandler):
         email = '%s@fedoraproject.org' % username
         pdc['persons']._(dict(username=username, email=email))
 
-    def audit(self):
+    def audit(self, pdc):
         raise NotImplementedError()
 
-    def initialize(self):
+    def initialize(self, pdc):
         raise NotImplementedError()

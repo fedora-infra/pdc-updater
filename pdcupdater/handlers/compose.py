@@ -1,6 +1,7 @@
 import requests
 import pdcupdater.handlers
 
+
 class NewComposeHandler(pdcupdater.handlers.BaseHandler):
     """ When pungi-koji finishes a new compose. """
 
@@ -52,8 +53,8 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             rpm_manifest=rpms,
         ))
 
-    def audit(self):
+    def audit(self, pdc):
         raise NotImplementedError()
 
-    def initialize(self):
+    def initialize(self, pdc):
         raise NotImplementedError()

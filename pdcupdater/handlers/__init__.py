@@ -50,6 +50,4 @@ class BaseHandler(object):
 
         It is expected to take a very long time to run.
         """
-
         pass
-

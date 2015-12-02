@@ -75,8 +75,8 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         )
         pdc['rpms']._(data)
 
-    def audit(self):
+    def audit(self, pdc):
         raise NotImplementedError()
 
-    def initialize(self):
+    def initialize(self, pdc):
         raise NotImplementedError()

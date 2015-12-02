@@ -26,10 +26,10 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
         # https://pdc.fedorainfracloud.org/rest_api/v1/release-components/
         pdc['release-components']._(data)
 
-    def audit(self):
+    def audit(self, pdc):
         raise NotImplementedError()
 
-    def initialize(self):
+    def initialize(self, pdc):
         raise NotImplementedError()
 
 
@@ -57,8 +57,8 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         # https://pdc.fedorainfracloud.org/rest_api/v1/release-components/
         pdc['release-components']._(data)
 
-    def audit(self):
+    def audit(self, pdc):
         raise NotImplementedError()
 
-    def initialize(self):
+    def initialize(self, pdc):
         raise NotImplementedError()
