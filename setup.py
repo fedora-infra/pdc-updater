@@ -6,6 +6,7 @@ requirements = [
     'fedmsg[commands]',
     'fedmsg[consumers]',
     'requests',
+    'dogpile.cache',
 ]
 
 
