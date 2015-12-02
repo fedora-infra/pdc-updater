@@ -1,6 +1,9 @@
 
 config = {
+    # Should we turn on the realtime updater?
     'pdcupdater.enabled': True,
+
+    # Credentials to talk to PDC
     'pdcupdater.pdc': {
         'server': 'https://pdc.fedorainfracloud.org/rest_api/v1/',
         'insecure': True,  # Just because we have a self-signed cert in the cloud
@@ -17,6 +20,13 @@ config = {
         # 7) the command should print out your token.
     },
 
+    # Credentials to talk to FAS
+    'pdcupdater.fas': {
+        'base_url': 'https://admin.fedoraproject.org/accounts',
+        'username': 'YOUR_USERNAME_GOES_HERE',
+        'password': 'AWESOME_SECRET_PASSWORD_GOES_HERE',
+    },
+
     # We have an explicit list of these in the config so we can turn them on
     # and off individually in production if one is causing an issue.
     'pdcupdater.handlers': [
@@ -27,4 +37,15 @@ config = {
         'pdcupdater.handlers.rpms:NewRPMHandler',
         'pdcupdater.handlers.persons:NewPersonHandler',
     ],
+
+    # Augment the base fedmsg logging config to also handle pdcupdater loggers.
+    'logging': dict(
+        loggers=dict(
+            pdcupdater={
+                "level": "DEBUG",
+                "propagate": False,
+                "handlers": ["console"],
+            },
+        )
+    )
 }

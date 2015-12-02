@@ -21,27 +21,46 @@ cassette_dir = dirname(dirname(__file__)) + '/vcr-request-data/'
 def mock_pdc(function):
     @functools.wraps(function)
     @pdc_client.test_helpers.mock_api
-    def wrapper(self, pdc):
+    def wrapper(self, pdc, *args, **kwargs):
+        # Mock out POST endpoints
         pdc.add_endpoint('global-components', 'POST', 'wat')
         pdc.add_endpoint('release-components', 'POST', 'wat')
         pdc.add_endpoint('compose-images', 'POST', 'wat')
         pdc.add_endpoint('compose-rpms', 'POST', 'wat')
         pdc.add_endpoint('persons', 'POST', 'wat')
         pdc.add_endpoint('rpms', 'POST', 'wat')
-        return function(self, pdc)
+
+        # Mock out GET endpoints
+        pdc.add_endpoint('persons', 'GET', {
+            'count': 0,
+            'next': None,
+            'previous': None,
+            'results': [
+                {'username': 'ralph', 'email': 'ralph@fedoraproject.org'},
+                {'username': 'lmacken', 'email': 'lmacken@fedoraproject.org'},
+            ],
+        })
+
+        return function(self, pdc, *args, **kwargs)
     return wrapper
 
 
 class BaseHandlerTest(unittest.TestCase):
     maxDiff = None
     handler_path = None
-    config = {}
+    config = {
+        'pdcupdater.fas': {
+            'base_url': 'whatever',
+            'username': 'whatever',
+            'password': 'whatever',
+        },
+    }
 
     def setUp(self):
         if not self.handler_path:
             log.info("!! Warning - no handler path declared by base class.")
 
-        config = self.config
+        config = BaseHandlerTest.config
         if self.handler_path:
             log.info("Initializing handler %s(%r)", self.handler_path, config)
             self.handler = fedmsg.utils.load_class(self.handler_path)(config)
@@ -49,7 +68,6 @@ class BaseHandlerTest(unittest.TestCase):
         log.info("Setting up vcr cassette in %s", cassette_dir)
         self.vcr = vcr.use_cassette(cassette_dir + self.id())
         self.vcr.__enter__()
-
 
     def tearDown(self):
         self.vcr.__exit__()

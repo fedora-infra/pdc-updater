@@ -1,3 +1,5 @@
+import mock
+
 from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
@@ -32,3 +34,122 @@ class TestNewPerson(BaseHandlerTest):
                 )),
             ],
         })
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.fas_persons')
+    def test_initialize_from_fas(self, pdc, fas):
+        # Mock out FAS results
+        fas.return_value = [
+            {'username': 'ralph'},
+            {'username': 'lmacken'},
+        ]
+
+        # Call the initializer
+        self.handler.initialize(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'persons': [
+                ('POST', [
+                    dict(
+                        username='ralph',
+                        email='ralph@fedoraproject.org',
+                    ),
+                    dict(
+                        username='lmacken',
+                        email='lmacken@fedoraproject.org',
+                    ),
+                ]),
+            ],
+        })
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.fas_persons')
+    def test_audit_simple(self, pdc, fas):
+        # Mock out FAS results
+        fas.return_value = [
+            {'username': 'ralph'},
+            {'username': 'lmacken'},
+        ]
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'persons': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, set())
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.fas_persons')
+    def test_audit_with_an_extra(self, pdc, fas):
+        # Mock out FAS results
+        fas.return_value = [
+            {'username': 'ralph'},
+        ]
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'persons': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set(['lmacken']))
+        self.assertSetEqual(absent, set())
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.fas_persons')
+    def test_audit_missing_one(self, pdc, fas):
+        # Mock out FAS results
+        fas.return_value = [
+            {'username': 'ralph'},
+            {'username': 'lmacken'},
+            {'username': 'toshio'},
+        ]
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'persons': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, set(['toshio']))
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.fas_persons')
+    def test_audit_flipping_out(self, pdc, fas):
+        # Mock out FAS results
+        fas.return_value = [
+            {'username': 'toshio'},
+        ]
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'persons': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set(['lmacken', 'ralph']))
+        self.assertSetEqual(absent, set(['toshio']))

@@ -6,6 +6,7 @@ from pdcupdater.tests.handler_tests import (
 )
 
 here = os.path.dirname(__file__)
+
 with open(here + '/data/composeinfo.json', 'r') as f:
     composeinfo = json.loads(f.read())
 
@@ -70,19 +71,20 @@ class TestNewCompose(BaseHandlerTest):
             ),
         )
         self.handler.handle(pdc, msg)
-        self.assertDictEqual(pdc.calls, {
-            'compose-images': [
-                ('POST', dict(
-                    release_id=u'rawhide',
-                    composeinfo=composeinfo,
-                    image_manifest=images,
-                )),
-            ],
-            'compose-rpms': [
-                ('POST', dict(
-                    release_id=u'rawhide',
-                    composeinfo=composeinfo,
-                    rpm_manifest=rpms,
-                )),
-            ],
-        })
+
+        # Check compose images
+        compose_images = pdc.calls['compose-images']
+        self.assertEquals(len(compose_images), 1)
+        self.assertDictEqual(compose_images[0][1], dict(
+            release_id=u'rawhide',
+            composeinfo=composeinfo,
+            image_manifest=images,
+        ))
+        # Check compose rpms
+        compose_rpms = pdc.calls['compose-rpms']
+        self.assertEquals(len(compose_rpms), 1)
+        self.assertEquals(compose_rpms[0][1], dict(
+            release_id=u'rawhide',
+            composeinfo=composeinfo,
+            rpm_manifest=rpms,
+        ))
