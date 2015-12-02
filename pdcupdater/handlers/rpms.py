@@ -24,7 +24,7 @@ def bodhi_releases():
 
 @cache.cache_on_arguments()
 def rawhide_tag():
-    # TODO - get this tag from bodhi, instead of guessing from pkgdb
+    # TODO - get this tag from PDC, instead of guessing from pkgdb
     url = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
     response = requests.get(url, params=dict(clt_status="Under Development"))
     if not bool(response):
