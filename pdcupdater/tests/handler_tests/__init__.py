@@ -42,7 +42,7 @@ def mock_pdc(function):
         })
 
         pdc.add_endpoint('rpms', 'GET', {
-            'count': 2
+            'count': 2,
             'next': None,
             'previous': None,
             'results': [{
