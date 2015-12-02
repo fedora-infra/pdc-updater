@@ -26,6 +26,6 @@ config = {
         #'pdcupdater.handlers.buildsys:ImageBuildHandler',
         #'pdcupdater.handlers.buildsys:RawhideRPMBuildHandler',
         #'pdcupdater.handlers.bodhi:UpdateRequestCompleteHandler',
-        #'pdcupdater.handlers.fas:NewUserHandler',  # This one is cheeseball.
+        'pdcupdater.handlers.persons:NewPersonHandler',
     ],
 }
