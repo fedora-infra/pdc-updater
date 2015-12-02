@@ -32,12 +32,24 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             raise IOError("Failed to get %r: %r" % (url, response))
         images = response.json()
 
+        url = base + '/rpms.json'
+        response = requests.get(url)
+        if not bool(response):
+            raise IOError("Failed to get %r: %r" % (url, response))
+        rpms = response.json()
+
         # https://github.com/product-definition-center/product-definition-center/issues/228
         # https://pdc.fedorainfracloud.org/rest_api/v1/compose-images/
         pdc['compose-images']._(dict(
             release_id=release_id,
             composeinfo=composeinfo,
             image_manifest=images,
+        ))
+        # https://pdc.fedorainfracloud.org/rest_api/v1/compose-rpms/
+        pdc['compose-rpms']._(dict(
+            release_id=release_id,
+            composeinfo=composeinfo,
+            rpm_manifest=rpms,
         ))
 
     def audit(self):

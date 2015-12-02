@@ -12,6 +12,9 @@ with open(here + '/data/composeinfo.json', 'r') as f:
 with open(here + '/data/images.json', 'r') as f:
     images = json.loads(f.read())
 
+with open(here + '/data/rpms.json', 'r') as f:
+    rpms = json.loads(f.read())
+
 
 class TestNewCompose(BaseHandlerTest):
     handler_path = 'pdcupdater.handlers.compose:NewComposeHandler'
@@ -73,6 +76,13 @@ class TestNewCompose(BaseHandlerTest):
                     release_id=u'rawhide',
                     composeinfo=composeinfo,
                     image_manifest=images,
+                )),
+            ],
+            'compose-rpms': [
+                ('POST', dict(
+                    release_id=u'rawhide',
+                    composeinfo=composeinfo,
+                    rpm_manifest=rpms,
                 )),
             ],
         })
