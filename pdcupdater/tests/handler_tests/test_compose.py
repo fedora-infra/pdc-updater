@@ -14,7 +14,7 @@ with open(here + '/data/images.json', 'r') as f:
 
 
 class TestNewCompose(BaseHandlerTest):
-    handler_path = 'pdcupdater.handlers.pkgdb:NewComposeHandler'
+    handler_path = 'pdcupdater.handlers.compose:NewComposeHandler'
     config = {}
 
     def test_cannot_handle_fedbadges(self):
@@ -70,7 +70,7 @@ class TestNewCompose(BaseHandlerTest):
         self.assertDictEqual(pdc.calls, {
             'compose-images': [
                 ('POST', dict(
-                    release_id=u'who-even-knows-what-this-should-be',
+                    release_id=u'rawhide',
                     composeinfo=composeinfo,
                     image_manifest=images,
                 )),
