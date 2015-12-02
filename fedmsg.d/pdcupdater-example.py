@@ -27,6 +27,9 @@ config = {
         'password': 'AWESOME_SECRET_PASSWORD_GOES_HERE',
     },
 
+    # Koji details
+    'pdcupdater.koji_url': 'http://koji.fedoraproject.org/kojihub',
+
     # We have an explicit list of these in the config so we can turn them on
     # and off individually in production if one is causing an issue.
     'pdcupdater.handlers': [

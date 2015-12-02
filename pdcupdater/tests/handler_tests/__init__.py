@@ -32,13 +32,36 @@ def mock_pdc(function):
 
         # Mock out GET endpoints
         pdc.add_endpoint('persons', 'GET', {
-            'count': 0,
+            'count': 2,
             'next': None,
             'previous': None,
             'results': [
                 {'username': 'ralph', 'email': 'ralph@fedoraproject.org'},
                 {'username': 'lmacken', 'email': 'lmacken@fedoraproject.org'},
             ],
+        })
+
+        pdc.add_endpoint('rpms', 'GET', {
+            'count': 2
+            'next': None,
+            'previous': None,
+            'results': [{
+                'name': 'dvisvgm',
+                'arch': 'src',
+                'epoch': None,
+                'version': '1.11',
+                'release': '1.el7',
+                'linked_releases': ['epel7'],
+                'srpm_name': 'undefined...',
+            }, {
+                'name': 'rubygem-jmespath-doc',
+                'arch': 'noarch',
+                'epoch': None,
+                'version': '1.1.3',
+                'release': '1.el7',
+                'linked_releases': ['epel7'],
+                'srpm_name': 'undefined...',
+            }],
         })
 
         return function(self, pdc, *args, **kwargs)
@@ -54,6 +77,8 @@ class BaseHandlerTest(unittest.TestCase):
             'username': 'whatever',
             'password': 'whatever',
         },
+
+        'pdcupdater.koji_url': 'blahblahblah',
     }
 
     def setUp(self):

@@ -23,3 +23,9 @@ def fas_persons(base_url, username, password):
         socket.setdefaulttimeout(timeout)
 
     return response['people']
+
+
+def koji_builds_in_tag(url, tag):
+    session = koji.ClientSession(url)
+    rpms, builds = session.listTaggedRPMS(tag)
+    return rpms

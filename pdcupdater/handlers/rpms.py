@@ -1,7 +1,10 @@
+import json
 import logging
 
 import requests
 import dogpile.cache
+
+from pdc_client import get_paged
 
 import pdcupdater.handlers
 
@@ -34,8 +37,18 @@ def rawhide_tag():
     return 'f' + rawhide['dist_tag'].strip('.fc')
 
 
+def interesting_tags():
+    releases = bodhi_releases()
+    stable_tags = [r['stable_tag'] for r in releases]
+    return stable_tags + [rawhide_tag()]
+
+
 class NewRPMHandler(pdcupdater.handlers.BaseHandler):
     """ When a new build is tagged into rawhide or a stable release. """
+
+    def __init__(self, *args, **kwargs):
+        super(NewRPMHandler, self).__init__(*args, **kwargs)
+        self.koji_url = self.config['pdcupdater.koji_url']
 
     def can_handle(self, msg):
         if not msg['topic'].endswith('buildsys.tag'):
@@ -45,11 +58,9 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         if msg['msg']['instance'] != 'primary':
             return False
 
-        releases = bodhi_releases()
-        stable_tags = [r['stable_tag'] for r in releases]
-        interesting = stable_tags + [rawhide_tag()]
-
+        interesting = interesting_tags()
         tag = msg['msg']['tag']
+
         if tag not in interesting:
             log.debug("%r not in %r.  Skipping."  % (tag, interesting))
             return False
@@ -76,7 +87,43 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         pdc['rpms']._(data)
 
     def audit(self, pdc):
-        raise NotImplementedError()
+        # Query the data sources
+        koji_rpms = self._gather_koji_rpms(pdc)
+        pdc_rpms = get_paged(pdc['rpms']._)
+
+        # Normalize the lists before comparing them.
+        koji_rpms = set([json.dumps(r, sort_keys=True) for r in koji_rpms])
+        pdc_rpms = set([json.dumps(r, sort_keys=True) for r in pdc_rpms])
+
+        # use set operators to determine the difference
+        present = pdc_rpms - koji_rpms
+        absent = koji_rpms - pdc_rpms
+
+        return present, absent
 
     def initialize(self, pdc):
-        raise NotImplementedError()
+        # Get a list of all rpms in koji
+        bulk_payload = self._gather_koji_rpms(pdc)
+        # And send it to PDC
+        pdc['rpms']._(bulk_payload)
+
+    def _gather_koji_rpms(self, pdc):
+        koji_rpms = {
+            tag: pdcupdater.services.koji_builds_in_tag(tag, self.koji_url)
+            for tag in interesting_tags()
+        }
+
+        # Flatten into a list and augment the koji dict with tag info.
+        return [
+            dict(
+                name=rpm['name'],
+                version=rpm['version'],
+                release=rpm['release'],
+                epoch=rpm['epoch'],
+                arch=rpm['arch'],
+                linked_releases=[tag],
+                srpm_name='undefined...', # TODO -- handle this
+            )
+            for tag, rpms in koji_rpms.items()
+            for rpm in rpms
+        ]
