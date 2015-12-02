@@ -3,7 +3,7 @@ from pdcupdater.tests.handler_tests import (
 )
 
 
-class TestNewPackage(BaseHandlerTest):
+class TestNewPerson(BaseHandlerTest):
     handler_path = 'pdcupdater.handlers.persons:NewPersonHandler'
     config = {}
 
