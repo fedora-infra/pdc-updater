@@ -24,6 +24,7 @@ def mock_pdc(function):
     def wrapper(self, pdc):
         pdc.add_endpoint('global-components', 'POST', 'wat')
         pdc.add_endpoint('release-components', 'POST', 'wat')
+        pdc.add_endpoint('compose-images', 'POST', 'wat')
         return function(self, pdc)
     return wrapper
 

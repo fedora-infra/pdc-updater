@@ -22,7 +22,7 @@ config = {
     'pdcupdater.handlers': [
         'pdcupdater.handlers.pkgdb:NewPackageHandler',
         'pdcupdater.handlers.pkgdb:NewPackageBranchHandler',
-        #'pdcupdater.handlers.compose:NewComposeHandler',
+        'pdcupdater.handlers.compose:NewComposeHandler',
         #'pdcupdater.handlers.buildsys:ImageBuildHandler',
         #'pdcupdater.handlers.buildsys:RawhideRPMBuildHandler',
         #'pdcupdater.handlers.bodhi:UpdateRequestCompleteHandler',
