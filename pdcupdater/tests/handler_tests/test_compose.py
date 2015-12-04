@@ -126,3 +126,58 @@ class TestNewCompose(BaseHandlerTest):
             composeinfo=composeinfo,
             rpm_manifest=rpms,
         ))
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.old_composes')
+    def test_audit_simple(self, pdc, old_composes):
+        # Mock out kojipkgs results
+        old_composes.return_value = [
+            ('rawhide', 'Fedora-24-20151130.n.2',
+             'https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-24-20151130.n.2',
+             ),
+        ]
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'composes': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, set())
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.old_composes')
+    def test_audit_missing_one(self, pdc, old_composes):
+        # Mock out kojipkgs results
+        old_composes.return_value = [
+            ('rawhide', 'Fedora-24-20151130.n.2',
+             'https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-24-20151130.n.2',
+             ),
+            ('rawhide', 'Fedora-24-20151130.n.3',
+             'https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-24-20151130.n.3',
+             ),
+        ]
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'composes': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, set([
+            ('rawhide', 'Fedora-24-20151130.n.3',
+             'https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-24-20151130.n.3',
+             ),
+        ]))

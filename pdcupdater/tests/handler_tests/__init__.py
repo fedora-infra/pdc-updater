@@ -64,6 +64,26 @@ def mock_pdc(function):
             }],
         })
 
+        pdc.add_endpoint('composes', 'GET', {
+            'count': 2,
+            'next': None,
+            'previous': None,
+            'results': [{
+                "acceptance_testing": "ComposeAcceptanceTestingState.name",
+                "compose_date": "20151130",
+                "compose_id": "Fedora-24-20151130.n.2",
+                "compose_label": "Fedora-24-20151130.n.2",
+                "compose_respin": "2",
+                "compose_type": "nightly",
+                "deleted": "boolean",
+                "linked_releases": [],
+                "release": "rawhide",
+                "rpm_mapping_template": "some url",
+                "rtt_tested_architectures": { },
+                "sigkeys": [],
+            }],
+        })
+
         return function(self, pdc, *args, **kwargs)
     return wrapper
 
@@ -78,7 +98,7 @@ class BaseHandlerTest(unittest.TestCase):
             'password': 'whatever',
         },
         'pdcupdater.koji_url': 'blahblahblah',
-        'pdcupdater.old_composes_url': 'blahblahblah',
+        'pdcupdater.old_composes_url': 'https://kojipkgs.fedoraproject.org/compose',
     }
 
     def setUp(self):

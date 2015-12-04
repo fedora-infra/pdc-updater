@@ -1,6 +1,9 @@
 import requests
 import pdcupdater.handlers
 
+from pdc_client import get_paged
+
+
 
 class NewComposeHandler(pdcupdater.handlers.BaseHandler):
     """ When pungi-koji finishes a new compose. """
@@ -31,7 +34,24 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         self._import_compose(pdc, release_id, compose_id, compose_url)
 
     def audit(self, pdc):
-        raise NotImplementedError()
+        # Query the data sources
+        old_composes = pdcupdater.services.old_composes(self.old_composes_url)
+        pdc_composes = get_paged(pdc['composes']._)
+
+        # normalize the two lists
+        compose2url = lambda compose: "/".join([
+            self.old_composes_url, compose['release'], compose['compose_id']
+        ])
+        old_composes = set(old_composes)
+        pdc_composes = set([(
+            compose['release'], compose['compose_id'], compose2url(compose)
+        ) for compose in pdc_composes])
+
+        # use set operators to determine the difference
+        present = pdc_composes - old_composes
+        absent = old_composes - pdc_composes
+
+        return present, absent
 
     def initialize(self, pdc):
         old_composes = pdcupdater.services.old_composes(self.old_composes_url)
@@ -72,4 +92,3 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             composeinfo=composeinfo,
             rpm_manifest=rpms,
         ))
-
