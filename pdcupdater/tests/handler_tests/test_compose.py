@@ -1,6 +1,8 @@
 import json
 import os
 
+import mock
+
 from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
@@ -36,7 +38,9 @@ class TestNewCompose(BaseHandlerTest):
             msg=dict(
                 # Probably some other info goes here too..
                 # but this is all we know for now.
-                compose_id='20151130.n.2',
+                compose_id='Fedora-24-20151130.n.2',
+                # TODO -- we're not sure what release will be called, actually.
+                release_id='rawhide',
             ),
         )
         result = self.handler.can_handle(msg)
@@ -51,7 +55,9 @@ class TestNewCompose(BaseHandlerTest):
             msg=dict(
                 # Probably some other info goes here too..
                 # but this is all we know for now.
-                compose_id='20151130.n.2',
+                compose_id='Fedora-24-20151130.n.2',
+                # TODO -- we're not sure what release will be called, actually.
+                release_id='rawhide',
             ),
         )
         result = self.handler.can_handle(msg)
@@ -67,10 +73,42 @@ class TestNewCompose(BaseHandlerTest):
             msg=dict(
                 # Probably some other info goes here too..
                 # but this is all we know for now.
-                compose_id='20151130.n.2',
+                compose_id='Fedora-24-20151130.n.2',
+                # TODO -- we're not sure what release will be called, actually.
+                release_id='rawhide',
             ),
         )
         self.handler.handle(pdc, msg)
+
+        # Check compose images
+        compose_images = pdc.calls['compose-images']
+        self.assertEquals(len(compose_images), 1)
+        self.assertDictEqual(compose_images[0][1], dict(
+            release_id=u'rawhide',
+            composeinfo=composeinfo,
+            image_manifest=images,
+        ))
+        # Check compose rpms
+        compose_rpms = pdc.calls['compose-rpms']
+        self.assertEquals(len(compose_rpms), 1)
+        self.assertEquals(compose_rpms[0][1], dict(
+            release_id=u'rawhide',
+            composeinfo=composeinfo,
+            rpm_manifest=rpms,
+        ))
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.old_composes')
+    def test_initialize_from_old_composes(self, pdc, old_composes):
+        # Mock out kojipkgs results
+        old_composes.return_value = [
+            ('rawhide', 'Fedora-24-20151130.n.2',
+             'https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-24-20151130.n.2',
+             ),
+        ]
+
+        # Call the initializer
+        self.handler.initialize(pdc)
 
         # Check compose images
         compose_images = pdc.calls['compose-images']

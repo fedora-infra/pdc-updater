@@ -77,8 +77,8 @@ class BaseHandlerTest(unittest.TestCase):
             'username': 'whatever',
             'password': 'whatever',
         },
-
         'pdcupdater.koji_url': 'blahblahblah',
+        'pdcupdater.old_composes_url': 'blahblahblah',
     }
 
     def setUp(self):
@@ -91,7 +91,8 @@ class BaseHandlerTest(unittest.TestCase):
             self.handler = fedmsg.utils.load_class(self.handler_path)(config)
 
         log.info("Setting up vcr cassette in %s", cassette_dir)
-        self.vcr = vcr.use_cassette(cassette_dir + self.id())
+        filename = cassette_dir + self.id()
+        self.vcr = vcr.use_cassette(filename, record_mode='new_episodes')
         self.vcr.__enter__()
 
     def tearDown(self):

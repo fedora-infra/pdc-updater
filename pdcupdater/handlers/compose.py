@@ -5,21 +5,41 @@ import pdcupdater.handlers
 class NewComposeHandler(pdcupdater.handlers.BaseHandler):
     """ When pungi-koji finishes a new compose. """
 
+    def __init__(self, *args, **kwargs):
+        super(NewComposeHandler, self).__init__(*args, **kwargs)
+        self.old_composes_url = self.config['pdcupdater.old_composes_url']
+
     def can_handle(self, msg):
         return msg['topic'].endswith('pungi.compose.finish')
 
     def handle(self, pdc, msg):
-        idx = msg['msg']['compose_id']
+        # This is something like Fedora-24-20151130.n.2
+        compose_id = msg['msg']['compose_id']
 
-        # TODO -- don't hardcode these two values.
-        # get them from the pungi fedmsg message once we have an example.
-        branch = 'rawhide'  # in kojipkgs terms
-        prefix = 'Fedora-24'  # in kojipkgs terms
-        release_id = 'rawhide'  # in PDC terms
+        # TODO -- we're not actually sure what this is going to be called in
+        # the message payload yet...
+        release_id = msg['msg']['release_id']
 
         koji = "https://kojipkgs.fedoraproject.org"
-        tmpl = "{koji}/compose/{branch}/{prefix}-{idx}/compose/metadata"
-        base = tmpl.format(koji=koji, branch=branch, prefix=prefix, idx=idx)
+        tmpl = "{koji}/compose/{release_id}/{compose_id}"
+        compose_url = tmpl.format(
+            koji=koji,
+            release_id=release_id,
+            compose_id=compose_id,
+        )
+
+        self._import_compose(pdc, release_id, compose_id, compose_url)
+
+    def audit(self, pdc):
+        raise NotImplementedError()
+
+    def initialize(self, pdc):
+        old_composes = pdcupdater.services.old_composes(self.old_composes_url)
+        for release_id, compose_id, url in old_composes:
+            self._import_compose(pdc, release_id, compose_id, url)
+
+    def _import_compose(self, pdc, release_id, compose_id, compose_url):
+        base = compose_url + "/compose/metadata"
 
         url = base + '/composeinfo.json'
         response = requests.get(url)
@@ -53,8 +73,3 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             rpm_manifest=rpms,
         ))
 
-    def audit(self, pdc):
-        raise NotImplementedError()
-
-    def initialize(self, pdc):
-        raise NotImplementedError()
