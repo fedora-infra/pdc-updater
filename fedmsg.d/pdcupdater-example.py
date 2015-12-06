@@ -20,15 +20,18 @@ config = {
         # 7) the command should print out your token.
     },
 
-    # Credentials to talk to FAS
-    'pdcupdater.fas': {
-        'base_url': 'https://admin.fedoraproject.org/accounts',
-        'username': 'YOUR_USERNAME_GOES_HERE',
-        'password': 'AWESOME_SECRET_PASSWORD_GOES_HERE',
-    },
+    ## Credentials to talk to FAS
+    #'pdcupdater.fas': {
+    #    'base_url': 'https://admin.fedoraproject.org/accounts',
+    #    'username': 'YOUR_USERNAME_GOES_HERE',
+    #    'password': 'AWESOME_SECRET_PASSWORD_GOES_HERE',
+    #},
 
     # Koji details
     'pdcupdater.koji_url': 'http://koji.fedoraproject.org/kojihub',
+
+    # Where to find composes
+    'pdcupdater.old_composes_url': 'https://kojipkgs.fedoraproject.org/compose/',
 
     # We have an explicit list of these in the config so we can turn them on
     # and off individually in production if one is causing an issue.
