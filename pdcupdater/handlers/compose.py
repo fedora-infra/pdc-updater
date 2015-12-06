@@ -1,5 +1,6 @@
 import requests
 import pdcupdater.handlers
+import pdcupdater.services
 
 from pdc_client import get_paged
 
