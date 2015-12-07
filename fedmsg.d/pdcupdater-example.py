@@ -27,6 +27,9 @@ config = {
     #    'password': 'AWESOME_SECRET_PASSWORD_GOES_HERE',
     #},
 
+    # PkgDB details
+    'pdcupdater.pkgdb_url': 'https://admin.fedoraproject.org/pkgdb',
+
     # Koji details
     'pdcupdater.koji_url': 'http://koji.fedoraproject.org/kojihub',
 
