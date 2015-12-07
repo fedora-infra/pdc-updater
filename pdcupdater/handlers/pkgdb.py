@@ -27,10 +27,25 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
         pdc['release-components']._(data)
 
     def audit(self, pdc):
-        raise NotImplementedError()
+        packages = pdcupdater.services.pkgdb(**self.pkgdb_config)
+        pdc_pkgs = get_paged(pdc['global-components']._)
+
+        # normalize the two lists
+        pkg_package = set([p['name'] for p in packages])
+        pdc_package = set([p['name'] for p in pdc_pkgs])
+
+        # use set operators to determine the difference
+        present = pdc_package - pkg_package
+        absent = pkg_package - pdc_package
+
+        return present, absent
 
     def initialize(self, pdc):
-        raise NotImplementedError()
+        packages = pdcupdater.services.pkgdb(**self.pkgdb_config)
+        bulk_payload = [dict(
+            name=package['name'],
+        ) for package in packages]
+        pdc['global-components']._(bulk_payload)
 
 
 class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
@@ -58,7 +73,45 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         pdc['release-components']._(data)
 
     def audit(self, pdc):
-        raise NotImplementedError()
+        packages = pdcupdater.services.pkgdb(**self.pkgdb_config, acls=True)
+        pdc_pkgs = get_paged(pdc['release-components']._)
+
+        # normalize the two lists
+        pkg_package = set(
+            (
+                package['name'],
+                acls['collection']['koji_name'],
+                acls['collection']['branchname']
+            )
+            for package in packages
+            for acls in package['acls']
+        )
+        pdc_package = set(
+            (p['name'], p['release'], p['dist_git_branch'])
+            for p in pdc_pkgs
+        )
+
+        # use set operators to determine the difference
+        present = pdc_package - pkg_package
+        absent = pkg_package - pdc_package
+
+        return present, absent
 
     def initialize(self, pdc):
-        raise NotImplementedError()
+        packages = pdcupdater.services.pkgdb(**self.pkgdb_config, acls=True)
+        bulk_payload = [
+            dict(
+                name=package['name'],
+                release=acls['collection']['koji_name'],
+                global_component=package['name'],
+                dist_git_branch=acls['collection']['branchname'],
+                bugzilla_component=package['name'],
+                brew_package=package['name'],
+                active=True,
+                type='srpm',
+            )
+        for package in packages
+        for acls in package['acls']
+        ]
+
+        pdc['release-components']._(bulk_payload)
