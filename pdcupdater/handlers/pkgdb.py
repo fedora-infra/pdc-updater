@@ -1,5 +1,8 @@
 import pdcupdater.handlers
 
+from pdc_client import get_paged
+
+
 class NewPackageHandler(pdcupdater.handlers.BaseHandler):
     """ When a new package gets added to pkgdb. """
 
