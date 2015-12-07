@@ -1,3 +1,4 @@
+import copy
 import json
 import mock
 
@@ -239,6 +240,119 @@ PKGDB_DATA = json.loads('''
 }
 ''')
 
+PDC_DATA = [
+    {
+        'active': True,
+        'brew_package': u'guake',
+        'bugzilla_component': u'guake',
+        'dist_git_branch': u'master',
+        'global_component': u'guake',
+        'name': u'guake',
+        'release': u'rawhide',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'guake',
+        'bugzilla_component': u'guake',
+        'dist_git_branch': u'el6',
+        'global_component': u'guake',
+        'name': u'guake',
+        'release': u'dist-6E-epel',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'guake',
+        'bugzilla_component': u'guake',
+        'dist_git_branch': u'f20',
+        'global_component': u'guake',
+        'name': u'guake',
+        'release': u'f20',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'guake',
+        'bugzilla_component': u'guake',
+        'dist_git_branch': u'epel7',
+        'global_component': u'guake',
+        'name': u'guake',
+        'release': u'epel7',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'guake',
+        'bugzilla_component': u'guake',
+        'dist_git_branch': u'f21',
+        'global_component': u'guake',
+        'name': u'guake',
+        'release': u'f21',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'guake',
+        'bugzilla_component': u'guake',
+        'dist_git_branch': u'f22',
+        'global_component': u'guake',
+        'name': u'guake',
+        'release': u'f22',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'guake',
+        'bugzilla_component': u'guake',
+        'dist_git_branch': u'f23',
+        'global_component': u'guake',
+        'name': u'guake',
+        'release': u'f23',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'geany',
+        'bugzilla_component': u'geany',
+        'dist_git_branch': u'master',
+        'global_component': u'geany',
+        'name': u'geany',
+        'release': u'rawhide',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'geany',
+        'bugzilla_component': u'geany',
+        'dist_git_branch': u'el6',
+        'global_component': u'geany',
+        'name': u'geany',
+        'release': u'dist-6E-epel',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'geany',
+        'bugzilla_component': u'geany',
+        'dist_git_branch': u'epel7',
+        'global_component': u'geany',
+        'name': u'geany',
+        'release': u'epel7',
+        'type': 'srpm'
+    },
+    {
+        'active': True,
+        'brew_package': u'geany',
+        'bugzilla_component': u'geany',
+        'dist_git_branch': u'f23',
+        'global_component': u'geany',
+        'name': u'geany',
+        'release': u'f23',
+        'type': 'srpm'
+    }
+    ]
+
 
 
 class TestNewPackage(BaseHandlerTest):
@@ -295,7 +409,7 @@ class TestNewPackage(BaseHandlerTest):
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb')
     def test_initialize_new_package(self, pdc, pkgdb):
-        # Mock out FAS results
+        # Mock out pgkdb results
         pkgdb.return_value = PKGDB_DATA['packages']
 
         # Call the initializer
@@ -354,8 +468,128 @@ class TestNewBranch(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb')
+    def test_audit_simple(self, pdc, pkgdb):
+        # Mock out pgkdb results
+        pkgdb.return_value = PKGDB_DATA['packages']
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'release-components': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, set())
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.pkgdb')
+    def test_audit_with_an_extra(self, pdc, pkgdb):
+        # Mock out pgkdb results
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
+        del(pkgdb.return_value[0]['acls'][0])
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'release-components': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set([('guake', 'rawhide', 'master')]))
+        self.assertSetEqual(absent, set())
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.pkgdb')
+    def test_audit_missing_one(self, pdc, pkgdb):
+        # Mock out pgkdb results
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
+        acl = json.loads('''
+        {
+          "acls": ["..."],
+          "collection": {
+            "allow_retire": true,
+            "branchname": "f18",
+            "dist_tag": ".fc18",
+            "koji_name": "dist-f18",
+            "name": "Fedora",
+            "status": "EOL",
+            "version": "18"
+          },
+          "critpath": false,
+          "point_of_contact": "pingou",
+          "status": "Approved",
+          "status_change": 1400071464.0
+        }
+        ''')
+        pkgdb.return_value[0]['acls'].append(acl)
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'release-components': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, set([('guake', 'dist-f18', 'f18')]))
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.pkgdb')
+    def test_audit_flipping_out(self, pdc, pkgdb):
+        # Mock out pgkdb results
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
+        acl = json.loads('''
+        {
+          "acls": ["..."],
+          "collection": {
+            "allow_retire": true,
+            "branchname": "f18",
+            "dist_tag": ".fc18",
+            "koji_name": "dist-f18",
+            "name": "Fedora",
+            "status": "EOL",
+            "version": "18"
+          },
+          "critpath": false,
+          "point_of_contact": "pingou",
+          "status": "Approved",
+          "status_change": 1400071464.0
+        }
+        ''')
+        del(pkgdb.return_value[0]['acls'][0])
+        pkgdb.return_value[0]['acls'].append(acl)
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'release-components': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set([('guake', 'rawhide', 'master')]))
+        self.assertSetEqual(absent, set([('guake', 'dist-f18', 'f18')]))
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.pkgdb')
     def test_initialize_new_package_branch(self, pdc, pkgdb):
-        # Mock out FAS results
+        # Mock out pgkdb results
         pkgdb.return_value = PKGDB_DATA['packages']
 
         # Call the initializer
@@ -364,95 +598,6 @@ class TestNewBranch(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'release-components': [
-                ('POST', [
-                  {'active': True,
-                   'brew_package': u'guake',
-                   'bugzilla_component': u'guake',
-                   'dist_git_branch': u'master',
-                   'global_component': u'guake',
-                   'name': u'guake',
-                   'release': u'rawhide',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'guake',
-                   'bugzilla_component': u'guake',
-                   'dist_git_branch': u'el6',
-                   'global_component': u'guake',
-                   'name': u'guake',
-                   'release': u'dist-6E-epel',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'guake',
-                   'bugzilla_component': u'guake',
-                   'dist_git_branch': u'f20',
-                   'global_component': u'guake',
-                   'name': u'guake',
-                   'release': u'f20',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'guake',
-                   'bugzilla_component': u'guake',
-                   'dist_git_branch': u'epel7',
-                   'global_component': u'guake',
-                   'name': u'guake',
-                   'release': u'epel7',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'guake',
-                   'bugzilla_component': u'guake',
-                   'dist_git_branch': u'f21',
-                   'global_component': u'guake',
-                   'name': u'guake',
-                   'release': u'f21',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'guake',
-                   'bugzilla_component': u'guake',
-                   'dist_git_branch': u'f22',
-                   'global_component': u'guake',
-                   'name': u'guake',
-                   'release': u'f22',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'guake',
-                   'bugzilla_component': u'guake',
-                   'dist_git_branch': u'f23',
-                   'global_component': u'guake',
-                   'name': u'guake',
-                   'release': u'f23',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'geany',
-                   'bugzilla_component': u'geany',
-                   'dist_git_branch': u'master',
-                   'global_component': u'geany',
-                   'name': u'geany',
-                   'release': u'rawhide',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'geany',
-                   'bugzilla_component': u'geany',
-                   'dist_git_branch': u'el6',
-                   'global_component': u'geany',
-                   'name': u'geany',
-                   'release': u'dist-6E-epel',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'geany',
-                   'bugzilla_component': u'geany',
-                   'dist_git_branch': u'epel7',
-                   'global_component': u'geany',
-                   'name': u'geany',
-                   'release': u'epel7',
-                   'type': 'srpm'},
-                  {'active': True,
-                   'brew_package': u'geany',
-                   'bugzilla_component': u'geany',
-                   'dist_git_branch': u'f23',
-                   'global_component': u'geany',
-                   'name': u'geany',
-                   'release': u'f23',
-                   'type': 'srpm'},
-                ]),
+                ('POST', PDC_DATA),
             ],
         })
