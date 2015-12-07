@@ -97,6 +97,7 @@ class BaseHandlerTest(unittest.TestCase):
             'username': 'whatever',
             'password': 'whatever',
         },
+        'pdcupdater.pkgdb_url': 'blihblihblih',
         'pdcupdater.koji_url': 'blahblahblah',
         'pdcupdater.old_composes_url': 'https://kojipkgs.fedoraproject.org/compose',
     }
