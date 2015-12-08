@@ -5,7 +5,7 @@ from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
 
-def mocked_koji_response(tag, url):
+def mocked_koji_response(url, tag):
     if tag != 'epel7':
         return []
     return [{
@@ -34,13 +34,13 @@ def mocked_koji_response(tag, url):
         'size': 175000,
     }]
 
-def mocked_koji_response_missing_one(tag, url):
-    response = mocked_koji_response(tag, url)
+def mocked_koji_response_missing_one(url, tag):
+    response = mocked_koji_response(url, tag)
     if tag == 'epel7':
         return response[:1]
     return response
 
-def mocked_koji_response_adding_one(tag, url):
+def mocked_koji_response_adding_one(url, tag):
     if tag == 'f24':
         return [{
             'build_id': 696907,
@@ -56,7 +56,7 @@ def mocked_koji_response_adding_one(tag, url):
             'size': 175000,
         }]
     else:
-        return mocked_koji_response(tag, url)
+        return mocked_koji_response(url, tag)
 
 
 class TestNewRPM(BaseHandlerTest):
