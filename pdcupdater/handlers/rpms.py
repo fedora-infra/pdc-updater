@@ -109,7 +109,7 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
 
     def _gather_koji_rpms(self, pdc):
         koji_rpms = {
-            tag: pdcupdater.services.koji_builds_in_tag(tag, self.koji_url)
+            tag: pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
             for tag in interesting_tags()
         }
 

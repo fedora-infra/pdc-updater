@@ -407,7 +407,7 @@ class TestNewPackage(BaseHandlerTest):
         })
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_simple(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = PKGDB_DATA['packages']
@@ -427,7 +427,7 @@ class TestNewPackage(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_with_an_extra(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
@@ -448,7 +448,7 @@ class TestNewPackage(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_missing_one(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
@@ -478,7 +478,7 @@ class TestNewPackage(BaseHandlerTest):
         self.assertSetEqual(absent, set(['gnome-terminal']))
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_flipping_out(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
@@ -509,7 +509,7 @@ class TestNewPackage(BaseHandlerTest):
         self.assertSetEqual(absent, set([('gnome-terminal')]))
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_initialize_new_package(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = PKGDB_DATA['packages']
@@ -569,7 +569,7 @@ class TestNewBranch(BaseHandlerTest):
         })
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_simple(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = PKGDB_DATA['packages']
@@ -589,7 +589,7 @@ class TestNewBranch(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_with_an_extra(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
@@ -610,7 +610,7 @@ class TestNewBranch(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_missing_one(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
@@ -649,7 +649,7 @@ class TestNewBranch(BaseHandlerTest):
         self.assertSetEqual(absent, set([('guake', 'dist-f18', 'f18')]))
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_flipping_out(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
@@ -689,7 +689,7 @@ class TestNewBranch(BaseHandlerTest):
         self.assertSetEqual(absent, set([('guake', 'dist-f18', 'f18')]))
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.pkgdb')
+    @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_initialize_new_package_branch(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = PKGDB_DATA['packages']

@@ -1,9 +1,15 @@
+import copy
+import logging
 import requests
+
 import pdcupdater.handlers
 import pdcupdater.services
+import pdcupdater.utils
 
 from pdc_client import get_paged
 
+
+log = logging.getLogger(__name__)
 
 
 class NewComposeHandler(pdcupdater.handlers.BaseHandler):
@@ -22,17 +28,17 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
 
         # TODO -- we're not actually sure what this is going to be called in
         # the message payload yet...
-        release_id = msg['msg']['release_id']
+        branch = msg['msg']['branch']
 
         koji = "https://kojipkgs.fedoraproject.org"
-        tmpl = "{koji}/compose/{release_id}/{compose_id}"
+        tmpl = "{koji}/compose/{branch}/{compose_id}"
         compose_url = tmpl.format(
             koji=koji,
-            release_id=release_id,
+            branch=branch,
             compose_id=compose_id,
         )
 
-        self._import_compose(pdc, release_id, compose_id, compose_url)
+        self._import_compose(pdc, compose_id, compose_url)
 
     def audit(self, pdc):
         # Query the data sources
@@ -56,10 +62,13 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
 
     def initialize(self, pdc):
         old_composes = pdcupdater.services.old_composes(self.old_composes_url)
-        for release_id, compose_id, url in old_composes:
-            self._import_compose(pdc, release_id, compose_id, url)
+        for branch, compose_id, url in old_composes:
+            try:
+                self._import_compose(pdc, compose_id, url)
+            except Exception:
+                log.exception("Failed to import %r" % url)
 
-    def _import_compose(self, pdc, release_id, compose_id, compose_url):
+    def _import_compose(self, pdc, compose_id, compose_url):
         base = compose_url + "/compose/metadata"
 
         url = base + '/composeinfo.json'
@@ -68,6 +77,15 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             raise IOError("Failed to get %r: %r" % (url, response))
         composeinfo = response.json()
 
+        # Before we waste any more time pulling down 100MB files from koji and
+        # POSTing them back to PDC, let's check to see if we already know about
+        # this compose.
+        compose_id = composeinfo['payload']['compose']['id']
+        if pdcupdater.utils.compose_exists(pdc, compose_id):
+            log.warn("%r already exists in PDC." % compose_id)
+            return
+
+        # OK, go ahead and pull down these gigantic files.
         url = base + '/images.json'
         response = requests.get(url)
         if not bool(response):
@@ -79,6 +97,13 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         if not bool(response):
             raise IOError("Failed to get %r: %r" % (url, response))
         rpms = response.json()
+
+        # PDC demands lowercase
+        composeinfo['payload']['release']['short'] = \
+            composeinfo['payload']['release']['short'].lower()
+        release = copy.copy(composeinfo['payload']['release'])
+        release_id = "{short}-{version}-fedora-NEXT".format(**release)
+        pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
         # https://github.com/product-definition-center/product-definition-center/issues/228
         # https://pdc.fedorainfracloud.org/rest_api/v1/compose-images/

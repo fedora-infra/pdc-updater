@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 
@@ -11,6 +12,9 @@ here = os.path.dirname(__file__)
 
 with open(here + '/data/composeinfo.json', 'r') as f:
     composeinfo = json.loads(f.read())
+    composeinfo_modified = copy.copy(composeinfo)
+    composeinfo_modified['payload']['release']['short'] = \
+        composeinfo_modified['payload']['release']['short'].lower()
 
 with open(here + '/data/images.json', 'r') as f:
     images = json.loads(f.read())
@@ -40,7 +44,7 @@ class TestNewCompose(BaseHandlerTest):
                 # but this is all we know for now.
                 compose_id='Fedora-24-20151130.n.2',
                 # TODO -- we're not sure what release will be called, actually.
-                release_id='rawhide',
+                branch='rawhide',
             ),
         )
         result = self.handler.can_handle(msg)
@@ -57,7 +61,7 @@ class TestNewCompose(BaseHandlerTest):
                 # but this is all we know for now.
                 compose_id='Fedora-24-20151130.n.2',
                 # TODO -- we're not sure what release will be called, actually.
-                release_id='rawhide',
+                branch='rawhide',
             ),
         )
         result = self.handler.can_handle(msg)
@@ -75,7 +79,7 @@ class TestNewCompose(BaseHandlerTest):
                 # but this is all we know for now.
                 compose_id='Fedora-24-20151130.n.2',
                 # TODO -- we're not sure what release will be called, actually.
-                release_id='rawhide',
+                branch='rawhide',
             ),
         )
         self.handler.handle(pdc, msg)
@@ -84,16 +88,16 @@ class TestNewCompose(BaseHandlerTest):
         compose_images = pdc.calls['compose-images']
         self.assertEquals(len(compose_images), 1)
         self.assertDictEqual(compose_images[0][1], dict(
-            release_id=u'rawhide',
-            composeinfo=composeinfo,
+            release_id='fedora-24-fedora-NEXT',
+            composeinfo=composeinfo_modified,
             image_manifest=images,
         ))
         # Check compose rpms
         compose_rpms = pdc.calls['compose-rpms']
         self.assertEquals(len(compose_rpms), 1)
         self.assertEquals(compose_rpms[0][1], dict(
-            release_id=u'rawhide',
-            composeinfo=composeinfo,
+            release_id='fedora-24-fedora-NEXT',
+            composeinfo=composeinfo_modified,
             rpm_manifest=rpms,
         ))
 
@@ -114,16 +118,16 @@ class TestNewCompose(BaseHandlerTest):
         compose_images = pdc.calls['compose-images']
         self.assertEquals(len(compose_images), 1)
         self.assertDictEqual(compose_images[0][1], dict(
-            release_id=u'rawhide',
-            composeinfo=composeinfo,
+            release_id='fedora-24-fedora-NEXT',
+            composeinfo=composeinfo_modified,
             image_manifest=images,
         ))
         # Check compose rpms
         compose_rpms = pdc.calls['compose-rpms']
         self.assertEquals(len(compose_rpms), 1)
         self.assertEquals(compose_rpms[0][1], dict(
-            release_id=u'rawhide',
-            composeinfo=composeinfo,
+            release_id='fedora-24-fedora-NEXT',
+            composeinfo=composeinfo_modified,
             rpm_manifest=rpms,
         ))
 

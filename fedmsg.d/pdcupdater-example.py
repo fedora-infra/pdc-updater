@@ -39,12 +39,11 @@ config = {
     # We have an explicit list of these in the config so we can turn them on
     # and off individually in production if one is causing an issue.
     'pdcupdater.handlers': [
+        'pdcupdater.handlers.persons:NewPersonHandler',
         'pdcupdater.handlers.pkgdb:NewPackageHandler',
         'pdcupdater.handlers.pkgdb:NewPackageBranchHandler',
-        'pdcupdater.handlers.compose:NewComposeHandler',
-        #'pdcupdater.handlers.buildsys:ImageBuildHandler',
         'pdcupdater.handlers.rpms:NewRPMHandler',
-        'pdcupdater.handlers.persons:NewPersonHandler',
+        'pdcupdater.handlers.compose:NewComposeHandler',
     ],
 
     # Augment the base fedmsg logging config to also handle pdcupdater loggers.

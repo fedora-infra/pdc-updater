@@ -5,10 +5,6 @@ import socket
 import bs4
 import requests
 
-import fedora.client
-import fedora.client.fas2
-import pkgdb2client
-
 log = logging.getLogger(__name__)
 
 def with_ridiculous_timeout(function):
@@ -67,6 +63,7 @@ def old_composes(base_url):
                 continue
 
             # If we got this far, then return it
+            log.info("  found %s/%s" % (branch, compose))
             yield branch, compose, compose_link
 
     # Finally, close the requests session.
@@ -77,6 +74,10 @@ def old_composes(base_url):
 def fas_persons(base_url, username, password):
     """ Return the list of users in the Fedora Account System. """
 
+    import fedora.client
+    import fedora.client.fas2
+
+    log.info("Connecting to FAS at %r" % base_url)
     fasclient = fedora.client.fas2.AccountSystem(
         base_url=base_url, username=username, password=password)
 
@@ -88,13 +89,18 @@ def fas_persons(base_url, username, password):
 
 
 def koji_builds_in_tag(url, tag):
+    """ Return the list of koji builds in a tag. """
     import koji
+    log.info("Connecting to koji at %r" % url)
     session = koji.ClientSession(url)
     rpms, builds = session.listTaggedRPMS(tag)
     return rpms
 
 
-def pkgdb(base_url, acls=False):
+def pkgdb_packages(base_url, acls=False):
+    """ Return all the packages in pkgdb.  """
+    import pkgdb2client
+    log.info("Connecting to pkgdb at %r" % base_url)
     pkgdb = pkgdb2client.PkgDB(url=base_url)
     pkg = pkgdb.get_packages(page='all', acls=True)
     return pkg['packages']

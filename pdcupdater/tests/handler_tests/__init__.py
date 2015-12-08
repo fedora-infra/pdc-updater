@@ -17,6 +17,10 @@ log = logging.getLogger(__name__)
 
 cassette_dir = dirname(dirname(__file__)) + '/vcr-request-data/'
 
+def mock_404():
+    import beanbag.bbexcept
+    response = object()
+    raise beanbag.bbexcept.BeanBagException(response, "404, nope.")
 
 def mock_pdc(function):
     @functools.wraps(function)
@@ -31,6 +35,11 @@ def mock_pdc(function):
         pdc.add_endpoint('rpms', 'POST', 'wat')
 
         # Mock out GET endpoints
+        pdc.add_endpoint('composes/Fedora-24-20151130.n.2', 'GET', mock_404)
+        pdc.add_endpoint('releases/fedora-24-fedora-NEXT', 'GET', {
+            'wat': 'foo',
+        })
+
         pdc.add_endpoint('persons', 'GET', {
             'count': 2,
             'next': None,

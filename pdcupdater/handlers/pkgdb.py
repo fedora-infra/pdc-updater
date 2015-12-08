@@ -34,7 +34,7 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
         pdc['release-components']._(data)
 
     def audit(self, pdc):
-        packages = pdcupdater.services.pkgdb(self.pkgdb_url)
+        packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url)
         pdc_pkgs = get_paged(pdc['global-components']._)
 
         # normalize the two lists
@@ -48,7 +48,7 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
         return present, absent
 
     def initialize(self, pdc):
-        packages = pdcupdater.services.pkgdb(self.pkgdb_url)
+        packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url)
         bulk_payload = [dict(
             name=package['name'],
         ) for package in packages]
@@ -84,7 +84,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         pdc['release-components']._(data)
 
     def audit(self, pdc):
-        packages = pdcupdater.services.pkgdb(self.pkgdb_url, acls=True)
+        packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url, acls=True)
         pdc_pkgs = get_paged(pdc['release-components']._)
 
         # normalize the two lists
@@ -109,7 +109,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         return present, absent
 
     def initialize(self, pdc):
-        packages = pdcupdater.services.pkgdb(self.pkgdb_url, acls=True)
+        packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url, acls=True)
         bulk_payload = [
             dict(
                 name=package['name'],
