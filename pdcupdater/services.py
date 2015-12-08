@@ -6,6 +6,7 @@ import requests
 
 import fedora.client
 import fedora.client.fas2
+import pkgdb2client
 
 log = logging.getLogger(__name__)
 
@@ -82,6 +83,12 @@ def koji_builds_in_tag(url, tag):
     session = koji.ClientSession(url)
     rpms, builds = session.listTaggedRPMS(tag)
     return rpms
+
+
+def pkgdb(base_url, acls=False):
+    pkgdb = pkgdb2client.PkgDB(url=base_url)
+    pkg = pkgdb.get_packages(page='all', acls=True)
+    return pkg['packages']
 
 
 if __name__ == '__main__':

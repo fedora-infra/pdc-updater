@@ -8,6 +8,7 @@ requirements = [
     'requests',
     'dogpile.cache',
     'python-fedora',
+    'packagedb-cli',
 ]
 
 
