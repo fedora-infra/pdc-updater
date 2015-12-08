@@ -83,7 +83,7 @@ def fas_persons(base_url, username, password):
 
     log.info("Downloading FAS userlist...")
     response = fasclient.send_request(
-        '/user/list', req_params={'search': '*'}, auth=True)
+        '/user/list', req_params={'search': '*'}, auth=True, timeout=600)
 
     return response['people']
 
