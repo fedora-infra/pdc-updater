@@ -1,3 +1,4 @@
+import functools
 import logging
 import socket
 
@@ -9,6 +10,18 @@ import fedora.client.fas2
 import pkgdb2client
 
 log = logging.getLogger(__name__)
+
+def with_ridiculous_timeout(function):
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        original = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(600)
+        try:
+            return function(*args, **kwargs)
+        finally:
+            socket.setdefaulttimeout(original)
+    return wrapper
+
 
 
 def _scrape_links(session, url):
@@ -60,20 +73,16 @@ def old_composes(base_url):
     session.close()
 
 
+@with_ridiculous_timeout
 def fas_persons(base_url, username, password):
     """ Return the list of users in the Fedora Account System. """
 
     fasclient = fedora.client.fas2.AccountSystem(
         base_url=base_url, username=username, password=password)
 
-    timeout = socket.getdefaulttimeout()
-    socket.setdefaulttimeout(600)
-    try:
-        log.info("Downloading FAS userlist...")
-        response = fasclient.send_request(
-            '/user/list', req_params={'search': '*'}, auth=True)
-    finally:
-        socket.setdefaulttimeout(timeout)
+    log.info("Downloading FAS userlist...")
+    response = fasclient.send_request(
+        '/user/list', req_params={'search': '*'}, auth=True)
 
     return response['people']
 
