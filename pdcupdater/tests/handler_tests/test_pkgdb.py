@@ -408,6 +408,108 @@ class TestNewPackage(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb')
+    def test_audit_simple(self, pdc, pkgdb):
+        # Mock out pgkdb results
+        pkgdb.return_value = PKGDB_DATA['packages']
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'global-components': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, set())
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.pkgdb')
+    def test_audit_with_an_extra(self, pdc, pkgdb):
+        # Mock out pgkdb results
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
+        del(pkgdb.return_value[0])
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'global-components': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set(['guake']))
+        self.assertSetEqual(absent, set())
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.pkgdb')
+    def test_audit_missing_one(self, pdc, pkgdb):
+        # Mock out pgkdb results
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
+        pkg = json.loads('''
+        {
+            "name": "gnome-terminal",
+            "review_url": null,
+            "status": "Approved",
+            "summary": "The gnome terminal",
+            "upstream_url": "http://www.gnome.org/"
+        }
+        ''')
+        pkgdb.return_value.append(pkg)
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'global-components': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, set(['gnome-terminal']))
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.pkgdb')
+    def test_audit_flipping_out(self, pdc, pkgdb):
+        # Mock out pgkdb results
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
+        pkg = json.loads('''
+        {
+            "name": "gnome-terminal",
+            "review_url": null,
+            "status": "Approved",
+            "summary": "The gnome terminal",
+            "upstream_url": "http://www.gnome.org/"
+        }
+        ''')
+        del(pkgdb.return_value[0])
+        pkgdb.return_value.append(pkg)
+
+        # Call the auditor
+        present, absent = self.handler.audit(pdc)
+
+        # Check the PDC calls..
+        self.assertDictEqual(pdc.calls, {
+            'global-components': [
+                ('GET', {'page': 1}),
+            ],
+        })
+
+        # Check the results.
+        self.assertSetEqual(present, set(['guake']))
+        self.assertSetEqual(absent, set([('gnome-terminal')]))
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.pkgdb')
     def test_initialize_new_package(self, pdc, pkgdb):
         # Mock out pgkdb results
         pkgdb.return_value = PKGDB_DATA['packages']

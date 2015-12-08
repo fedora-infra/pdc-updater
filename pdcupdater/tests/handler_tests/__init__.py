@@ -160,6 +160,16 @@ def mock_pdc(function):
             ]
         })
 
+        pdc.add_endpoint('global-components', 'GET', {
+            'count': 11,
+            'next': None,
+            'previous': None,
+            'results': [
+              {'name': u'geany'},
+              {'name': u'guake'},
+            ]
+        })
+
         pdc.add_endpoint('composes', 'GET', {
             'count': 2,
             'next': None,
