@@ -50,10 +50,11 @@ def audit():
     for handler in handlers:
         results[type(handler).__name__] = handler.audit(pdc)
 
-    retval = _print_audit_report(results)
+    verbose = False
+    retval = _print_audit_report(results, verbose)
     sys.exit(retval)
 
-def _print_audit_report(results):
+def _print_audit_report(results, verbose):
     fail = False
     for key, values in results.items():
         present, absent = values
@@ -82,6 +83,7 @@ def _print_audit_report(results):
     print "Details"
     print "======="
 
+    limit = 100
     for key, values in results.items():
         present, absent = values
         if not present and not absent:
@@ -97,9 +99,14 @@ def _print_audit_report(results):
         else:
             print "Values present in PDC but missing from the source:"
             print
-            for value in present:
-                print "-", value
-
+            if verbose or len(present) < limit:
+                for value in present:
+                    print "-", value
+            else:
+                present = list(present)
+                for value in present[:limit]:
+                    print "-", value
+                print "- (plus %i more... truncated.)" % (len(present) - limit)
         print
 
         if not absent:
@@ -107,8 +114,14 @@ def _print_audit_report(results):
         else:
             print "Values absent from PDC but present in the source:"
             print
-            for value in absent:
-                print "-", value
+            if verbose or len(absent) < limit:
+                for value in absent:
+                    print "-", value
+            else:
+                absent = list(absent)
+                for value in absent[:limit]:
+                    print "-", value
+                print "- (plus %i more... truncated.)" % (len(absent) - limit)
 
     if not fail:
         return 0
