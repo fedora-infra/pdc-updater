@@ -19,6 +19,12 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         super(NewComposeHandler, self).__init__(*args, **kwargs)
         self.old_composes_url = self.config['pdcupdater.old_composes_url']
 
+    @property
+    def topic_suffixes(self):
+        return [
+            'pungi.compose.status.change',
+        ]
+
     def can_handle(self, msg):
         if not msg['topic'].endswith('pungi.compose.status.change'):
             return False

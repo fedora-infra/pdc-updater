@@ -50,6 +50,10 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         super(NewRPMHandler, self).__init__(*args, **kwargs)
         self.koji_url = self.config['pdcupdater.koji_url']
 
+    @property
+    def topic_suffixes(self):
+        return ['buildsys.tag']
+
     def can_handle(self, msg):
         if not msg['topic'].endswith('buildsys.tag'):
             return False

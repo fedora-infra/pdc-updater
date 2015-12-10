@@ -11,6 +11,10 @@ class NewPersonHandler(pdcupdater.handlers.BaseHandler):
         super(NewPersonHandler, self).__init__(*args, **kwargs)
         self.fas_config = self.config['pdcupdater.fas']
 
+    @property
+    def topic_suffixes(self):
+        return ['fas.user.create']
+
     def can_handle(self, msg):
         return msg['topic'].endswith('fas.user.create')
 

@@ -67,7 +67,9 @@ def audit():
 
     results = {}
     for handler in handlers:
-        results[type(handler).__name__] = handler.audit(pdc)
+        name = type(handler).__name__
+        log.info('Performing audit for %s' % name)
+        results[name] = handler.audit(pdc)
 
     verbose = False
     retval = _print_audit_report(results, verbose)

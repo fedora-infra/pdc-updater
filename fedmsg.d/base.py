@@ -20,7 +20,7 @@
 config = dict(
     # Set this to dev if you're hacking on fedmsg or an app.
     # Set to stg or prod if running in the Fedora Infrastructure
-    environment="dev",
+    environment="prod",
 
     # Default is 0
     high_water_mark=0,

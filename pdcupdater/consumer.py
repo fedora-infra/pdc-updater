@@ -31,16 +31,10 @@ import pdc_client
 
 
 class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
-    topic = '*'
     config_key = 'pdcupdater.enabled'
 
     def __init__(self, hub):
-        super(PDCUpdater, self).__init__(hub)
-
-        if not self._initialized:
-            return
-
-        config = self.hub.config
+        config = hub.config
 
         # Ensure this is present, it should be a dict with a url and creds
         self.pdc_config = config['pdcupdater.pdc']
@@ -48,10 +42,19 @@ class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
         # Load all our worker bits.
         self.handlers = list(pdcupdater.handlers.load_handlers(config))
 
+        # Tell fedmsg to only notify us about topics that our handlers want.
+        self.topic = [
+            '.'.join([config['topic_prefix'], config['environment'], topic])
+            for handler in self.handlers for topic in handler.topic_suffixes
+        ]
+
+        super(PDCUpdater, self).__init__(hub)
+
     def consume(self, msg):
         msg = msg['body']  # Remove envelope
         idx = msg.get('msg_id', None)
-        self.log.debug("Received %r" % idx)
+        topic = msg.get('topic', None)
+        self.log.debug("Received %r, %r" % (idx, topic))
 
         pdc = pdc_client.PDCClient(**self.pdc_config)
         pdcupdater.utils.handle_message(pdc, self.handlers, msg)

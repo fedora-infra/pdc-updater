@@ -11,6 +11,10 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
         super(NewPackageHandler, self).__init__(*args, **kwargs)
         self.pkgdb_url = self.config['pdcupdater.pkgdb_url']
 
+    @property
+    def topic_suffixes(self):
+        return ['pkgdb.package.new']
+
     def can_handle(self, msg):
         return msg['topic'].endswith('pkgdb.package.new')
 
@@ -62,6 +66,10 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
     def __init__(self, *args, **kwargs):
         super(NewPackageBranchHandler, self).__init__(*args, **kwargs)
         self.pkgdb_url = self.config['pdcupdater.pkgdb_url']
+
+    @property
+    def topic_suffixes(self):
+        return ['pkgdb.package.branch.new']
 
     def can_handle(self, msg):
         return msg['topic'].endswith('pkgdb.package.branch.new')

@@ -18,6 +18,10 @@ class BaseHandler(object):
     def __init__(self, config):
         self.config = config
 
+    @abc.abstractproperty
+    def topic_suffixes(self):
+        pass
+
     @abc.abstractmethod
     def can_handle(self, msg):
         """ Return True or False if this handler can handle this message. """
