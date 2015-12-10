@@ -13,9 +13,7 @@ def ensure_release_exists(pdc, release_id, release):
     try:
         pdc['releases'][release_id]._()
     except beanbag.bbexcept.BeanBagException as e:
-        # I dunno about this beanbag API.  How are we supposed
-        # to know this is a 404?
-        if not '404' in str(e):
+        if e.response.status_code != 404:
             raise
         log.warn("No release %r exists.  Creating." % release_id)
 
@@ -41,9 +39,7 @@ def ensure_product_exists(pdc, product_id, product):
     try:
         pdc['base-products'][product_id]._()
     except beanbag.bbexcept.BeanBagException as e:
-        # I dunno about this beanbag API.  How are we supposed
-        # to know this is a 404?
-        if not '404' in str(e):
+        if e.response.status_code != 404:
             raise
         log.warn("No product %r exists.  Creating." % product_id)
         pdc['base-products']._(product)
@@ -55,7 +51,7 @@ def compose_exists(pdc, compose_id):
         pdc['composes'][compose_id]._()
         return True
     except beanbag.bbexcept.BeanBagException as e:
-        if not '404' in str(e):
+        if e.response.status_code != 404:
             raise
         return False
 
@@ -87,4 +83,8 @@ def handle_message(pdc, handlers, msg, verbose=False):
             continue
         log.info("%s handling %s %s" % (name, idx, topic))
         with annotated(pdc, msg['msg_id']) as client:
-            handler.handle(client, msg)
+            try:
+                handler.handle(client, msg)
+            except beanbag.bbexcept.BeanBagException as e:
+                log.error(e.response.text)
+                raise
