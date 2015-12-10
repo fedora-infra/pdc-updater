@@ -29,7 +29,7 @@ def handle():
     pdc = pdc_client.PDCClient(**config['pdcupdater.pdc'])
     handlers = pdcupdater.handlers.load_handlers(config)
     for msg in messages:
-        pdcupdater.utils.handle_message(pdc, handlers, msg)
+        pdcupdater.utils.handle_message(pdc, handlers, msg, verbose=True)
 
 
 def _initialize_basics(pdc):

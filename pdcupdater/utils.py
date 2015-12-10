@@ -77,10 +77,14 @@ def annotated(client, msg_id):
         client.set_comment('No comment.')
 
 
-def handle_message(pdc, handlers, msg):
+def handle_message(pdc, handlers, msg, verbose=False):
     idx, topic = msg['msg_id'], msg['topic']
     for handler in handlers:
-        if handler.can_handle(msg):
-            log.info("%r handling %r %r" % (handler, topic, idx))
-            with annotated(pdc, msg['msg_id']) as client:
-                handler.handle(client, msg)
+        name = type(handler).__name__
+        if not handler.can_handle(msg):
+            if verbose:
+                log.info("%s could not handle %s" % (name, idx))
+            continue
+        log.info("%s handling %s %s" % (name, idx, topic))
+        with annotated(pdc, msg['msg_id']) as client:
+            handler.handle(client, msg)
