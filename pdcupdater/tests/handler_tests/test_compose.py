@@ -193,8 +193,4 @@ class TestNewCompose(BaseHandlerTest):
 
         # Check the results.
         self.assertSetEqual(present, set())
-        self.assertSetEqual(absent, set([
-            ('rawhide', 'Fedora-24-20151130.n.3',
-             'https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-24-20151130.n.3',
-             ),
-        ]))
+        self.assertSetEqual(absent, set(['Fedora-24-20151130.n.3']))

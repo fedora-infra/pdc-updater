@@ -48,13 +48,8 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         pdc_composes = get_paged(pdc['composes']._)
 
         # normalize the two lists
-        compose2url = lambda compose: "/".join([
-            self.old_composes_url, compose['release'], compose['compose_id']
-        ])
-        old_composes = set(old_composes)
-        pdc_composes = set([(
-            compose['release'], compose['compose_id'], compose2url(compose)
-        ) for compose in pdc_composes])
+        old_composes = set([idx for branch, idx, url in old_composes])
+        pdc_composes = set([c['compose_id'] for c in pdc_composes])
 
         # use set operators to determine the difference
         present = pdc_composes - old_composes
