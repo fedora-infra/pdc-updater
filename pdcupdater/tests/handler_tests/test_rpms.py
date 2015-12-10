@@ -7,7 +7,25 @@ from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
 
-def mocked_koji_response(url, tag):
+
+def mocked_koji_from_build_criu(url, buildid):
+    return {'epoch': None}, ["criu-1.6.1-1.fc22.src.rpm"]
+
+
+def mocked_koji_from_build_thunderbird(url, buildid):
+    return {'epoch': None}, [
+        "mozilla-crashreporter-thunderbird-debuginfo-38.4.0-2.fc24.x86_64.rpm",
+        "thunderbird-38.4.0-2.fc24.armv7hl.rpm",
+        "thunderbird-38.4.0-2.fc24.src.rpm",
+        "thunderbird-38.4.0-2.fc24.x86_64.rpm",
+        "thunderbird-debuginfo-38.4.0-2.fc24.armv7hl.rpm",
+        "thunderbird-debuginfo-38.4.0-2.fc24.x86_64.rpm",
+        "thunderbird-lightning-gdata-38.4.01.9.0.3-2.fc24.armv7hl.rpm",
+        "thunderbird-lightning-gdata-38.4.01.9.0.3-2.fc24.x86_64.rpm",
+    ]
+
+
+def mocked_koji_from_tag(url, tag):
     if tag != 'epel7':
         return []
     return [{
@@ -36,13 +54,15 @@ def mocked_koji_response(url, tag):
         'size': 175000,
     }]
 
-def mocked_koji_response_missing_one(url, tag):
-    response = mocked_koji_response(url, tag)
+
+def mocked_koji_from_tag_missing_one(url, tag):
+    response = mocked_koji_from_tag(url, tag)
     if tag == 'epel7':
         return response[:1]
     return response
 
-def mocked_koji_response_adding_one(url, tag):
+
+def mocked_koji_from_tag_adding_one(url, tag):
     if tag == 'f24':
         return [{
             'build_id': 696907,
@@ -58,7 +78,7 @@ def mocked_koji_response_adding_one(url, tag):
             'size': 175000,
         }]
     else:
-        return mocked_koji_response(url, tag)
+        return mocked_koji_from_tag(url, tag)
 
 
 class TestNewRPM(BaseHandlerTest):
@@ -96,44 +116,126 @@ class TestNewRPM(BaseHandlerTest):
         self.assertEquals(result, True)
 
     @mock_pdc
-    def test_handle_new_primary_rawhide_build(self, pdc):
+    @mock.patch('pdcupdater.services.koji_rpms_from_build')
+    def test_handle_new_primary_rawhide_build(self, pdc, koji):
+        koji.side_effect = mocked_koji_from_build_thunderbird
         idx = '2015-c37d4607-e8de-4229-990a-981c40a9bb93'
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
+            'releases/fedora-24-fedora-NEXT': [('GET', {})],
             'rpms': [
                 ('POST', {
-                    "name": u"thunderbird",
-                    "version": u"38.4.0",
-                    "release": u"2.fc24",
+                    "name": "mozilla-crashreporter-thunderbird-debuginfo",
+                    "version": "38.4.0",
+                    "release": "2.fc24",
                     "linked_releases": [
-                        u'f24',
+                        'fedora-24-fedora-NEXT',
                     ],
-                    # TODO -- these three are still really unhandled.
-                    "epoch": 0,
-                    "arch": u"src",
+                    "epoch": None,
+                    "arch": "x86_64",
+                    "srpm_name": "undefined...",
+                }),
+                ('POST', {
+                    "name": "thunderbird",
+                    "version": "38.4.0",
+                    "release": "2.fc24",
+                    "linked_releases": [
+                        'fedora-24-fedora-NEXT',
+                    ],
+                    "epoch": None,
+                    "arch": "armv7hl",
+                    "srpm_name": "undefined...",
+                }),
+                ('POST', {
+                    "name": "thunderbird",
+                    "version": "38.4.0",
+                    "release": "2.fc24",
+                    "linked_releases": [
+                        'fedora-24-fedora-NEXT',
+                    ],
+                    "epoch": None,
+                    "arch": "src",
+                    "srpm_name": "undefined...",
+                }),
+                ('POST', {
+                    "name": "thunderbird",
+                    "version": "38.4.0",
+                    "release": "2.fc24",
+                    "linked_releases": [
+                        'fedora-24-fedora-NEXT',
+                    ],
+                    "epoch": None,
+                    "arch": "x86_64",
+                    "srpm_name": "undefined...",
+                }),
+                ('POST', {
+                    "name": "thunderbird-debuginfo",
+                    "version": "38.4.0",
+                    "release": "2.fc24",
+                    "linked_releases": [
+                        'fedora-24-fedora-NEXT',
+                    ],
+                    "epoch": None,
+                    "arch": "armv7hl",
+                    "srpm_name": "undefined...",
+                }),
+                ('POST', {
+                    "name": "thunderbird-debuginfo",
+                    "version": "38.4.0",
+                    "release": "2.fc24",
+                    "linked_releases": [
+                        'fedora-24-fedora-NEXT',
+                    ],
+                    "epoch": None,
+                    "arch": "x86_64",
+                    "srpm_name": "undefined...",
+                }),
+                ('POST', {
+                    "name": "thunderbird-lightning-gdata",
+                    "version": "38.4.01.9.0.3",
+                    "release": "2.fc24",
+                    "linked_releases": [
+                        'fedora-24-fedora-NEXT',
+                    ],
+                    "epoch": None,
+                    "arch": "armv7hl",
+                    "srpm_name": "undefined...",
+                }),
+                ('POST', {
+                    "name": "thunderbird-lightning-gdata",
+                    "version": "38.4.01.9.0.3",
+                    "release": "2.fc24",
+                    "linked_releases": [
+                        'fedora-24-fedora-NEXT',
+                    ],
+                    "epoch": None,
+                    "arch": "x86_64",
                     "srpm_name": "undefined...",
                 }),
             ],
         })
 
     @mock_pdc
-    def test_handle_new_stable_update_tag(self, pdc):
+    @mock.patch('pdcupdater.services.koji_rpms_from_build')
+    def test_handle_new_stable_update_tag(self, pdc, koji):
+        koji.side_effect = mocked_koji_from_build_criu
+
         idx = '2015-19772dd8-21f4-4b25-a557-41d313a74a88'
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
+            'releases/fedora-22-fedora-NEXT-updates': [('GET', {})],
             'rpms': [
                 ('POST', {
-                    "name": u"criu",
-                    "version": u"1.6.1",
-                    "release": u"1.fc22",
+                    "name": "criu",
+                    "version": "1.6.1",
+                    "release": "1.fc22",
                     "linked_releases": [
-                        u'f22',
+                        'fedora-22-fedora-NEXT-updates',
                     ],
-                    # TODO -- these three are still really unhandled.
-                    "epoch": 0,
-                    "arch": u"src",
+                    "epoch": None,
+                    "arch": "src",
                     "srpm_name": "undefined...",
                 }),
             ],
@@ -142,7 +244,7 @@ class TestNewRPM(BaseHandlerTest):
     @mock_pdc
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
     def test_initialize_from_koji(self, pdc, koji):
-        koji.side_effect = mocked_koji_response
+        koji.side_effect = mocked_koji_from_tag
 
         # Call the initializer
         self.handler.initialize(pdc)
@@ -157,7 +259,7 @@ class TestNewRPM(BaseHandlerTest):
                     'version': '1.11',
                     'release': '1.el7',
                     "linked_releases": [
-                        u'epel7',
+                        'epel-7-fedora-NEXT-updates',
                     ],
 
                     # TODO -- this is still really unhandled.
@@ -169,7 +271,7 @@ class TestNewRPM(BaseHandlerTest):
                     'version': '1.1.3',
                     'release': '1.el7',
                     "linked_releases": [
-                        u'epel7',
+                        'epel-7-fedora-NEXT-updates',
                     ],
 
                     # TODO -- this is still really unhandled.
@@ -182,7 +284,7 @@ class TestNewRPM(BaseHandlerTest):
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
     def test_audit(self, pdc, koji):
         # Mock out koji response
-        koji.side_effect = mocked_koji_response
+        koji.side_effect = mocked_koji_from_tag
 
         # Call the auditor
         present, absent = self.handler.audit(pdc)
@@ -202,7 +304,7 @@ class TestNewRPM(BaseHandlerTest):
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
     def test_audit_missing_one(self, pdc, koji):
         # Mock out koji response
-        koji.side_effect = mocked_koji_response_missing_one
+        koji.side_effect = mocked_koji_from_tag_missing_one
 
         # Call the auditor
         present, absent = self.handler.audit(pdc)
@@ -219,7 +321,9 @@ class TestNewRPM(BaseHandlerTest):
         self.assertSetEqual(present, set([json.dumps({
             "arch": "noarch",
             "epoch": None,
-            "linked_releases": ["epel7"],
+            "linked_releases": [
+                "epel-7-fedora-NEXT-updates",
+            ],
             "name": "rubygem-jmespath-doc",
             "release": "1.el7",
             "srpm_name": "undefined...",
@@ -231,7 +335,7 @@ class TestNewRPM(BaseHandlerTest):
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
     def test_audit_adding_one(self, pdc, koji):
         # Mock out koji response
-        koji.side_effect = mocked_koji_response_adding_one
+        koji.side_effect = mocked_koji_from_tag_adding_one
 
         # Call the auditor
         present, absent = self.handler.audit(pdc)
@@ -249,7 +353,9 @@ class TestNewRPM(BaseHandlerTest):
         self.assertSetEqual(absent, set([json.dumps({
             "arch": "noarch",
             "epoch": None,
-            "linked_releases": ["f24"],
+            "linked_releases": [
+                u'fedora-24-fedora-NEXT',
+            ],
             "name": "rubygem-jmespath-doc",
             "release": "1.fc24",
             "srpm_name": "undefined...",

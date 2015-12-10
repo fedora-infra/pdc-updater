@@ -29,7 +29,6 @@ def ensure_release_exists(pdc, release_id, release):
         release_payload.update(dict(
             active=True,
             base_product=product_id,
-            release_type='ga',
         ))
         pdc['releases']._(release_payload)
 

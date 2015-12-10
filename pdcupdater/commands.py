@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 import pdc_client
 
 
-def handle():
+def retry():
     config = fedmsg.config.load_config()
     logging.config.dictConfig(config['logging'])
     msg_ids = sys.argv[1:]

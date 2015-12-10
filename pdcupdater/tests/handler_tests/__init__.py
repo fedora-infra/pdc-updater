@@ -20,7 +20,9 @@ cassette_dir = dirname(dirname(__file__)) + '/vcr-request-data/'
 
 def mock_404():
     import beanbag.bbexcept
-    response = object()
+    class Mock404Response(object):
+        status_code = 404
+    response = Mock404Response()
     raise beanbag.bbexcept.BeanBagException(response, "404, nope.")
 
 def mock_pdc(function):
@@ -38,6 +40,9 @@ def mock_pdc(function):
         # Mock out GET endpoints
         pdc.add_endpoint('composes/Fedora-24-20151130.n.2', 'GET', mock_404)
         pdc.add_endpoint('releases/fedora-24-fedora-NEXT', 'GET', {
+            'wat': 'foo',
+        })
+        pdc.add_endpoint('releases/fedora-22-fedora-NEXT-updates', 'GET', {
             'wat': 'foo',
         })
 
@@ -61,7 +66,9 @@ def mock_pdc(function):
                 'epoch': None,
                 'version': '1.11',
                 'release': '1.el7',
-                'linked_releases': ['epel7'],
+                'linked_releases': [
+                    'epel-7-fedora-NEXT-updates',
+                ],
                 'srpm_name': 'undefined...',
             }, {
                 'name': 'rubygem-jmespath-doc',
@@ -69,7 +76,9 @@ def mock_pdc(function):
                 'epoch': None,
                 'version': '1.1.3',
                 'release': '1.el7',
-                'linked_releases': ['epel7'],
+                'linked_releases': [
+                    'epel-7-fedora-NEXT-updates',
+                ],
                 'srpm_name': 'undefined...',
             }],
         })
@@ -214,7 +223,7 @@ class BaseHandlerTest(unittest.TestCase):
             'password': 'whatever',
         },
         'pdcupdater.pkgdb_url': 'blihblihblih',
-        'pdcupdater.koji_url': 'blahblahblah',
+        'pdcupdater.koji_url': 'http://koji.fedoraproject.org/kojihub',
         'pdcupdater.old_composes_url': 'https://kojipkgs.fedoraproject.org/compose',
     }
 

@@ -43,6 +43,36 @@ def interesting_tags():
     return stable_tags + [rawhide_tag()]
 
 
+def tag2release(tag):
+    if tag == rawhide_tag():
+        release = {
+            'name': 'Fedora',
+            'short': 'fedora',
+            'version': tag.strip('f'),
+            'release_type': 'ga',
+        }
+        release_id = "{short}-{version}-fedora-NEXT".format(**release)
+    else:
+        bodhi_info = {r['stable_tag']: r for r in bodhi_releases()}[tag]
+        if 'EPEL' in bodhi_info['id_prefix']:
+            release = {
+                'name': 'Fedora EPEL',
+                'short': 'epel',
+                'version': bodhi_info['version'],
+                'release_type': 'updates',
+            }
+        else:
+            release = {
+                'name': 'Fedora Updates',
+                'short': 'fedora',
+                'version': bodhi_info['version'],
+                'release_type': 'updates',
+            }
+        release_id = "{short}-{version}-fedora-NEXT-{release_type}".format(**release)
+
+    return release_id, release
+
+
 class NewRPMHandler(pdcupdater.handlers.BaseHandler):
     """ When a new build is tagged into rawhide or a stable release. """
 
@@ -73,26 +103,34 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
 
     def handle(self, pdc, msg):
         tag = msg['msg']['tag']
-        lookup = {r['stable_tag']: r for r in bodhi_releases()}
-        release_id = lookup.get(tag, {'dist_tag': rawhide_tag()})['dist_tag']
+        release_id, release = tag2release(tag)
+        pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
+
+        build, rpms = pdcupdater.services.koji_rpms_from_build(
+            self.koji_url, msg['msg']['build_id'])
 
         # https://pdc.fedorainfracloud.org/rest_api/v1/rpms/
-        data = dict(
-            name=msg['msg']['name'],
-            version=msg['msg']['version'],
-            release=msg['msg']['release'],
-            arch='src', # TODO --handle this for real
-            epoch=0, # TODO -- handle this
-            srpm_name='undefined...', # TODO -- handle this
-            linked_releases=[
-                release_id,
-            ],
-        )
-        pdc['rpms']._(data)
+        for rpm in rpms:
+            # Start with podofo-0.9.1-17.el7.ppc64.rpm
+            name, version, release = rpm.rsplit('-', 2)
+            release, arch, _ = release.rsplit('.', 2)
+            data = dict(
+                name=name,
+                version=version,
+                release=release,
+                arch=arch,
+                epoch=build['epoch'],
+                # Leave this undefined for now until we know what its for...
+                srpm_name='undefined...', # build['nvr'],
+                linked_releases=[
+                    release_id,
+                ],
+            )
+            pdc['rpms']._(data)
 
     def audit(self, pdc):
         # Query the data sources
-        koji_rpms = self._gather_koji_rpms(pdc)
+        koji_rpms = self._gather_koji_rpms()
         pdc_rpms = get_paged(pdc['rpms']._)
 
         # Normalize the lists before comparing them.
@@ -107,11 +145,11 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
 
     def initialize(self, pdc):
         # Get a list of all rpms in koji
-        bulk_payload = self._gather_koji_rpms(pdc)
+        bulk_payload = self._gather_koji_rpms()
         # And send it to PDC
         pdc['rpms']._(bulk_payload)
 
-    def _gather_koji_rpms(self, pdc):
+    def _gather_koji_rpms(self):
         koji_rpms = {
             tag: pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
             for tag in interesting_tags()
@@ -125,7 +163,10 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
                 release=rpm['release'],
                 epoch=rpm['epoch'],
                 arch=rpm['arch'],
-                linked_releases=[tag],
+                linked_releases=[
+                    tag2release(tag)[0],  # Just the release_id
+                ],
+                # How would we determine the srpm_name at this point?  Guess?
                 srpm_name='undefined...', # TODO -- handle this
             )
             for tag, rpms in koji_rpms.items()

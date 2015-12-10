@@ -91,10 +91,34 @@ def fas_persons(base_url, username, password):
 def koji_builds_in_tag(url, tag):
     """ Return the list of koji builds in a tag. """
     import koji
-    log.info("Connecting to koji at %r" % url)
+    log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
     session = koji.ClientSession(url)
     rpms, builds = session.listTaggedRPMS(tag)
     return rpms
+
+
+def koji_rpms_from_build(url, build_id):
+    import koji
+    log.info("Listing rpms in koji(%s) for %r" % (url, build_id))
+    session = koji.ClientSession(url)
+    build = session.getBuild(build_id)
+    children = session.getTaskChildren(build['task_id'])
+
+    rpms = set()
+    for child in children:
+        results = session.getTaskResult(child['id'])
+        if not results:
+            continue
+
+        # rpm looks like 'tasks/4547/12094547/podofo-0.9.1-17.el7.ppc64.rpm'
+        for rpm in results.get('rpms', []):
+            rpms.add(rpm.split('/')[-1])
+        for rpm in results.get('srpms', []):
+            rpms.add(rpm.split('/')[-1])
+
+    # Dependable order for testing.
+    rpms = list(sorted(rpms))
+    return build, rpms
 
 
 def pkgdb_packages(base_url, acls=False):

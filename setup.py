@@ -34,6 +34,6 @@ setup(
     [console_scripts]
     pdc-updater-initialize = pdcupdater.commands:initialize
     pdc-updater-audit = pdcupdater.commands:audit
-    pdc-updater-handle = pdcupdater.commands:handle
+    pdc-updater-retry = pdcupdater.commands:retry
     """,
 )
