@@ -38,13 +38,28 @@ class TestNewCompose(BaseHandlerTest):
         # https://pagure.io/pungi/blob/master/f/doc/configuration.rst#_566
         # https://pagure.io/pungi/blob/master/f/bin/pungi-fedmsg-notification
         msg = dict(
-            topic='org.fedoraproject.prod.pungi.compose.start',
+            topic='org.fedoraproject.prod.pungi.compose.status.change',
             msg=dict(
-                # Probably some other info goes here too..
-                # but this is all we know for now.
+                status='STARTED',
                 compose_id='Fedora-24-20151130.n.2',
-                # TODO -- we're not sure what release will be called, actually.
-                branch='rawhide',
+                location='http://kojipkgs.fedoraproject.org/compose//rawhide/'
+                'Fedora-24-20151130.n.2/compose',
+            ),
+        )
+        result = self.handler.can_handle(msg)
+        self.assertEquals(result, False)
+
+    def test_cannot_handle_new_compose_doomed(self):
+        # Read the docs and code about the message producer for more info
+        # https://pagure.io/pungi/blob/master/f/doc/configuration.rst#_566
+        # https://pagure.io/pungi/blob/master/f/bin/pungi-fedmsg-notification
+        msg = dict(
+            topic='org.fedoraproject.prod.pungi.compose.status.change',
+            msg=dict(
+                status='DOOMED',
+                compose_id='Fedora-24-20151130.n.2',
+                location='http://kojipkgs.fedoraproject.org/compose//rawhide/'
+                'Fedora-24-20151130.n.2/compose',
             ),
         )
         result = self.handler.can_handle(msg)
@@ -55,13 +70,12 @@ class TestNewCompose(BaseHandlerTest):
         # https://pagure.io/pungi/blob/master/f/doc/configuration.rst#_566
         # https://pagure.io/pungi/blob/master/f/bin/pungi-fedmsg-notification
         msg = dict(
-            topic='org.fedoraproject.prod.pungi.compose.finish',
+            topic='org.fedoraproject.prod.pungi.compose.status.change',
             msg=dict(
-                # Probably some other info goes here too..
-                # but this is all we know for now.
+                status='FINISHED',
                 compose_id='Fedora-24-20151130.n.2',
-                # TODO -- we're not sure what release will be called, actually.
-                branch='rawhide',
+                location='http://kojipkgs.fedoraproject.org/compose//rawhide/'
+                'Fedora-24-20151130.n.2/compose',
             ),
         )
         result = self.handler.can_handle(msg)
@@ -73,13 +87,12 @@ class TestNewCompose(BaseHandlerTest):
         # https://pagure.io/pungi/blob/master/f/doc/configuration.rst#_566
         # https://pagure.io/pungi/blob/master/f/bin/pungi-fedmsg-notification
         msg = dict(
-            topic='org.fedoraproject.prod.pungi.compose.finish',
+            topic='org.fedoraproject.prod.pungi.compose.status.change',
             msg=dict(
-                # Probably some other info goes here too..
-                # but this is all we know for now.
+                status='FINISHED',
                 compose_id='Fedora-24-20151130.n.2',
-                # TODO -- we're not sure what release will be called, actually.
-                branch='rawhide',
+                location='http://kojipkgs.fedoraproject.org/compose//rawhide/'
+                'Fedora-24-20151130.n.2/compose',
             ),
         )
         self.handler.handle(pdc, msg)

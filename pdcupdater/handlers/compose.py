@@ -20,23 +20,25 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         self.old_composes_url = self.config['pdcupdater.old_composes_url']
 
     def can_handle(self, msg):
-        return msg['topic'].endswith('pungi.compose.finish')
+        if not msg['topic'].endswith('pungi.compose.status.change'):
+            return False
+        if msg['msg']['status'] != 'FINISHED':
+            return False
+        return True
 
     def handle(self, pdc, msg):
         # This is something like Fedora-24-20151130.n.2
         compose_id = msg['msg']['compose_id']
 
-        # TODO -- we're not actually sure what this is going to be called in
-        # the message payload yet...
-        branch = msg['msg']['branch']
-
-        koji = "https://kojipkgs.fedoraproject.org"
-        tmpl = "{koji}/compose/{branch}/{compose_id}"
-        compose_url = tmpl.format(
-            koji=koji,
-            branch=branch,
-            compose_id=compose_id,
-        )
+        # The URL given looks like
+        # http://kojipkgs.fedoraproject.org/compose/rawhide/COMPOSEID/compose
+        # but we want
+        # http://kojipkgs.fedoraproject.org/compose/rawhide/COMPOSEID
+        # So handle it carefully, like this
+        compose_url = msg['msg']['location']\
+            .strip('/')\
+            .strip('compose')\
+            .strip('/')
 
         self._import_compose(pdc, compose_id, compose_url)
 
@@ -62,7 +64,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
 
     def initialize(self, pdc):
         old_composes = pdcupdater.services.old_composes(self.old_composes_url)
-        for branch, compose_id, url in old_composes:
+        for _, compose_id, url in old_composes:
             try:
                 self._import_compose(pdc, compose_id, url)
             except Exception:
