@@ -79,7 +79,7 @@ def _print_audit_report(results, verbose):
     fail = False
     for key, values in results.items():
         present, absent = values
-        fail = fail or (not present and not absent)
+        fail = fail or present or absent
 
     if fail:
         print "OK"
