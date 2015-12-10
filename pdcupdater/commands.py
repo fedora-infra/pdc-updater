@@ -3,14 +3,33 @@ import logging.config
 import sys
 
 import fedmsg.config
+import fedmsg.encoding
 
 import pdcupdater.handlers
+import pdcupdater.utils
+
 import beanbag.bbexcept
 
 log = logging.getLogger(__name__)
 
 # https://github.com/product-definition-center/pdc-client/issues/8
 import pdc_client
+
+
+def handle():
+    config = fedmsg.config.load_config()
+    logging.config.dictConfig(config['logging'])
+    msg_ids = sys.argv[1:]
+    if msg_ids:
+        messages = [pdcupdater.utils.get_fedmsg(idx) for idx in msg_ids]
+    else:
+        log.info("No msg_ids supplied.  Reading message payload from stdin.")
+        messages = [fedmsg.encoding.loads(sys.stdin.read())]
+
+    pdc = pdc_client.PDCClient(**config['pdcupdater.pdc'])
+    handlers = pdcupdater.handlers.load_handlers(config)
+    for msg in messages:
+        pdcupdater.utils.handle_message(pdc, handlers, msg)
 
 
 def _initialize_basics(pdc):
