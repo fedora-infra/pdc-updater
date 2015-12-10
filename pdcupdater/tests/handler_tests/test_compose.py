@@ -4,6 +4,7 @@ import os
 
 import mock
 
+import pdcupdater.utils
 from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
@@ -29,7 +30,7 @@ class TestNewCompose(BaseHandlerTest):
 
     def test_cannot_handle_fedbadges(self):
         idx = '2015-6c98c8e3-0dcb-497d-a0d8-0b3d026a4cfb'
-        msg = self.get_fedmsg(idx)
+        msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(msg)
         self.assertEquals(result, False)
 

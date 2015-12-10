@@ -1,5 +1,7 @@
 import copy
+import contextlib
 
+import requests
 import beanbag.bbexcept
 
 import logging
@@ -56,3 +58,29 @@ def compose_exists(pdc, compose_id):
         if not '404' in str(e):
             raise
         return False
+
+
+def get_fedmsg(idx):
+    url = 'https://apps.fedoraproject.org/datagrepper/id'
+    response = requests.get(url, params=dict(id=idx))
+    if not bool(response):
+        raise IOError("Failed to talk to %r %r" % (response.url, response))
+    return response.json()
+
+
+@contextlib.contextmanager
+def annotated(client, msg_id):
+    client.set_comment(msg_id)
+    try:
+        yield client
+    finally:
+        client.set_comment('No comment.')
+
+
+def handle_message(pdc, handlers, msg):
+    idx, topic = msg['msg_id'], msg['topic']
+    for handler in handlers:
+        if handler.can_handle(msg):
+            log.info("%r handling %r %r" % (handler, topic, idx))
+            with annotated(pdc, msg['msg_id']) as client:
+                handler.handle(client, msg)

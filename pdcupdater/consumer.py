@@ -19,7 +19,6 @@ Authors:    Ralph Bean <rbean@redhat.com>
 
 """
 
-import contextlib
 import fedmsg.consumers
 
 import pdcupdater.handlers
@@ -28,20 +27,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-# https://github.com/product-definition-center/pdc-client/issues/8
-try:
-    import pdc_client
-except ImportError:
-    log.exception("No pdc_client available.")
-
-
-@contextlib.contextmanager
-def annotated(client, msg_id):
-    client.set_comment(msg_id)
-    try:
-        yield client
-    finally:
-        client.set_comment('No comment.')
+import pdc_client
 
 
 class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
@@ -63,13 +49,9 @@ class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
         self.handlers = list(pdcupdater.handlers.load_handlers(config))
 
     def consume(self, msg):
-        topic, msg = msg['topic'], msg['body']
+        msg = msg['body']  # Remove envelope
         idx = msg.get('msg_id', None)
         self.log.debug("Received %r" % idx)
 
         pdc = pdc_client.PDCClient(**self.pdc_config)
-        for handler in self.handlers:
-            if handler.can_handle(msg):
-                self.log.info("%r handling %r %r" % (handler, topic, idx))
-                with annotated(pdc, msg['msg_id']) as client:
-                    handler.handle(client, msg)
+        pdcupdater.utils.handle_message(pdc, self.handlers, msg)
