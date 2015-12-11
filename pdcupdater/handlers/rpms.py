@@ -119,13 +119,16 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
                 version=version,
                 release=release,
                 arch=arch,
-                epoch=build['epoch'],
-                # Leave this undefined for now until we know what its for...
-                srpm_name='undefined...', # build['nvr'],
+                epoch=build['epoch'] or 0,
+                srpm_name=build['name'],
+                srpm_nevra=None,  # This gets overwritten below
                 linked_releases=[
                     release_id,
                 ],
             )
+            if arch != 'src':
+                data['srpm_nevra'] = build['nvr']
+            log.info("Adding rpm %s to PDC release %s" % (rpm, release_id))
             pdc['rpms']._(data)
 
     def audit(self, pdc):
@@ -161,13 +164,13 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
                 name=rpm['name'],
                 version=rpm['version'],
                 release=rpm['release'],
-                epoch=rpm['epoch'],
+                epoch=rpm['epoch'] or 0,
                 arch=rpm['arch'],
                 linked_releases=[
                     tag2release(tag)[0],  # Just the release_id
                 ],
-                # How would we determine the srpm_name at this point?  Guess?
-                srpm_name='undefined...', # TODO -- handle this
+                srpm_name=rpm['srpm_name'],
+                srpm_nevra=rpm['arch'] != 'src' and rpm.get('srpm_nevra') or None,
             )
             for tag, rpms in koji_rpms.items()
             for rpm in rpms

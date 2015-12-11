@@ -94,6 +94,14 @@ def koji_builds_in_tag(url, tag):
     log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
     session = koji.ClientSession(url)
     rpms, builds = session.listTaggedRPMS(tag)
+
+    # Extract some srpm-level info from the build attach it to each rpm
+    builds = {build['build_id']: build for build in builds}
+    for rpm in rpms:
+        idx = rpm['build_id']
+        rpm['srpm_name'] = builds[idx]['name']
+        rpm['srpm_nevra'] = builds[idx]['nvr']
+
     return rpms
 
 

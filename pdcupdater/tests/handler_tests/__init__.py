@@ -63,23 +63,25 @@ def mock_pdc(function):
             'results': [{
                 'name': 'dvisvgm',
                 'arch': 'src',
-                'epoch': None,
+                'epoch': 0,
                 'version': '1.11',
                 'release': '1.el7',
                 'linked_releases': [
                     'epel-7-fedora-NEXT-updates',
                 ],
-                'srpm_name': 'undefined...',
+                'srpm_name': 'dvisvgm',
+                'srpm_nevra': None,
             }, {
                 'name': 'rubygem-jmespath-doc',
                 'arch': 'noarch',
-                'epoch': None,
+                'epoch': 0,
                 'version': '1.1.3',
                 'release': '1.el7',
                 'linked_releases': [
                     'epel-7-fedora-NEXT-updates',
                 ],
-                'srpm_name': 'undefined...',
+                'srpm_name': 'rubygem-jmespath',
+                'srpm_nevra': 'rubygem-jmespath-1.1.3-1.el7',
             }],
         })
 

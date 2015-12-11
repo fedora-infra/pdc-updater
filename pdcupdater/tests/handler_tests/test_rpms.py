@@ -9,11 +9,19 @@ from pdcupdater.tests.handler_tests import (
 
 
 def mocked_koji_from_build_criu(url, buildid):
-    return {'epoch': None}, ["criu-1.6.1-1.fc22.src.rpm"]
+    return {
+        'epoch': None,
+        'name': 'criu',
+        'nvr': 'criu-1.6.1-1.fc22',
+    }, ["criu-1.6.1-1.fc22.src.rpm"]
 
 
 def mocked_koji_from_build_thunderbird(url, buildid):
-    return {'epoch': None}, [
+    return {
+        'epoch': None,
+        'name': 'thunderbird',
+        'nvr': 'thunderbird-38.4.0-2.fc24',
+    }, [
         "mozilla-crashreporter-thunderbird-debuginfo-38.4.0-2.fc24.x86_64.rpm",
         "thunderbird-38.4.0-2.fc24.armv7hl.rpm",
         "thunderbird-38.4.0-2.fc24.src.rpm",
@@ -40,6 +48,8 @@ def mocked_koji_from_tag(url, tag):
         'buildroot_id': 4386200,
         'payloadhash': '46f384609c0db547753857d5b0476cae',
         'size': 841828,
+        # Extracted from the associated build
+        'srpm_name': 'dvisvgm',
     }, {
         'build_id': 696907,
         'name': 'rubygem-jmespath-doc',
@@ -52,6 +62,9 @@ def mocked_koji_from_tag(url, tag):
         'buildroot_id': 4364114,
         'payloadhash': '6b98468f3efe29367c923c577861dec5',
         'size': 175000,
+        # Extracted from the associated build
+        'srpm_name': 'rubygem-jmespath',
+        'srpm_nevra': 'rubygem-jmespath-1.1.3-1.el7',
     }]
 
 
@@ -76,6 +89,9 @@ def mocked_koji_from_tag_adding_one(url, tag):
             'buildroot_id': 4364114,
             'payloadhash': '6b98468f3efe29367c923c577861dec5',
             'size': 175000,
+            # Extracted from the associated build
+            'srpm_name': 'rubygem-jmespath',
+            'srpm_nevra': 'rubygem-jmespath-1.1.3-1.fc24',
         }]
     else:
         return mocked_koji_from_tag(url, tag)
@@ -132,9 +148,10 @@ class TestNewRPM(BaseHandlerTest):
                     "linked_releases": [
                         'fedora-24-fedora-NEXT',
                     ],
-                    "epoch": None,
+                    "epoch": 0,
                     "arch": "x86_64",
-                    "srpm_name": "undefined...",
+                    "srpm_name": "thunderbird",
+                    "srpm_nevra": "thunderbird-38.4.0-2.fc24",
                 }),
                 ('POST', {
                     "name": "thunderbird",
@@ -143,9 +160,10 @@ class TestNewRPM(BaseHandlerTest):
                     "linked_releases": [
                         'fedora-24-fedora-NEXT',
                     ],
-                    "epoch": None,
+                    "epoch": 0,
                     "arch": "armv7hl",
-                    "srpm_name": "undefined...",
+                    "srpm_name": "thunderbird",
+                    "srpm_nevra": "thunderbird-38.4.0-2.fc24",
                 }),
                 ('POST', {
                     "name": "thunderbird",
@@ -154,9 +172,10 @@ class TestNewRPM(BaseHandlerTest):
                     "linked_releases": [
                         'fedora-24-fedora-NEXT',
                     ],
-                    "epoch": None,
+                    "epoch": 0,
                     "arch": "src",
-                    "srpm_name": "undefined...",
+                    "srpm_name": "thunderbird",
+                    "srpm_nevra": None,
                 }),
                 ('POST', {
                     "name": "thunderbird",
@@ -165,9 +184,10 @@ class TestNewRPM(BaseHandlerTest):
                     "linked_releases": [
                         'fedora-24-fedora-NEXT',
                     ],
-                    "epoch": None,
+                    "epoch": 0,
                     "arch": "x86_64",
-                    "srpm_name": "undefined...",
+                    "srpm_name": "thunderbird",
+                    "srpm_nevra": "thunderbird-38.4.0-2.fc24",
                 }),
                 ('POST', {
                     "name": "thunderbird-debuginfo",
@@ -176,9 +196,10 @@ class TestNewRPM(BaseHandlerTest):
                     "linked_releases": [
                         'fedora-24-fedora-NEXT',
                     ],
-                    "epoch": None,
+                    "epoch": 0,
                     "arch": "armv7hl",
-                    "srpm_name": "undefined...",
+                    "srpm_name": "thunderbird",
+                    "srpm_nevra": "thunderbird-38.4.0-2.fc24",
                 }),
                 ('POST', {
                     "name": "thunderbird-debuginfo",
@@ -187,9 +208,10 @@ class TestNewRPM(BaseHandlerTest):
                     "linked_releases": [
                         'fedora-24-fedora-NEXT',
                     ],
-                    "epoch": None,
+                    "epoch": 0,
                     "arch": "x86_64",
-                    "srpm_name": "undefined...",
+                    "srpm_name": "thunderbird",
+                    "srpm_nevra": "thunderbird-38.4.0-2.fc24",
                 }),
                 ('POST', {
                     "name": "thunderbird-lightning-gdata",
@@ -198,9 +220,10 @@ class TestNewRPM(BaseHandlerTest):
                     "linked_releases": [
                         'fedora-24-fedora-NEXT',
                     ],
-                    "epoch": None,
+                    "epoch": 0,
                     "arch": "armv7hl",
-                    "srpm_name": "undefined...",
+                    "srpm_name": "thunderbird",
+                    "srpm_nevra": "thunderbird-38.4.0-2.fc24",
                 }),
                 ('POST', {
                     "name": "thunderbird-lightning-gdata",
@@ -209,9 +232,10 @@ class TestNewRPM(BaseHandlerTest):
                     "linked_releases": [
                         'fedora-24-fedora-NEXT',
                     ],
-                    "epoch": None,
+                    "epoch": 0,
                     "arch": "x86_64",
-                    "srpm_name": "undefined...",
+                    "srpm_name": "thunderbird",
+                    "srpm_nevra": "thunderbird-38.4.0-2.fc24",
                 }),
             ],
         })
@@ -234,9 +258,10 @@ class TestNewRPM(BaseHandlerTest):
                     "linked_releases": [
                         'fedora-22-fedora-NEXT-updates',
                     ],
-                    "epoch": None,
+                    "epoch": 0,
                     "arch": "src",
-                    "srpm_name": "undefined...",
+                    "srpm_name": "criu",
+                    "srpm_nevra": None,
                 }),
             ],
         })
@@ -255,27 +280,25 @@ class TestNewRPM(BaseHandlerTest):
                 ('POST', [{
                     'name': 'dvisvgm',
                     'arch': 'src',
-                    'epoch': None,
+                    'epoch': 0,
                     'version': '1.11',
                     'release': '1.el7',
                     "linked_releases": [
                         'epel-7-fedora-NEXT-updates',
                     ],
-
-                    # TODO -- this is still really unhandled.
-                    "srpm_name": "undefined...",
+                    "srpm_name": "dvisvgm",
+                    "srpm_nevra": None,
                 }, {
                     'name': 'rubygem-jmespath-doc',
                     'arch': 'noarch',
-                    'epoch': None,
+                    'epoch': 0,
                     'version': '1.1.3',
                     'release': '1.el7',
                     "linked_releases": [
                         'epel-7-fedora-NEXT-updates',
                     ],
-
-                    # TODO -- this is still really unhandled.
-                    "srpm_name": "undefined...",
+                    "srpm_name": "rubygem-jmespath",
+                    "srpm_nevra": "rubygem-jmespath-1.1.3-1.el7",
                 }]),
             ],
         })
@@ -320,14 +343,15 @@ class TestNewRPM(BaseHandlerTest):
         # We removed a build from koji, so it is erroneously "present" in PDC
         self.assertSetEqual(present, set([json.dumps({
             "arch": "noarch",
-            "epoch": None,
+            "epoch": 0,
             "linked_releases": [
                 "epel-7-fedora-NEXT-updates",
             ],
             "name": "rubygem-jmespath-doc",
-            "release": "1.el7",
-            "srpm_name": "undefined...",
             "version": "1.1.3",
+            "release": "1.el7",
+            "srpm_name": "rubygem-jmespath",
+            "srpm_nevra": "rubygem-jmespath-1.1.3-1.el7",
         }, sort_keys=True)]))
         self.assertSetEqual(absent, set())
 
@@ -352,12 +376,13 @@ class TestNewRPM(BaseHandlerTest):
         # We added an extra koji build, so it is "absent" from PDC.
         self.assertSetEqual(absent, set([json.dumps({
             "arch": "noarch",
-            "epoch": None,
+            "epoch": 0,
             "linked_releases": [
                 u'fedora-24-fedora-NEXT',
             ],
             "name": "rubygem-jmespath-doc",
-            "release": "1.fc24",
-            "srpm_name": "undefined...",
             "version": "1.1.3",
+            "release": "1.fc24",
+            "srpm_name": "rubygem-jmespath",
+            "srpm_nevra": "rubygem-jmespath-1.1.3-1.fc24",
         }, sort_keys=True)]))
