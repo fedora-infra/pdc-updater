@@ -18,6 +18,10 @@ class BaseHandler(object):
     def __init__(self, config):
         self.config = config
 
+    @abc.abstractproperty
+    def topic_suffixes(self):
+        pass
+
     @abc.abstractmethod
     def can_handle(self, msg):
         """ Return True or False if this handler can handle this message. """
@@ -36,9 +40,10 @@ class BaseHandler(object):
 
         It is expected to take a long time to run.
 
-        It should return a list of dictionaries, each of which should indicate
-        if a check failed or passed, and why.  Those dicts will be sewn
-        together into an email to the releng group.
+        It should return a two lists.  The first should be a list of items
+        present in PDC but not in the other service.  The second should be a
+        list of items present in the other service, but not in PDC. Those lists
+        will be sewn together into an email to the releng group.
         """
         pass
 
@@ -50,6 +55,4 @@ class BaseHandler(object):
 
         It is expected to take a very long time to run.
         """
-
         pass
-

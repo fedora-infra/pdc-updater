@@ -19,7 +19,6 @@ Authors:    Ralph Bean <rbean@redhat.com>
 
 """
 
-import contextlib
 import fedmsg.consumers
 
 import pdcupdater.handlers
@@ -28,33 +27,14 @@ import logging
 log = logging.getLogger(__name__)
 
 
-# https://github.com/product-definition-center/pdc-client/issues/8
-try:
-    import pdc_client
-except ImportError:
-    log.exception("No pdc_client available.")
-
-
-@contextlib.contextmanager
-def annotated(client, msg_id):
-    client.set_comment(msg_id)
-    try:
-        yield client
-    finally:
-        client.set_comment('No comment.')
+import pdc_client
 
 
 class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
-    topic = '*'
     config_key = 'pdcupdater.enabled'
 
     def __init__(self, hub):
-        super(PDCUpdater, self).__init__(hub)
-
-        if not self._initialized:
-            return
-
-        config = self.hub.config
+        config = hub.config
 
         # Ensure this is present, it should be a dict with a url and creds
         self.pdc_config = config['pdcupdater.pdc']
@@ -62,14 +42,19 @@ class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
         # Load all our worker bits.
         self.handlers = list(pdcupdater.handlers.load_handlers(config))
 
+        # Tell fedmsg to only notify us about topics that our handlers want.
+        self.topic = [
+            '.'.join([config['topic_prefix'], config['environment'], topic])
+            for handler in self.handlers for topic in handler.topic_suffixes
+        ]
+
+        super(PDCUpdater, self).__init__(hub)
+
     def consume(self, msg):
-        topic, msg = msg['topic'], msg['body']
+        msg = msg['body']  # Remove envelope
         idx = msg.get('msg_id', None)
-        self.log.debug("Received %r" % idx)
+        topic = msg.get('topic', None)
+        self.log.debug("Received %r, %r" % (idx, topic))
 
         pdc = pdc_client.PDCClient(**self.pdc_config)
-        for handler in self.handlers:
-            if handler.can_handle(msg):
-                self.log.info("%r handling %r %r" % (handler, topic, idx))
-                with annotated(pdc, msg['msg_id']) as client:
-                    handler.handle(client, msg)
+        pdcupdater.utils.handle_message(pdc, self.handlers, msg)

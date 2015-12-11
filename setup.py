@@ -7,6 +7,8 @@ requirements = [
     'fedmsg[consumers]',
     'requests',
     'dogpile.cache',
+    'python-fedora',
+    'packagedb-cli',
 ]
 
 
@@ -28,5 +30,10 @@ setup(
     entry_points="""
     [moksha.consumer]
     updater = pdcupdater.consumer:PDCUpdater
+
+    [console_scripts]
+    pdc-updater-initialize = pdcupdater.commands:initialize
+    pdc-updater-audit = pdcupdater.commands:audit
+    pdc-updater-retry = pdcupdater.commands:retry
     """,
 )
