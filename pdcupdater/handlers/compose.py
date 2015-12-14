@@ -88,6 +88,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         # POSTing them back to PDC, let's check to see if we already know about
         # this compose.
         compose_id = composeinfo['payload']['compose']['id']
+        log.info("Importing compose %r" % compose_id)
         if pdcupdater.utils.compose_exists(pdc, compose_id):
             log.warn("%r already exists in PDC." % compose_id)
             return
