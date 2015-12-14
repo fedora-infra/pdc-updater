@@ -68,8 +68,12 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         for _, compose_id, url in old_composes:
             try:
                 self._import_compose(pdc, compose_id, url)
-            except Exception:
-                log.exception("Failed to import %r" % url)
+            except Exception as e:
+                if hasattr(e, 'response'):
+                    log.exception("Failed to import %r %r" % (url, e.response.text))
+                else:
+                    log.exception("Failed to import %r %r" % url)
+
 
     def _import_compose(self, pdc, compose_id, compose_url):
         base = compose_url + "/compose/metadata"
