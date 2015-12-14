@@ -30,6 +30,11 @@ config = dict(
                 "propagate": False,
                 "handlers": ["console"],
             },
+            pkgdb2client={
+                "level": "INFO",
+                "propagate": False,
+                "handlers": ["console"],
+            },
         ),
     ),
 )
