@@ -134,7 +134,7 @@ def pkgdb_packages(base_url, acls=False):
     import pkgdb2client
     log.info("Connecting to pkgdb at %r" % base_url)
     pkgdb = pkgdb2client.PkgDB(url=base_url)
-    pkg = pkgdb.get_packages(page='all', acls=True)
+    pkg = pkgdb.get_packages(page='all', acls=acls, limit=10)
     return pkg['packages']
 
 
