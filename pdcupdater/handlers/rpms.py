@@ -147,10 +147,10 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         return present, absent
 
     def initialize(self, pdc):
-        # Get a list of all rpms in koji
-        bulk_payload = self._gather_koji_rpms()
-        # And send it to PDC
-        pdc['rpms']._(bulk_payload)
+        # Get a list of all rpms in koji and send it to PDC
+        for batch in self._gather_koji_rpms():
+            log.info("Uploading info about %i rpms to PDC." % len(batch))
+            pdc['rpms']._(batch)
 
     def _gather_koji_rpms(self):
         koji_rpms = {
@@ -159,19 +159,19 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         }
 
         # Flatten into a list and augment the koji dict with tag info.
-        return [
-            dict(
-                name=rpm['name'],
-                version=rpm['version'],
-                release=rpm['release'],
-                epoch=rpm['epoch'] or 0,
-                arch=rpm['arch'],
-                linked_releases=[
-                    tag2release(tag)[0],  # Just the release_id
-                ],
-                srpm_name=rpm['srpm_name'],
-                srpm_nevra=rpm['arch'] != 'src' and rpm.get('srpm_nevra') or None,
-            )
-            for tag, rpms in koji_rpms.items()
-            for rpm in rpms
-        ]
+        for tag, rpms in koji_rpms.items():
+            yield [
+                dict(
+                    name=rpm['name'],
+                    version=rpm['version'],
+                    release=rpm['release'],
+                    epoch=rpm['epoch'] or 0,
+                    arch=rpm['arch'],
+                    linked_releases=[
+                        tag2release(tag)[0],  # Just the release_id
+                    ],
+                    srpm_name=rpm['srpm_name'],
+                    srpm_nevra=rpm['arch'] != 'src' and rpm.get('srpm_nevra') or None,
+                )
+                for rpm in rpms
+            ]
