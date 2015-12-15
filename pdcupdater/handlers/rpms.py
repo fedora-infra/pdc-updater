@@ -90,6 +90,7 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
 
         # Ignore secondary arches for now
         if msg['msg']['instance'] != 'primary':
+            log.debug("From %r.  Skipping." % (msg['msg']['instance']))
             return False
 
         interesting = interesting_tags()
