@@ -31,7 +31,7 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
             #bugzilla_component=name,
             brew_package=name,
             active=True,
-            type='srpm',
+            type='rpm',
         )
         # https://pdc.fedorainfracloud.org/rest_api/v1/global-components/
         pdc['global-components']._(dict(name=name))
@@ -87,7 +87,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
             #bugzilla_component=name,
             brew_package=name,
             active=True,
-            type='srpm',
+            type='rpm',
         )
         # https://pdc.fedorainfracloud.org/rest_api/v1/release-components/
         pdc['release-components']._(data)
@@ -128,7 +128,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
                 #bugzilla_component=package['name'],
                 brew_package=package['name'],
                 active=True,
-                type='srpm',
+                type='rpm',
             )
         for package in packages
         for acls in package['acls']
