@@ -133,7 +133,7 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
 
     def audit(self, pdc):
         # Query the data sources
-        koji_rpms = self._gather_koji_rpms()
+        koji_rpms = sum(self._gather_koji_rpms(), [])
         pdc_rpms = get_paged(pdc['rpms']._)
 
         # Normalize the lists before comparing them.
