@@ -1,7 +1,34 @@
 import pdcupdater.handlers
 import pdcupdater.services
+import pdcupdater.utils
 
 from pdc_client import get_paged
+
+import logging
+
+log = logging.getLogger(__name__)
+
+
+def collection2release_id(pdc, collection):
+    # Silly rawhide.  We don't know what number you are...
+    if collection['version'] == 'devel':
+        collection['version'] = collection['dist_tag'].split('fc')[-1]
+        release_type = 'ga'
+        template = "{short}-{version}-fedora-NEXT"
+    else:
+        release_type = 'updates'
+        template = "{short}-{version}-fedora-NEXT-updates"
+
+    # lowercase this for the prefix.
+    release = {
+        'name': collection['name'],
+        'short': collection['name'].lower().split()[-1],
+        'version': collection['version'],
+        'release_type': release_type,
+    }
+    release_id = template.format(**release)
+    pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
+    return release_id
 
 
 class NewPackageHandler(pdcupdater.handlers.BaseHandler):
@@ -21,11 +48,12 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
     def handle(self, pdc, msg):
         name = msg['msg']['package_name']
         branch = msg['msg']['package_listing']['collection']['branchname']
-        release = msg['msg']['package_listing']['collection']['koji_name']
+        collection = msg['msg']['package_listing']['collection']
+        release_id = collection2release_id(pdc, collection)
         global_component = name
         data = dict(
             name=name,
-            release=release,
+            release=release_id,
             global_component=global_component,
             dist_git_branch=branch,
             #bugzilla_component=name,
@@ -33,9 +61,9 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
             active=True,
             type='rpm',
         )
-        # https://pdc.fedorainfracloud.org/rest_api/v1/global-components/
-        pdc['global-components']._(dict(name=name))
+        pdcupdater.utils.ensure_global_component_exists(pdc, name)
         # https://pdc.fedorainfracloud.org/rest_api/v1/release-components/
+        log.info("Creating release component %s for %s" % (name, release_id))
         pdc['release-components']._(data)
 
     def audit(self, pdc):
@@ -77,11 +105,12 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
     def handle(self, pdc, msg):
         name = msg['msg']['package_listing']['package']['name']
         branch = msg['msg']['package_listing']['collection']['branchname']
-        release = msg['msg']['package_listing']['collection']['koji_name']
+        collection = msg['msg']['package_listing']['collection']
+        release_id = collection2release_id(pdc, collection)
         global_component = name
         data = dict(
             name=name,
-            release=release,
+            release=release_id,
             global_component=global_component,
             dist_git_branch=branch,
             #bugzilla_component=name,
@@ -90,6 +119,8 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
             type='rpm',
         )
         # https://pdc.fedorainfracloud.org/rest_api/v1/release-components/
+        pdcupdater.utils.ensure_global_component_exists(pdc, name)
+        log.info("Creating release component %s for %s" % (name, release_id))
         pdc['release-components']._(data)
 
     def audit(self, pdc):
@@ -122,7 +153,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         bulk_payload = [
             dict(
                 name=package['name'],
-                release=acls['collection']['koji_name'],
+                release=collection2release_id(pdc, acls['collection']),
                 global_component=package['name'],
                 dist_git_branch=acls['collection']['branchname'],
                 #bugzilla_component=package['name'],

@@ -44,6 +44,13 @@ def ensure_product_exists(pdc, product_id, product):
         pdc['base-products']._(product)
 
 
+def ensure_global_component_exists(pdc, name):
+    response = pdc['global-components']._(name=name)
+    if not response['results']:
+        log.warn("No global-component %r exists.  Creating." % name)
+        pdc['global-components']._(dict(name=name))
+
+
 def compose_exists(pdc, compose_id):
     """ Return True if a compose exists in PDC.  False if not. """
     try:
