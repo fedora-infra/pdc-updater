@@ -81,7 +81,7 @@ def _print_audit_report(results, verbose):
         present, absent = values
         fail = fail or present or absent
 
-    if fail:
+    if not fail:
         print "OK"
     else:
         print "WARN"
