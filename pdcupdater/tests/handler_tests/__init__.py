@@ -39,12 +39,14 @@ def mock_pdc(function):
 
         # Mock out GET endpoints
         pdc.add_endpoint('composes/Fedora-24-20151130.n.2', 'GET', mock_404)
-        pdc.add_endpoint('releases/fedora-24-fedora-NEXT', 'GET', {
-            'wat': 'foo',
-        })
-        pdc.add_endpoint('releases/fedora-22-fedora-NEXT-updates', 'GET', {
-            'wat': 'foo',
-        })
+
+        pdc.add_endpoint('releases/fedora-24-fedora-NEXT', 'GET', {})
+        pdc.add_endpoint('releases/fedora-23-fedora-NEXT-updates', 'GET', {})
+        pdc.add_endpoint('releases/fedora-22-fedora-NEXT-updates', 'GET', {})
+        pdc.add_endpoint('releases/fedora-21-fedora-NEXT-updates', 'GET', {})
+        pdc.add_endpoint('releases/fedora-20-fedora-NEXT-updates', 'GET', {})
+        pdc.add_endpoint('releases/epel-7-fedora-NEXT-updates', 'GET', {})
+        pdc.add_endpoint('releases/epel-6-fedora-NEXT-updates', 'GET', {})
 
         pdc.add_endpoint('persons', 'GET', {
             'count': 2,

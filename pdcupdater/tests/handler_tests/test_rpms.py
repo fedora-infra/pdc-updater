@@ -275,8 +275,15 @@ class TestNewRPM(BaseHandlerTest):
         self.handler.initialize(pdc)
 
         # Check the PDC calls..
+        # One POST for each release (but we only have rpms for one)
         self.assertDictEqual(pdc.calls, {
             'rpms': [
+                ('POST', []),
+                ('POST', []),
+                ('POST', []),
+                ('POST', []),
+                ('POST', []),
+                ('POST', []),
                 ('POST', [{
                     'name': 'dvisvgm',
                     'arch': 'src',
