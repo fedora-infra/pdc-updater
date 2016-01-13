@@ -7,7 +7,7 @@
 %endif
 
 Name:               pdc-updater
-Version:            0.6.3
+Version:            0.1.0
 Release:            1%{?dist}
 Summary:            Update the product definition center in response to fedmsg
 
@@ -21,8 +21,27 @@ BuildRequires:      python2-devel
 BuildRequires:      python-setuptools
 
 BuildRequires:      fedmsg
+BuildRequires:      python-fedmsg-commands
+BuildRequires:      python-fedmsg-consumers
+BuildRequires:      python-requests
+BuildRequires:      python-dogpile-cache
+BuildRequires:      python-fedora
+BuildRequires:      packagedb-cli
+BuildRequires:      pdc-client
+
+# For the tests
+BuildRequires:      python-nose
+BuildRequires:      python-vcrpy
+BuildRequires:      python-mock
 
 Requires:           fedmsg
+Requires:           python-fedmsg-commands
+Requires:           python-fedmsg-consumers
+Requires:           python-requests
+Requires:           python-dogpile-cache
+Requires:           python-fedora
+Requires:           packagedb-cli
+Requires:           pdc-client
 
 %description
 Fedmsg consumer that listens to activity on the Fedora message bus, and updates
@@ -43,12 +62,22 @@ rm -rf %{name}.egg-info
 # setuptools installs these, but we don't want them.
 rm -rf %{buildroot}%{python2_sitelib}/tests/
 
+%check
+# The tests require network, but we mock that with vcr
+PYTHONPATH=. nosetests -v
+
 %files
 %doc README.rst
 %license LICENSE
 %{python2_sitelib}/pdcupdater/
-%{python2_sitelib}/pdcupdater-%{version}*
+%{python2_sitelib}/pdc_updater-%{version}*
+%{_bindir}/pdc-updater-retry
+%{_bindir}/pdc-updater-audit
+%{_bindir}/pdc-updater-initialize
 
 %changelog
+* Tue Jan 12 2016 Ralph Bean <rbean@redhat.com> - 0.1.0-1
+- Getting ready for staging deployment.
+
 * Wed Nov 18 2015 Ralph Bean <rbean@redhat.com> - 0.0.1-1
 - The dawn of time.
