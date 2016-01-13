@@ -1,0 +1,274 @@
+{
+    "header": {
+        "version": "1.0"
+    }, 
+    "payload": {
+        "compose": {
+            "date": "20151130", 
+            "id": "Fedora-24-20151130.n.2", 
+            "respin": 2, 
+            "type": "nightly"
+        }, 
+        "release": {
+            "name": "Fedora", 
+            "short": "Fedora", 
+            "version": "24"
+        }, 
+        "variants": {
+            "Cloud": {
+                "arches": [
+                    "armhfp", 
+                    "i386", 
+                    "x86_64"
+                ], 
+                "id": "Cloud", 
+                "name": "Cloud", 
+                "paths": {
+                    "debug_packages": {
+                        "armhfp": "Cloud/armhfp/debug/tree/Packages", 
+                        "i386": "Cloud/i386/debug/tree/Packages", 
+                        "x86_64": "Cloud/x86_64/debug/tree/Packages"
+                    }, 
+                    "debug_repository": {
+                        "armhfp": "Cloud/armhfp/debug/tree", 
+                        "i386": "Cloud/i386/debug/tree", 
+                        "x86_64": "Cloud/x86_64/debug/tree"
+                    }, 
+                    "debug_tree": {
+                        "armhfp": "Cloud/armhfp/debug/tree", 
+                        "i386": "Cloud/i386/debug/tree", 
+                        "x86_64": "Cloud/x86_64/debug/tree"
+                    }, 
+                    "isos": {
+                        "i386": "Cloud/i386/iso", 
+                        "x86_64": "Cloud/x86_64/iso"
+                    }, 
+                    "os_tree": {
+                        "armhfp": "Cloud/armhfp/os", 
+                        "i386": "Cloud/i386/os", 
+                        "x86_64": "Cloud/x86_64/os"
+                    }, 
+                    "packages": {
+                        "armhfp": "Cloud/armhfp/os/Packages", 
+                        "i386": "Cloud/i386/os/Packages", 
+                        "x86_64": "Cloud/x86_64/os/Packages"
+                    }, 
+                    "repository": {
+                        "armhfp": "Cloud/armhfp/os", 
+                        "i386": "Cloud/i386/os", 
+                        "x86_64": "Cloud/x86_64/os"
+                    }, 
+                    "source_packages": {
+                        "armhfp": "Cloud/source/tree/Packages", 
+                        "i386": "Cloud/source/tree/Packages", 
+                        "x86_64": "Cloud/source/tree/Packages"
+                    }, 
+                    "source_repository": {
+                        "armhfp": "Cloud/source/tree", 
+                        "i386": "Cloud/source/tree", 
+                        "x86_64": "Cloud/source/tree"
+                    }, 
+                    "source_tree": {
+                        "armhfp": "Cloud/source/tree", 
+                        "i386": "Cloud/source/tree", 
+                        "x86_64": "Cloud/source/tree"
+                    }
+                }, 
+                "type": "variant", 
+                "uid": "Cloud"
+            }, 
+            "Everything": {
+                "arches": [
+                    "armhfp", 
+                    "i386", 
+                    "x86_64"
+                ], 
+                "id": "Everything", 
+                "name": "Everything", 
+                "paths": {
+                    "debug_packages": {
+                        "armhfp": "Everything/armhfp/debug/tree/Packages", 
+                        "i386": "Everything/i386/debug/tree/Packages", 
+                        "x86_64": "Everything/x86_64/debug/tree/Packages"
+                    }, 
+                    "debug_repository": {
+                        "armhfp": "Everything/armhfp/debug/tree", 
+                        "i386": "Everything/i386/debug/tree", 
+                        "x86_64": "Everything/x86_64/debug/tree"
+                    }, 
+                    "debug_tree": {
+                        "armhfp": "Everything/armhfp/debug/tree", 
+                        "i386": "Everything/i386/debug/tree", 
+                        "x86_64": "Everything/x86_64/debug/tree"
+                    }, 
+                    "isos": {
+                        "i386": "Everything/i386/iso", 
+                        "x86_64": "Everything/x86_64/iso"
+                    }, 
+                    "os_tree": {
+                        "armhfp": "Everything/armhfp/os", 
+                        "i386": "Everything/i386/os", 
+                        "x86_64": "Everything/x86_64/os"
+                    }, 
+                    "packages": {
+                        "armhfp": "Everything/armhfp/os/Packages", 
+                        "i386": "Everything/i386/os/Packages", 
+                        "x86_64": "Everything/x86_64/os/Packages"
+                    }, 
+                    "repository": {
+                        "armhfp": "Everything/armhfp/os", 
+                        "i386": "Everything/i386/os", 
+                        "x86_64": "Everything/x86_64/os"
+                    }, 
+                    "source_packages": {
+                        "armhfp": "Everything/source/tree/Packages", 
+                        "i386": "Everything/source/tree/Packages", 
+                        "x86_64": "Everything/source/tree/Packages"
+                    }, 
+                    "source_repository": {
+                        "armhfp": "Everything/source/tree", 
+                        "i386": "Everything/source/tree", 
+                        "x86_64": "Everything/source/tree"
+                    }, 
+                    "source_tree": {
+                        "armhfp": "Everything/source/tree", 
+                        "i386": "Everything/source/tree", 
+                        "x86_64": "Everything/source/tree"
+                    }
+                }, 
+                "type": "variant", 
+                "uid": "Everything"
+            }, 
+            "Server": {
+                "arches": [
+                    "armhfp", 
+                    "i386", 
+                    "x86_64"
+                ], 
+                "id": "Server", 
+                "name": "Server", 
+                "paths": {
+                    "debug_packages": {
+                        "armhfp": "Server/armhfp/debug/tree/Packages", 
+                        "i386": "Server/i386/debug/tree/Packages", 
+                        "x86_64": "Server/x86_64/debug/tree/Packages"
+                    }, 
+                    "debug_repository": {
+                        "armhfp": "Server/armhfp/debug/tree", 
+                        "i386": "Server/i386/debug/tree", 
+                        "x86_64": "Server/x86_64/debug/tree"
+                    }, 
+                    "debug_tree": {
+                        "armhfp": "Server/armhfp/debug/tree", 
+                        "i386": "Server/i386/debug/tree", 
+                        "x86_64": "Server/x86_64/debug/tree"
+                    }, 
+                    "isos": {
+                        "armhfp": "Server/armhfp/iso", 
+                        "i386": "Server/i386/iso", 
+                        "x86_64": "Server/x86_64/iso"
+                    }, 
+                    "jigdos": {
+                        "armhfp": "Server/armhfp/jigdo", 
+                        "i386": "Server/i386/jigdo", 
+                        "x86_64": "Server/x86_64/jigdo"
+                    }, 
+                    "os_tree": {
+                        "armhfp": "Server/armhfp/os", 
+                        "i386": "Server/i386/os", 
+                        "x86_64": "Server/x86_64/os"
+                    }, 
+                    "packages": {
+                        "armhfp": "Server/armhfp/os/Packages", 
+                        "i386": "Server/i386/os/Packages", 
+                        "x86_64": "Server/x86_64/os/Packages"
+                    }, 
+                    "repository": {
+                        "armhfp": "Server/armhfp/os", 
+                        "i386": "Server/i386/os", 
+                        "x86_64": "Server/x86_64/os"
+                    }, 
+                    "source_packages": {
+                        "armhfp": "Server/source/tree/Packages", 
+                        "i386": "Server/source/tree/Packages", 
+                        "x86_64": "Server/source/tree/Packages"
+                    }, 
+                    "source_repository": {
+                        "armhfp": "Server/source/tree", 
+                        "i386": "Server/source/tree", 
+                        "x86_64": "Server/source/tree"
+                    }, 
+                    "source_tree": {
+                        "armhfp": "Server/source/tree", 
+                        "i386": "Server/source/tree", 
+                        "x86_64": "Server/source/tree"
+                    }
+                }, 
+                "type": "variant", 
+                "uid": "Server"
+            }, 
+            "Workstation": {
+                "arches": [
+                    "armhfp", 
+                    "i386", 
+                    "x86_64"
+                ], 
+                "id": "Workstation", 
+                "name": "Workstation", 
+                "paths": {
+                    "debug_packages": {
+                        "armhfp": "Workstation/armhfp/debug/tree/Packages", 
+                        "i386": "Workstation/i386/debug/tree/Packages", 
+                        "x86_64": "Workstation/x86_64/debug/tree/Packages"
+                    }, 
+                    "debug_repository": {
+                        "armhfp": "Workstation/armhfp/debug/tree", 
+                        "i386": "Workstation/i386/debug/tree", 
+                        "x86_64": "Workstation/x86_64/debug/tree"
+                    }, 
+                    "debug_tree": {
+                        "armhfp": "Workstation/armhfp/debug/tree", 
+                        "i386": "Workstation/i386/debug/tree", 
+                        "x86_64": "Workstation/x86_64/debug/tree"
+                    }, 
+                    "isos": {
+                        "i386": "Workstation/i386/iso", 
+                        "x86_64": "Workstation/x86_64/iso"
+                    }, 
+                    "os_tree": {
+                        "armhfp": "Workstation/armhfp/os", 
+                        "i386": "Workstation/i386/os", 
+                        "x86_64": "Workstation/x86_64/os"
+                    }, 
+                    "packages": {
+                        "armhfp": "Workstation/armhfp/os/Packages", 
+                        "i386": "Workstation/i386/os/Packages", 
+                        "x86_64": "Workstation/x86_64/os/Packages"
+                    }, 
+                    "repository": {
+                        "armhfp": "Workstation/armhfp/os", 
+                        "i386": "Workstation/i386/os", 
+                        "x86_64": "Workstation/x86_64/os"
+                    }, 
+                    "source_packages": {
+                        "armhfp": "Workstation/source/tree/Packages", 
+                        "i386": "Workstation/source/tree/Packages", 
+                        "x86_64": "Workstation/source/tree/Packages"
+                    }, 
+                    "source_repository": {
+                        "armhfp": "Workstation/source/tree", 
+                        "i386": "Workstation/source/tree", 
+                        "x86_64": "Workstation/source/tree"
+                    }, 
+                    "source_tree": {
+                        "armhfp": "Workstation/source/tree", 
+                        "i386": "Workstation/source/tree", 
+                        "x86_64": "Workstation/source/tree"
+                    }
+                }, 
+                "type": "variant", 
+                "uid": "Workstation"
+            }
+        }
+    }
+}

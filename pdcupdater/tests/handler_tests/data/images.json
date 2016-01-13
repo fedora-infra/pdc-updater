@@ -1,0 +1,239 @@
+{
+    "header": {
+        "version": "1.0"
+    }, 
+    "payload": {
+        "compose": {
+            "date": "20151130", 
+            "id": "Fedora-24-20151130.n.2", 
+            "respin": 2, 
+            "type": "nightly"
+        }, 
+        "images": {
+            "Cloud": {
+                "i386": [
+                    {
+                        "arch": "i386", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "04e75cf1a3e6d885165394e731b46686", 
+                            "sha1": "db9247d8ab167b94fb287e4be9e8bd0eb1537423", 
+                            "sha256": "3ac2c82eac0ccbf740da11177e71fb117f924df4c9b31f441af0fa0865d99e96"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "42697d6b0a986d734f65d50ca854f8f9", 
+                        "mtime": 1448923652, 
+                        "path": "Cloud/i386/iso/Fedora-24-20151130.n.2-Cloud-i386-boot.iso", 
+                        "size": 519045120, 
+                        "type": "boot", 
+                        "volume_id": "Fedora-24-i386"
+                    }
+                ], 
+                "x86_64": [
+                    {
+                        "arch": "x86_64", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "7d8329870c6c987d94c58fb0e7231958", 
+                            "sha1": "bea01ecf9bcf9de47f064f0745971f6770632e38", 
+                            "sha256": "64636e78480d99275e9bccc2ce8acd023acf22d1f6e246be137171e54b22edbb"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "f9eb2a582f20005a233e8c2c26f86fb3", 
+                        "mtime": 1448923376, 
+                        "path": "Cloud/x86_64/iso/Fedora-24-20151130.n.2-Cloud-x86_64-boot.iso", 
+                        "size": 456130560, 
+                        "type": "boot", 
+                        "volume_id": "Fedora-24-x86_64"
+                    }
+                ]
+            }, 
+            "Everything": {
+                "i386": [
+                    {
+                        "arch": "i386", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "04e75cf1a3e6d885165394e731b46686", 
+                            "sha1": "db9247d8ab167b94fb287e4be9e8bd0eb1537423", 
+                            "sha256": "3ac2c82eac0ccbf740da11177e71fb117f924df4c9b31f441af0fa0865d99e96"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "42697d6b0a986d734f65d50ca854f8f9", 
+                        "mtime": 1448923652, 
+                        "path": "Everything/i386/iso/Fedora-24-20151130.n.2-Everything-i386-boot.iso", 
+                        "size": 519045120, 
+                        "type": "boot", 
+                        "volume_id": "Fedora-24-i386"
+                    }
+                ], 
+                "x86_64": [
+                    {
+                        "arch": "x86_64", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "7d8329870c6c987d94c58fb0e7231958", 
+                            "sha1": "bea01ecf9bcf9de47f064f0745971f6770632e38", 
+                            "sha256": "64636e78480d99275e9bccc2ce8acd023acf22d1f6e246be137171e54b22edbb"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "f9eb2a582f20005a233e8c2c26f86fb3", 
+                        "mtime": 1448923376, 
+                        "path": "Everything/x86_64/iso/Fedora-24-20151130.n.2-Everything-x86_64-boot.iso", 
+                        "size": 456130560, 
+                        "type": "boot", 
+                        "volume_id": "Fedora-24-x86_64"
+                    }
+                ]
+            }, 
+            "Server": {
+                "armhfp": [
+                    {
+                        "arch": "armhfp", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "ca21e7c50989583ed5a1a997fffaba81", 
+                            "sha1": "bdfa4015ba8c7cc037beebc1693ac4f1600a995f", 
+                            "sha256": "5db53ad2f4894d51dec296279901ac7561cfa33012ae2117ccb5aa95327bcd02"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "258d2339ba0251f6094ffab2abb87742", 
+                        "mtime": 1448926398, 
+                        "path": "Server/armhfp/iso/Fedora-24-20151130.n.2-Server-armhfp-dvd1.iso", 
+                        "size": 2789087232, 
+                        "type": "dvd", 
+                        "volume_id": "Fedora-24 Server.armhfp"
+                    }
+                ], 
+                "i386": [
+                    {
+                        "arch": "i386", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "04e75cf1a3e6d885165394e731b46686", 
+                            "sha1": "db9247d8ab167b94fb287e4be9e8bd0eb1537423", 
+                            "sha256": "3ac2c82eac0ccbf740da11177e71fb117f924df4c9b31f441af0fa0865d99e96"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "42697d6b0a986d734f65d50ca854f8f9", 
+                        "mtime": 1448923652, 
+                        "path": "Server/i386/iso/Fedora-24-20151130.n.2-Server-i386-boot.iso", 
+                        "size": 519045120, 
+                        "type": "boot", 
+                        "volume_id": "Fedora-24-i386"
+                    }, 
+                    {
+                        "arch": "i386", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "cf076abcff0dd40a1539a4f7075b9e6c", 
+                            "sha1": "14db9deee77e8172731848ce10d9d34685aa35ec", 
+                            "sha256": "09ba7a915656b1c646486d63f9334b3b18e7390bf227fa0125120d5770b10cc0"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "b4bcb526285228be2ec2f771fe0e75f9", 
+                        "mtime": 1448926145, 
+                        "path": "Server/i386/iso/Fedora-24-20151130.n.2-Server-i386-dvd1.iso", 
+                        "size": 3055550464, 
+                        "type": "dvd", 
+                        "volume_id": "Fedora-24 Server.i386"
+                    }
+                ], 
+                "x86_64": [
+                    {
+                        "arch": "x86_64", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "7d8329870c6c987d94c58fb0e7231958", 
+                            "sha1": "bea01ecf9bcf9de47f064f0745971f6770632e38", 
+                            "sha256": "64636e78480d99275e9bccc2ce8acd023acf22d1f6e246be137171e54b22edbb"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "f9eb2a582f20005a233e8c2c26f86fb3", 
+                        "mtime": 1448923376, 
+                        "path": "Server/x86_64/iso/Fedora-24-20151130.n.2-Server-x86_64-boot.iso", 
+                        "size": 456130560, 
+                        "type": "boot", 
+                        "volume_id": "Fedora-24-x86_64"
+                    }, 
+                    {
+                        "arch": "x86_64", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "e425f4f613cdb2df9cc7703b46b34c38", 
+                            "sha1": "39c3ebfbac34f3fc4cf9c007f343ee0fc64483fd", 
+                            "sha256": "7123f020fd91bcd907229c9fb6761651743b5ad05f5285f70f47e11805c11fa1"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "8b4fd708a8d3dbdfc27943dfd123a479", 
+                        "mtime": 1448926075, 
+                        "path": "Server/x86_64/iso/Fedora-24-20151130.n.2-Server-x86_64-dvd1.iso", 
+                        "size": 2963275776, 
+                        "type": "dvd", 
+                        "volume_id": "Fedora-24 Server.x86_64"
+                    }
+                ]
+            }, 
+            "Workstation": {
+                "i386": [
+                    {
+                        "arch": "i386", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "04e75cf1a3e6d885165394e731b46686", 
+                            "sha1": "db9247d8ab167b94fb287e4be9e8bd0eb1537423", 
+                            "sha256": "3ac2c82eac0ccbf740da11177e71fb117f924df4c9b31f441af0fa0865d99e96"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "42697d6b0a986d734f65d50ca854f8f9", 
+                        "mtime": 1448923652, 
+                        "path": "Workstation/i386/iso/Fedora-24-20151130.n.2-Workstation-i386-boot.iso", 
+                        "size": 519045120, 
+                        "type": "boot", 
+                        "volume_id": "Fedora-24-i386"
+                    }
+                ], 
+                "x86_64": [
+                    {
+                        "arch": "x86_64", 
+                        "bootable": true, 
+                        "checksums": {
+                            "md5": "7d8329870c6c987d94c58fb0e7231958", 
+                            "sha1": "bea01ecf9bcf9de47f064f0745971f6770632e38", 
+                            "sha256": "64636e78480d99275e9bccc2ce8acd023acf22d1f6e246be137171e54b22edbb"
+                        }, 
+                        "disc_count": 1, 
+                        "disc_number": 1, 
+                        "format": "iso", 
+                        "implant_md5": "f9eb2a582f20005a233e8c2c26f86fb3", 
+                        "mtime": 1448923376, 
+                        "path": "Workstation/x86_64/iso/Fedora-24-20151130.n.2-Workstation-x86_64-boot.iso", 
+                        "size": 456130560, 
+                        "type": "boot", 
+                        "volume_id": "Fedora-24-x86_64"
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,3 @@
+nose
+vcrpy
+mock
