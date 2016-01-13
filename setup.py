@@ -9,6 +9,7 @@ requirements = [
     'dogpile.cache',
     'python-fedora',
     'packagedb-cli',
+    'pdc-client',
 ]
 
 
@@ -18,7 +19,7 @@ with open('test-requirements.txt', 'r') as f:
 
 setup(
     name='pdc-updater',
-    version='0.0.1',
+    version='0.1.0',
     description='Update the product-definition-center in response to fedmsg',
     license='GPLv2+',
     author='Ralph Bean',
@@ -27,6 +28,7 @@ setup(
     install_requires=requirements,
     tests_require=test_requirements,
     packages=find_packages(),
+    include_data=True,
     entry_points="""
     [moksha.consumer]
     updater = pdcupdater.consumer:PDCUpdater
