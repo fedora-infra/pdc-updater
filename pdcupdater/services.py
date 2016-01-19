@@ -129,13 +129,23 @@ def koji_rpms_from_build(url, build_id):
     return build, rpms
 
 
-def pkgdb_packages(base_url, acls=False):
-    """ Return all the packages in pkgdb.  """
+def pkgdb_packages(base_url, extra=False):
+    """ Return a generator over all the packages in pkgdb.  """
     import pkgdb2client
     log.info("Connecting to pkgdb at %r" % base_url)
     pkgdb = pkgdb2client.PkgDB(url=base_url)
-    pkg = pkgdb.get_packages(page='all', acls=acls, limit=10)
-    return pkg['packages']
+    result = pkgdb.get_packages(page='all')
+    packages = result['packages']
+    if extra:
+        for i in range(len(packages)):
+            package = pkgdb.get_package(packages[i]['name'])
+            collections = [p['collection'] for p in package['packages']]
+            packages[i]['collections'] = collections
+            yield packages[i]
+    else:
+        for i in range(len(packages)):
+            yield packages[i]
+
 
 
 if __name__ == '__main__':
