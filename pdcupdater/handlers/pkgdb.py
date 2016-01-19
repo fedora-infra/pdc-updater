@@ -124,18 +124,19 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         pdc['release-components']._(data)
 
     def audit(self, pdc):
-        packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url, acls=True)
+        packages = pdcupdater.services.pkgdb_packages(
+            self.pkgdb_url, extra=True)
         pdc_pkgs = get_paged(pdc['release-components']._)
 
         # normalize the two lists
         pkg_package = set(
             (
                 package['name'],
-                acls['collection']['koji_name'],
-                acls['collection']['branchname']
+                collection['koji_name'],
+                collection['branchname']
             )
             for package in packages
-            for acls in package['acls']
+            for collection in package['collections']
         )
         pdc_package = set(
             (p['name'], p['release'], p['dist_git_branch'])
@@ -149,20 +150,21 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         return present, absent
 
     def initialize(self, pdc):
-        packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url, acls=True)
+        packages = pdcupdater.services.pkgdb_packages(
+            self.pkgdb_url, extra=True)
         bulk_payload = [
             dict(
                 name=package['name'],
-                release=collection2release_id(pdc, acls['collection']),
+                release=collection2release_id(pdc, collection),
                 global_component=package['name'],
-                dist_git_branch=acls['collection']['branchname'],
+                dist_git_branch=collection['branchname'],
                 #bugzilla_component=package['name'],
                 brew_package=package['name'],
                 active=True,
                 type='rpm',
             )
         for package in packages
-        for acls in package['acls']
+        for collection in package['collections']
         ]
 
         pdc['release-components']._(bulk_payload)
