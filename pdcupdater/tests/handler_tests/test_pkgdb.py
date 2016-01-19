@@ -1,5 +1,4 @@
 import copy
-import json
 import mock
 
 import pdcupdater.utils
@@ -7,16 +6,10 @@ from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
 
-PKGDB_DATA = json.loads('''
-{
-  "output": "ok",
-  "packages": [
+PKGDB_DATA = [
     {
-      "acls": [
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": true,
+        "collections": [{
+            "allow_retire": True,
             "branchname": "master",
             "date_created": "2014-05-14 12:36:15",
             "date_updated": "2014-05-14 12:36:15",
@@ -25,16 +18,8 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora",
             "status": "Under Development",
             "version": "devel"
-          },
-          "critpath": false,
-          "point_of_contact": "pingou",
-          "status": "Approved",
-          "status_change": 1400071464.0
-        },
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": false,
+        }, {
+            "allow_retire": False,
             "branchname": "el6",
             "date_created": "2014-05-14 12:36:15",
             "date_updated": "2014-05-14 12:36:15",
@@ -43,16 +28,8 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora EPEL",
             "status": "Active",
             "version": "6"
-          },
-          "critpath": false,
-          "point_of_contact": "pingou",
-          "status": "Approved",
-          "status_change": 1400071051.0
-        },
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": false,
+        }, {
+            "allow_retire": False,
             "branchname": "f20",
             "date_created": "2014-05-14 12:36:15",
             "date_updated": "2014-05-14 12:36:15",
@@ -61,16 +38,8 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora",
             "status": "EOL",
             "version": "20"
-          },
-          "critpath": false,
-          "point_of_contact": "pingou",
-          "status": "Approved",
-          "status_change": 1427210598.0
-        },
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": false,
+        }, {
+            "allow_retire": False,
             "branchname": "epel7",
             "date_created": "2014-05-14 12:36:15",
             "date_updated": "2014-05-14 12:36:15",
@@ -79,16 +48,8 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora EPEL",
             "status": "Active",
             "version": "7"
-          },
-          "critpath": false,
-          "point_of_contact": "pingou",
-          "status": "Approved",
-          "status_change": 1433185353.0
-        },
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": false,
+        }, {
+            "allow_retire": False,
             "branchname": "f21",
             "date_created": "2014-07-08 18:02:03",
             "date_updated": "2014-07-08 18:02:03",
@@ -97,16 +58,8 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora",
             "status": "Active",
             "version": "21"
-          },
-          "critpath": false,
-          "point_of_contact": "pingou",
-          "status": "Approved",
-          "status_change": 1404852308.0
-        },
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": false,
+        }, {
+            "allow_retire": False,
             "branchname": "f22",
             "date_created": "2015-02-10 14:00:01",
             "date_updated": "2015-02-10 14:00:01",
@@ -115,16 +68,8 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora",
             "status": "Active",
             "version": "22"
-          },
-          "critpath": false,
-          "point_of_contact": "pingou",
-          "status": "Approved",
-          "status_change": 1423586678.0
-        },
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": false,
+        }, {
+            "allow_retire": False,
             "branchname": "f23",
             "date_created": "2015-07-14 18:13:12",
             "date_updated": "2015-07-14 18:13:12",
@@ -133,29 +78,20 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora",
             "status": "Active",
             "version": "23"
-          },
-          "critpath": false,
-          "point_of_contact": "pingou",
-          "status": "Approved",
-          "status_change": 1436906709.0
-        }
-      ],
-      "creation_date": 1400070978.0,
-      "description": "Guake is a drop-down terminal for Gnome Desktop",
-      "koschei_monitor": false,
-      "monitor": true,
-      "name": "guake",
-      "review_url": null,
-      "status": "Approved",
-      "summary": "Drop-down terminal for GNOME",
-      "upstream_url": "http://www.guake.org/"
-    },
-    {
-      "acls": [
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": true,
+        }],
+        "creation_date": 1400070978.0,
+        "description": "Guake is a drop-down terminal for Gnome Desktop",
+        "koschei_monitor": False,
+        "monitor": True,
+        "name": "guake",
+        "review_url": None,
+        "status": "Approved",
+        "summary": "Drop-down terminal for GNOME",
+        "upstream_url": "http://www.guake.org/"
+    }, {
+
+        "collections": [{
+            "allow_retire": True,
             "branchname": "master",
             "date_created": "2014-05-14 12:36:15",
             "date_updated": "2014-05-14 12:36:15",
@@ -164,16 +100,8 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora",
             "status": "Under Development",
             "version": "devel"
-          },
-          "critpath": false,
-          "point_of_contact": "josef",
-          "status": "Approved",
-          "status_change": 1400071155.0
-        },
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": false,
+          }, {
+            "allow_retire": False,
             "branchname": "el6",
             "date_created": "2014-05-14 12:36:15",
             "date_updated": "2014-05-14 12:36:15",
@@ -182,16 +110,8 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora EPEL",
             "status": "Active",
             "version": "6"
-          },
-          "critpath": false,
-          "point_of_contact": "josef",
-          "status": "Approved",
-          "status_change": 1400071054.0
-        },
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": false,
+          }, {
+            "allow_retire": False,
             "branchname": "epel7",
             "date_created": "2014-05-14 12:36:15",
             "date_updated": "2014-05-14 12:36:15",
@@ -200,16 +120,8 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora EPEL",
             "status": "Active",
             "version": "7"
-          },
-          "critpath": false,
-          "point_of_contact": "josef",
-          "status": "Approved",
-          "status_change": 1400071867.0
-        },
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": false,
+          }, {
+            "allow_retire": False,
             "branchname": "f23",
             "date_created": "2015-07-14 18:13:12",
             "date_updated": "2015-07-14 18:13:12",
@@ -218,28 +130,18 @@ PKGDB_DATA = json.loads('''
             "name": "Fedora",
             "status": "Active",
             "version": "23"
-          },
-          "critpath": false,
-          "point_of_contact": "josef",
-          "status": "Approved",
-          "status_change": 1436899104.0
-        }
-      ],
-      "creation_date": 1400070978.0,
-      "description": "Geany is a small and fast integrated development enviroment",
-      "koschei_monitor": true,
-      "monitor": true,
-      "name": "geany",
-      "review_url": null,
-      "status": "Approved",
-      "summary": "A fast and lightweight IDE using GTK2",
-      "upstream_url": "http://www.geany.org/"
+          }],
+        "creation_date": 1400070978.0,
+        "description": "Geany is a small and fast integrated development enviroment",
+        "koschei_monitor": True,
+        "monitor": True,
+        "name": "geany",
+        "review_url": None,
+        "status": "Approved",
+        "summary": "A fast and lightweight IDE using GTK2",
+        "upstream_url": "http://www.geany.org/"
     }
-  ],
-  "page": 1,
-  "page_total": 1
-}
-''')
+    ]
 
 PDC_DATA = [
     {
@@ -414,7 +316,7 @@ class TestNewPackage(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_simple(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = PKGDB_DATA['packages']
+        pkgdb.return_value = PKGDB_DATA
 
         # Call the auditor
         present, absent = self.handler.audit(pdc)
@@ -434,7 +336,7 @@ class TestNewPackage(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_with_an_extra(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA)
         del(pkgdb.return_value[0])
 
         # Call the auditor
@@ -455,16 +357,14 @@ class TestNewPackage(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_missing_one(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
-        pkg = json.loads('''
-        {
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA)
+        pkg = {
             "name": "gnome-terminal",
-            "review_url": null,
+            "review_url": None,
             "status": "Approved",
             "summary": "The gnome terminal",
             "upstream_url": "http://www.gnome.org/"
         }
-        ''')
         pkgdb.return_value.append(pkg)
 
         # Call the auditor
@@ -485,16 +385,14 @@ class TestNewPackage(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_flipping_out(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
-        pkg = json.loads('''
-        {
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA)
+        pkg = {
             "name": "gnome-terminal",
-            "review_url": null,
+            "review_url": None,
             "status": "Approved",
             "summary": "The gnome terminal",
             "upstream_url": "http://www.gnome.org/"
         }
-        ''')
         del(pkgdb.return_value[0])
         pkgdb.return_value.append(pkg)
 
@@ -516,7 +414,7 @@ class TestNewPackage(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_initialize_new_package(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = PKGDB_DATA['packages']
+        pkgdb.return_value = PKGDB_DATA
 
         # Call the initializer
         self.handler.initialize(pdc)
@@ -578,7 +476,7 @@ class TestNewBranch(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_simple(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = PKGDB_DATA['packages']
+        pkgdb.return_value = PKGDB_DATA
 
         # Call the auditor
         present, absent = self.handler.audit(pdc)
@@ -598,8 +496,8 @@ class TestNewBranch(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_with_an_extra(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
-        del(pkgdb.return_value[0]['acls'][0])
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA)
+        del(pkgdb.return_value[0]['collections'][0])
 
         # Call the auditor
         present, absent = self.handler.audit(pdc)
@@ -619,26 +517,17 @@ class TestNewBranch(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_missing_one(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
-        acl = json.loads('''
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": true,
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA)
+        collection = {
+            "allow_retire": True,
             "branchname": "f18",
             "dist_tag": ".fc18",
             "koji_name": "dist-f18",
             "name": "Fedora",
             "status": "EOL",
             "version": "18"
-          },
-          "critpath": false,
-          "point_of_contact": "pingou",
-          "status": "Approved",
-          "status_change": 1400071464.0
         }
-        ''')
-        pkgdb.return_value[0]['acls'].append(acl)
+        pkgdb.return_value[0]['collections'].append(collection)
 
         # Call the auditor
         present, absent = self.handler.audit(pdc)
@@ -658,27 +547,18 @@ class TestNewBranch(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_audit_flipping_out(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = copy.deepcopy(PKGDB_DATA['packages'])
-        acl = json.loads('''
-        {
-          "acls": ["..."],
-          "collection": {
-            "allow_retire": true,
+        pkgdb.return_value = copy.deepcopy(PKGDB_DATA)
+        collection = {
+            "allow_retire": True,
             "branchname": "f18",
             "dist_tag": ".fc18",
             "koji_name": "dist-f18",
             "name": "Fedora",
             "status": "EOL",
             "version": "18"
-          },
-          "critpath": false,
-          "point_of_contact": "pingou",
-          "status": "Approved",
-          "status_change": 1400071464.0
         }
-        ''')
-        del(pkgdb.return_value[0]['acls'][0])
-        pkgdb.return_value[0]['acls'].append(acl)
+        del(pkgdb.return_value[0]['collections'][0])
+        pkgdb.return_value[0]['collections'].append(collection)
 
         # Call the auditor
         present, absent = self.handler.audit(pdc)
@@ -698,7 +578,7 @@ class TestNewBranch(BaseHandlerTest):
     @mock.patch('pdcupdater.services.pkgdb_packages')
     def test_initialize_new_package_branch(self, pdc, pkgdb):
         # Mock out pgkdb results
-        pkgdb.return_value = PKGDB_DATA['packages']
+        pkgdb.return_value = PKGDB_DATA
 
         # Call the initializer
         self.handler.initialize(pdc)
