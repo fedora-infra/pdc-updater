@@ -7,6 +7,7 @@ import dogpile.cache
 from pdc_client import get_paged
 
 import pdcupdater.handlers
+import pdcupdater.services
 
 
 log = logging.getLogger(__name__)
@@ -151,7 +152,8 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         # Get a list of all rpms in koji and send it to PDC
         for batch in self._gather_koji_rpms():
             log.info("Uploading info about %i rpms to PDC." % len(batch))
-            pdc['rpms']._(batch)
+            for entry in batch:
+                pdc['rpms']._(entry)
 
     def _gather_koji_rpms(self):
         koji_rpms = {
