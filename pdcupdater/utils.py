@@ -8,6 +8,39 @@ import logging
 log = logging.getLogger(__name__)
 
 
+def ensure_component_group_exists(pdc, component_group):
+    """ Create a component_group in PDC if it doesn't already exist. """
+    component_group_type = component_group['group_type']
+    ensure_component_group_type_exists(pdc, component_group_type)
+    try:
+        # Try to create it
+        pdc['component-groups']._(component_group)
+    except beanbag.bbexcept.BeanBagException as e:
+        if e.response.status_code != 400:
+            raise
+        body = e.response.json()
+        if not 'non_field_errors' in body:
+            raise
+        message = u'The fields group_type, release, description must make a unique set.'
+        if body['non_field_errors'] != [message]:
+            raise
+
+
+def ensure_component_group_type_exists(pdc, component_group_type):
+    """ Create a component_group-type in PDC if it doesn't already exist. """
+    try:
+        # Try to create it
+        pdc['component-group-types']._(dict(name=component_group_type))
+    except beanbag.bbexcept.BeanBagException as e:
+        if e.response.status_code != 400:
+            raise
+        body = e.response.json()
+        if not 'name' in body:
+            raise
+        if body['name'] != [u"This field must be unique."]:
+            raise
+
+
 def ensure_release_exists(pdc, release_id, release):
     """ Create a release in PDC if it doesn't already exist. """
     try:
@@ -30,6 +63,27 @@ def ensure_global_component_exists(pdc, name):
     if not response['results']:
         log.warn("No global-component %r exists.  Creating." % name)
         pdc['global-components']._(dict(name=name))
+
+
+def ensure_release_component_exists(pdc, release_id, name):
+    """ Create a release-component in PDC if it doesn't already exist. """
+    ensure_global_component_exists(pdc, name)
+    try:
+        # Try to create it
+        pdc['release-components']._({
+            'name': name,
+            'global_component': name,
+            'release': release_id,
+        })
+    except beanbag.bbexcept.BeanBagException as e:
+        if e.response.status_code != 400:
+            raise
+        body = e.response.json()
+        if not 'non_field_errors' in body:
+            raise
+        message = u'The fields release, name must make a unique set.'
+        if body['non_field_errors'] != [message]:
+            raise
 
 
 def compose_exists(pdc, compose_id):
