@@ -1,4 +1,14 @@
 
+0.2.1
+-----
+
+Commits
+
+- 52bd663d2 specbump.
+  https://github.com/fedora-infra/pdc-updater/commit/52bd663d2
+- cad29ef33 Get rid of all the bulk-insert actions.  They timeout.
+  https://github.com/fedora-infra/pdc-updater/commit/cad29ef33
+
 0.2.0
 -----
 
