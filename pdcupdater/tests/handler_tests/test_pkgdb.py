@@ -422,14 +422,12 @@ class TestNewPackage(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'global-components': [
-                ('POST', [
-                    dict(
-                        name='guake',
-                    ),
-                    dict(
-                        name='geany',
-                    ),
-                ]),
+                ('POST', dict(
+                    name='guake',
+                )),
+                ('POST', dict(
+                    name='geany',
+                )),
             ],
         })
 
@@ -586,7 +584,7 @@ class TestNewBranch(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'release-components': [
-                ('POST', PDC_DATA),
+                ('POST', item) for item in PDC_DATA
             ],
             'releases/epel-6-updates': [('GET', {}), ('GET', {})],
             'releases/epel-7-updates': [('GET', {}), ('GET', {})],

@@ -51,16 +51,14 @@ class TestNewPerson(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'persons': [
-                ('POST', [
-                    dict(
-                        username='ralph',
-                        email='ralph@fedoraproject.org',
-                    ),
-                    dict(
-                        username='lmacken',
-                        email='lmacken@fedoraproject.org',
-                    ),
-                ]),
+                ('POST', dict(
+                    username='ralph',
+                    email='ralph@fedoraproject.org',
+                )),
+                ('POST', dict(
+                    username='lmacken',
+                    email='lmacken@fedoraproject.org',
+                )),
             ],
         })
 

@@ -40,8 +40,12 @@ class NewPersonHandler(pdcupdater.handlers.BaseHandler):
 
     def initialize(self, pdc):
         fas_persons = pdcupdater.services.fas_persons(**self.fas_config)
-        bulk_payload = [dict(
+        persons = [dict(
             username=person['username'],
             email='%s@fedoraproject.org' % person['username'],
         ) for person in fas_persons]
-        pdc['persons']._(bulk_payload)
+        for person in persons:
+            try:
+                pdc['persons']._(person)
+            except beanbag.bbexcept.BeanBagException as e:
+                log.warn("persons, %r %r" % (component, e.response))
