@@ -2,6 +2,7 @@ import pdcupdater.handlers
 import pdcupdater.services
 import pdcupdater.utils
 
+import beanbag.bbexcept
 from pdc_client import get_paged
 
 import logging
@@ -82,10 +83,14 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
 
     def initialize(self, pdc):
         packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url)
-        bulk_payload = [dict(
+        components = [dict(
             name=package['name'],
         ) for package in packages]
-        pdc['global-components']._(bulk_payload)
+        for component in components:
+            try:
+                pdc['global-components']._(component)
+            except beanbag.bbexcept.BeanBagException as e:
+                log.warn("global-component, %r %r" % (component, e.response))
 
 
 class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
@@ -152,7 +157,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
     def initialize(self, pdc):
         packages = pdcupdater.services.pkgdb_packages(
             self.pkgdb_url, extra=True)
-        bulk_payload = [
+        components = [
             dict(
                 name=package['name'],
                 release=collection2release_id(pdc, collection),
@@ -167,4 +172,8 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         for collection in package['collections']
         ]
 
-        pdc['release-components']._(bulk_payload)
+        for component in components:
+            try:
+                pdc['release-components']._(component)
+            except beanbag.bbexcept.BeanBagException as e:
+                log.warn("release-component, %r %r" % (component, e.response))

@@ -7,7 +7,7 @@
 %endif
 
 Name:               pdc-updater
-Version:            0.1.1
+Version:            0.2.0
 Release:            1%{?dist}
 Summary:            Update the product definition center in response to fedmsg
 
@@ -76,6 +76,9 @@ PYTHONPATH=. nosetests -v
 %{_bindir}/pdc-updater-initialize
 
 %changelog
+* Tue Jan 26 2016 Ralph Bean <rbean@redhat.com> - 0.2.0-1
+- new version
+
 * Tue Jan 19 2016 Ralph Bean <rbean@redhat.com> - 0.1.1-1
 - Bugfix release.
 
