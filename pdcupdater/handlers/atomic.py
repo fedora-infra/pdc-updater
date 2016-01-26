@@ -36,29 +36,56 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
             return False
         return True
 
-    def atomic_component_group_from_git(self):
+    def atomic_component_groups_from_git(self, pdc):
         # TODO -- handle mapping branches to releases.
         # for now we just do master <-> rawhide
-        params = dict()  # use h=f23 for a different branch
-        filename = 'fedora-%s.json' % self.group_type
-        response = requests.get(self.git_url + filename, params=params)
-        data = response.json()
-        packages = data['packages']
 
-        release_id = 'fedora-24' # XXX - hard-coded
-        return {
-            'group_type': self.group_type,
-            'release': release_id,
-            'description': 'Deps for %s %s' % (self.group_type, self.git_url),
-            'components': [{
+        # First, build a mapping of git branches (from the fedora-atomic
+        # fedorahosted repo) to PDC release ids.
+        tags = [pdcupdater.utils.rawhide_tag()]
+        for release in pdcupdater.utils.bodhi_releases():
+            if 'EPEL' in release['id_prefix']:
+                # We don't maintain an atomic group for epel.
+                continue
+            tags.append(release['stable_tag'])
+
+        pdc_releases = [pdcupdater.utils.tag2release(tag) for tag in tags]
+        for release_id, release in pdc_releases:
+            # First, make sure PDC can handle a group on this release
+            pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
+
+            # Then, map the fedorahosted git repo branch to our PDC release
+            if release['release_type'] == 'ga':
+                branch = 'master'
+            else:
+                branch = 'f' + release['version']
+
+            # Go, get, and parse the data
+            params = dict(h=branch)
+            filename = 'fedora-%s.json' % self.group_type
+            response = requests.get(self.git_url + filename, params=params)
+            data = response.json()
+
+            # And return formatted component group data
+            packages = data['packages']
+            yield {
+                'group_type': self.group_type,
                 'release': release_id,
-                'name': package,
-            } for package in packages],
-        }
+                'description': 'Deps for %s %s' % (
+                    self.group_type,
+                    self.git_url,
+                ),
+                'components': [{
+                    'release': release_id,
+                    'name': package,
+                } for package in packages],
+            }
 
     def handle(self, pdc, msg):
-        component_group = self.atomic_component_group_from_git()
-        self._update_atomic_component_group(pdc, component_group)
+        component_groups = self.atomic_component_groups_from_git(pdc)
+        # TODO -- use only the group associated with the branch in this message
+        for group in component_groups:
+            self._update_atomic_component_group(pdc, group)
 
     def audit(self, pdc):
         # Query the data sources
@@ -80,18 +107,19 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
         return present, absent
 
     def initialize(self, pdc):
-        component_group = self.atomic_component_group_from_git()
-        self._update_atomic_component_group(pdc, component_group)
+        component_groups = self.atomic_component_groups_from_git(pdc)
+        for group in component_groups:
+            self._update_atomic_component_group(pdc, group)
 
     def _update_atomic_component_group(self, pdc, component_group):
-        # Figure out the primary key for this group we have here..
-        group_pk = pdcupdater.utils.get_group_pk(pdc, component_group)
-
         # Make sure our pre-requisites exist
         pdcupdater.utils.ensure_component_group_exists(pdc, component_group)
         for component in component_group['components']:
             pdcupdater.utils.ensure_release_component_exists(
                 pdc, component['release'], component['name'])
+
+        # Figure out the primary key for this group we have here..
+        group_pk = pdcupdater.utils.get_group_pk(pdc, component_group)
 
         # And perform the update with a PUT
         pdc['component-groups'][group_pk]._ = component_group

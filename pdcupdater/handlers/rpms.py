@@ -1,77 +1,24 @@
 import json
 import logging
 
-import requests
-import dogpile.cache
-
 from pdc_client import get_paged
 
 import pdcupdater.handlers
 import pdcupdater.services
+from pdcupdater.utils import (
+    bodhi_releases,
+    rawhide_tag,
+    tag2release,
+)
 
 
 log = logging.getLogger(__name__)
-
-cache = dogpile.cache.make_region()
-cache.configure('dogpile.cache.memory', expiration_time=300)
-
-
-@cache.cache_on_arguments()
-def bodhi_releases():
-    # TODO -- get these releases from PDC, instead of from Bodhi
-    url = 'https://bodhi.fedoraproject.org/releases'
-    response = requests.get(url, params=dict(rows_per_page=100))
-    if not bool(response):
-        raise IOError('Failed to talk to %r: %r' % (url, response))
-    return response.json()['releases']
-
-
-@cache.cache_on_arguments()
-def rawhide_tag():
-    # TODO - get this tag from PDC, instead of guessing from pkgdb
-    url = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
-    response = requests.get(url, params=dict(clt_status="Under Development"))
-    if not bool(response):
-        raise IOError('Failed to talk to %r: %r' % (url, response))
-    collections = response.json()['collections']
-    rawhide = [c for c in collections if c['koji_name'] == 'rawhide'][0]
-    return 'f' + rawhide['dist_tag'].strip('.fc')
 
 
 def interesting_tags():
     releases = bodhi_releases()
     stable_tags = [r['stable_tag'] for r in releases]
     return stable_tags + [rawhide_tag()]
-
-
-def tag2release(tag):
-    if tag == rawhide_tag():
-        release = {
-            'name': 'Fedora',
-            'short': 'fedora',
-            'version': tag.strip('f'),
-            'release_type': 'ga',
-        }
-        release_id = "{short}-{version}".format(**release)
-    else:
-        bodhi_info = {r['stable_tag']: r for r in bodhi_releases()}[tag]
-        if 'EPEL' in bodhi_info['id_prefix']:
-            release = {
-                'name': 'Fedora EPEL',
-                'short': 'epel',
-                'version': bodhi_info['version'],
-                'release_type': 'updates',
-            }
-        else:
-            release = {
-                'name': 'Fedora Updates',
-                'short': 'fedora',
-                'version': bodhi_info['version'],
-                'release_type': 'updates',
-            }
-        release_id = "{short}-{version}-{release_type}".format(**release)
-
-    return release_id, release
 
 
 class NewRPMHandler(pdcupdater.handlers.BaseHandler):
