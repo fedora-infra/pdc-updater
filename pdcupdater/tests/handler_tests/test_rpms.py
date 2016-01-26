@@ -139,14 +139,14 @@ class TestNewRPM(BaseHandlerTest):
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
-            'releases/fedora-24-fedora-NEXT': [('GET', {})],
+            'releases/fedora-24': [('GET', {})],
             'rpms': [
                 ('POST', {
                     "name": "mozilla-crashreporter-thunderbird-debuginfo",
                     "version": "38.4.0",
                     "release": "2.fc24",
                     "linked_releases": [
-                        'fedora-24-fedora-NEXT',
+                        'fedora-24',
                     ],
                     "epoch": 0,
                     "arch": "x86_64",
@@ -158,7 +158,7 @@ class TestNewRPM(BaseHandlerTest):
                     "version": "38.4.0",
                     "release": "2.fc24",
                     "linked_releases": [
-                        'fedora-24-fedora-NEXT',
+                        'fedora-24',
                     ],
                     "epoch": 0,
                     "arch": "armv7hl",
@@ -170,7 +170,7 @@ class TestNewRPM(BaseHandlerTest):
                     "version": "38.4.0",
                     "release": "2.fc24",
                     "linked_releases": [
-                        'fedora-24-fedora-NEXT',
+                        'fedora-24',
                     ],
                     "epoch": 0,
                     "arch": "src",
@@ -182,7 +182,7 @@ class TestNewRPM(BaseHandlerTest):
                     "version": "38.4.0",
                     "release": "2.fc24",
                     "linked_releases": [
-                        'fedora-24-fedora-NEXT',
+                        'fedora-24',
                     ],
                     "epoch": 0,
                     "arch": "x86_64",
@@ -194,7 +194,7 @@ class TestNewRPM(BaseHandlerTest):
                     "version": "38.4.0",
                     "release": "2.fc24",
                     "linked_releases": [
-                        'fedora-24-fedora-NEXT',
+                        'fedora-24',
                     ],
                     "epoch": 0,
                     "arch": "armv7hl",
@@ -206,7 +206,7 @@ class TestNewRPM(BaseHandlerTest):
                     "version": "38.4.0",
                     "release": "2.fc24",
                     "linked_releases": [
-                        'fedora-24-fedora-NEXT',
+                        'fedora-24',
                     ],
                     "epoch": 0,
                     "arch": "x86_64",
@@ -218,7 +218,7 @@ class TestNewRPM(BaseHandlerTest):
                     "version": "38.4.01.9.0.3",
                     "release": "2.fc24",
                     "linked_releases": [
-                        'fedora-24-fedora-NEXT',
+                        'fedora-24',
                     ],
                     "epoch": 0,
                     "arch": "armv7hl",
@@ -230,7 +230,7 @@ class TestNewRPM(BaseHandlerTest):
                     "version": "38.4.01.9.0.3",
                     "release": "2.fc24",
                     "linked_releases": [
-                        'fedora-24-fedora-NEXT',
+                        'fedora-24',
                     ],
                     "epoch": 0,
                     "arch": "x86_64",
@@ -249,14 +249,14 @@ class TestNewRPM(BaseHandlerTest):
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
-            'releases/fedora-22-fedora-NEXT-updates': [('GET', {})],
+            'releases/fedora-22-updates': [('GET', {})],
             'rpms': [
                 ('POST', {
                     "name": "criu",
                     "version": "1.6.1",
                     "release": "1.fc22",
                     "linked_releases": [
-                        'fedora-22-fedora-NEXT-updates',
+                        'fedora-22-updates',
                     ],
                     "epoch": 0,
                     "arch": "src",
@@ -276,38 +276,32 @@ class TestNewRPM(BaseHandlerTest):
 
         # Check the PDC calls..
         # One POST for each release (but we only have rpms for one)
-        self.assertDictEqual(pdc.calls, {
-            'rpms': [
-                ('POST', []),
-                ('POST', []),
-                ('POST', []),
-                ('POST', []),
-                ('POST', []),
-                ('POST', []),
-                ('POST', [{
-                    'name': 'dvisvgm',
-                    'arch': 'src',
-                    'epoch': 0,
-                    'version': '1.11',
-                    'release': '1.el7',
-                    "linked_releases": [
-                        'epel-7-fedora-NEXT-updates',
-                    ],
-                    "srpm_name": "dvisvgm",
-                    "srpm_nevra": None,
-                }, {
-                    'name': 'rubygem-jmespath-doc',
-                    'arch': 'noarch',
-                    'epoch': 0,
-                    'version': '1.1.3',
-                    'release': '1.el7',
-                    "linked_releases": [
-                        'epel-7-fedora-NEXT-updates',
-                    ],
-                    "srpm_name": "rubygem-jmespath",
-                    "srpm_nevra": "rubygem-jmespath-1.1.3-1.el7",
-                }]),
+        rpm_calls = pdc.calls['rpms']
+
+        self.assertEqual(len(rpm_calls), 2)
+        self.assertDictEqual(rpm_calls[0][1], {
+            'name': 'dvisvgm',
+            'arch': 'src',
+            'epoch': 0,
+            'version': '1.11',
+            'release': '1.el7',
+            "linked_releases": [
+                'epel-7-updates',
             ],
+            "srpm_name": "dvisvgm",
+            "srpm_nevra": None,
+        })
+        self.assertDictEqual(rpm_calls[1][1], {
+            'name': 'rubygem-jmespath-doc',
+            'arch': 'noarch',
+            'epoch': 0,
+            'version': '1.1.3',
+            'release': '1.el7',
+            "linked_releases": [
+                'epel-7-updates',
+            ],
+            "srpm_name": "rubygem-jmespath",
+            "srpm_nevra": "rubygem-jmespath-1.1.3-1.el7",
         })
 
     @mock_pdc
@@ -352,7 +346,7 @@ class TestNewRPM(BaseHandlerTest):
             "arch": "noarch",
             "epoch": 0,
             "linked_releases": [
-                "epel-7-fedora-NEXT-updates",
+                "epel-7-updates",
             ],
             "name": "rubygem-jmespath-doc",
             "version": "1.1.3",
@@ -385,7 +379,7 @@ class TestNewRPM(BaseHandlerTest):
             "arch": "noarch",
             "epoch": 0,
             "linked_releases": [
-                u'fedora-24-fedora-NEXT',
+                u'fedora-24',
             ],
             "name": "rubygem-jmespath-doc",
             "version": "1.1.3",

@@ -3,9 +3,74 @@ import contextlib
 
 import requests
 import beanbag.bbexcept
+import pdc_client
 
 import logging
 log = logging.getLogger(__name__)
+
+import dogpile.cache
+cache = dogpile.cache.make_region()
+cache.configure('dogpile.cache.memory', expiration_time=300)
+
+
+def get_group_pk(pdc, target_group):
+    """ Return the primary key int identifier for a component group. """
+    # List all of our component groups
+    groups = pdc_client.get_paged(pdc['component-groups']._)
+
+    ignored_keys = ['components']
+    for group in groups:
+        # Iterate over them until we find "the one"
+        if all([
+            group[key] == target_group[key]
+            for key in target_group
+            if key not in ignored_keys
+        ]):
+            return group['id']
+
+    # If we can't find it, then complain.
+    raise ValueError("Could not find matching group for %r" % target_group)
+
+
+def ensure_component_group_exists(pdc, component_group):
+    """ Create a component_group in PDC if it doesn't already exist. """
+
+    # Scrub our input
+    if 'components' in component_group:
+        component_group = copy.copy(component_group)
+        del component_group['components']
+
+    # Check that the type exists first...
+    component_group_type = component_group['group_type']
+    ensure_component_group_type_exists(pdc, component_group_type)
+
+    try:
+        # Try to create it
+        pdc['component-groups']._(component_group)
+    except beanbag.bbexcept.BeanBagException as e:
+        if e.response.status_code != 400:
+            raise
+        body = e.response.json()
+        if not 'non_field_errors' in body:
+            raise
+        message = u'The fields group_type, release, description must make a unique set.'
+        if body['non_field_errors'] != [message]:
+            raise
+
+
+def ensure_component_group_type_exists(pdc, component_group_type):
+    """ Create a component_group-type in PDC if it doesn't already exist. """
+    try:
+        # Try to create it
+        pdc['component-group-types']._(dict(name=component_group_type))
+    except beanbag.bbexcept.BeanBagException as e:
+        if e.response.status_code != 400:
+            raise
+        body = e.response.json()
+        if not 'name' in body:
+            raise
+        if body['name'] != [u"This field must be unique."]:
+            raise
 
 
 def ensure_release_exists(pdc, release_id, release):
@@ -17,31 +82,12 @@ def ensure_release_exists(pdc, release_id, release):
             raise
         log.warn("No release %r exists.  Creating." % release_id)
 
-        product = dict(
-            name='Fedora',
-            short='fedora',
-            version='NEXT',
-        )
-        product_id = "{short}-{version}".format(**product)
-        ensure_product_exists(pdc, product_id, product)
-
         release_payload = copy.copy(release)
         release_payload.update(dict(
             active=True,
-            base_product=product_id,
         ))
         pdc['releases']._(release_payload)
-
-
-def ensure_product_exists(pdc, product_id, product):
-    """ Create a product in PDC if it doesn't already exist. """
-    try:
-        pdc['base-products'][product_id]._()
-    except beanbag.bbexcept.BeanBagException as e:
-        if e.response.status_code != 404:
-            raise
-        log.warn("No product %r exists.  Creating." % product_id)
-        pdc['base-products']._(product)
+        log.info("Created %r" % release_payload)
 
 
 def ensure_global_component_exists(pdc, name):
@@ -49,6 +95,27 @@ def ensure_global_component_exists(pdc, name):
     if not response['results']:
         log.warn("No global-component %r exists.  Creating." % name)
         pdc['global-components']._(dict(name=name))
+
+
+def ensure_release_component_exists(pdc, release_id, name):
+    """ Create a release-component in PDC if it doesn't already exist. """
+    ensure_global_component_exists(pdc, name)
+    try:
+        # Try to create it
+        pdc['release-components']._({
+            'name': name,
+            'global_component': name,
+            'release': release_id,
+        })
+    except beanbag.bbexcept.BeanBagException as e:
+        if e.response.status_code != 400:
+            raise
+        body = e.response.json()
+        if not 'non_field_errors' in body:
+            raise
+        message = u'The fields release, name must make a unique set.'
+        if body['non_field_errors'] != [message]:
+            raise
 
 
 def compose_exists(pdc, compose_id):
@@ -94,3 +161,57 @@ def handle_message(pdc, handlers, msg, verbose=False):
             except beanbag.bbexcept.BeanBagException as e:
                 log.error(e.response.text)
                 raise
+
+
+@cache.cache_on_arguments()
+def bodhi_releases():
+    # TODO -- get these releases from PDC, instead of from Bodhi
+    url = 'https://bodhi.fedoraproject.org/releases'
+    response = requests.get(url, params=dict(rows_per_page=100))
+    if not bool(response):
+        raise IOError('Failed to talk to %r: %r' % (url, response))
+    return response.json()['releases']
+
+
+@cache.cache_on_arguments()
+def rawhide_tag():
+    # TODO - get this tag from PDC, instead of guessing from pkgdb
+    url = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
+    response = requests.get(url, params=dict(clt_status="Under Development"))
+    if not bool(response):
+        raise IOError('Failed to talk to %r: %r' % (url, response))
+    collections = response.json()['collections']
+    rawhide = [c for c in collections if c['koji_name'] == 'rawhide'][0]
+    return 'f' + rawhide['dist_tag'].strip('.fc')
+
+
+def tag2release(tag):
+    if tag == rawhide_tag():
+        release = {
+            'name': 'Fedora',
+            'short': 'fedora',
+            'version': tag.strip('f'),
+            'release_type': 'ga',
+        }
+        release_id = "{short}-{version}".format(**release)
+    else:
+        bodhi_info = {r['stable_tag']: r for r in bodhi_releases()}[tag]
+        if 'EPEL' in bodhi_info['id_prefix']:
+            release = {
+                'name': 'Fedora EPEL',
+                'short': 'epel',
+                'version': bodhi_info['version'],
+                'release_type': 'updates',
+            }
+        else:
+            release = {
+                'name': 'Fedora Updates',
+                'short': 'fedora',
+                'version': bodhi_info['version'],
+                'release_type': 'updates',
+            }
+        release_id = "{short}-{version}-{release_type}".format(**release)
+
+    return release_id, release
+
+

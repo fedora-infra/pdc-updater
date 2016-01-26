@@ -57,7 +57,7 @@ def initialize():
         except beanbag.bbexcept.BeanBagException as e:
             log.exception(e.response.text)
             #raise  # TODO - eventually raise here.  While in dev, leave it out
-
+    log.info("Done initializing.")
 
 def audit():
     config = fedmsg.config.load_config()
