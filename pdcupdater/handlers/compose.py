@@ -111,7 +111,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             composeinfo['payload']['release']['short'].lower()
         release = copy.copy(composeinfo['payload']['release'])
         release['release_type'] = 'ga'
-        release_id = "{short}-{version}-fedora-NEXT".format(**release)
+        release_id = "{short}-{version}".format(**release)
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
         # https://github.com/product-definition-center/product-definition-center/issues/228

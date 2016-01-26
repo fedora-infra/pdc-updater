@@ -102,7 +102,7 @@ class TestNewCompose(BaseHandlerTest):
         compose_images = pdc.calls['compose-images']
         self.assertEquals(len(compose_images), 1)
         self.assertDictEqual(compose_images[0][1], dict(
-            release_id='fedora-24-fedora-NEXT',
+            release_id='fedora-24',
             composeinfo=composeinfo_modified,
             image_manifest=images,
         ))
@@ -110,7 +110,7 @@ class TestNewCompose(BaseHandlerTest):
         compose_rpms = pdc.calls['compose-rpms']
         self.assertEquals(len(compose_rpms), 1)
         self.assertEquals(compose_rpms[0][1], dict(
-            release_id='fedora-24-fedora-NEXT',
+            release_id='fedora-24',
             composeinfo=composeinfo_modified,
             rpm_manifest=rpms,
         ))
@@ -132,7 +132,7 @@ class TestNewCompose(BaseHandlerTest):
         compose_images = pdc.calls['compose-images']
         self.assertEquals(len(compose_images), 1)
         self.assertDictEqual(compose_images[0][1], dict(
-            release_id='fedora-24-fedora-NEXT',
+            release_id='fedora-24',
             composeinfo=composeinfo_modified,
             image_manifest=images,
         ))
@@ -140,7 +140,7 @@ class TestNewCompose(BaseHandlerTest):
         compose_rpms = pdc.calls['compose-rpms']
         self.assertEquals(len(compose_rpms), 1)
         self.assertEquals(compose_rpms[0][1], dict(
-            release_id='fedora-24-fedora-NEXT',
+            release_id='fedora-24',
             composeinfo=composeinfo_modified,
             rpm_manifest=rpms,
         ))

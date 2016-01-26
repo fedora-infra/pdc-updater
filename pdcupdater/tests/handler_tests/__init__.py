@@ -40,13 +40,13 @@ def mock_pdc(function):
         # Mock out GET endpoints
         pdc.add_endpoint('composes/Fedora-24-20151130.n.2', 'GET', mock_404)
 
-        pdc.add_endpoint('releases/fedora-24-fedora-NEXT', 'GET', {})
-        pdc.add_endpoint('releases/fedora-23-fedora-NEXT-updates', 'GET', {})
-        pdc.add_endpoint('releases/fedora-22-fedora-NEXT-updates', 'GET', {})
-        pdc.add_endpoint('releases/fedora-21-fedora-NEXT-updates', 'GET', {})
-        pdc.add_endpoint('releases/fedora-20-fedora-NEXT-updates', 'GET', {})
-        pdc.add_endpoint('releases/epel-7-fedora-NEXT-updates', 'GET', {})
-        pdc.add_endpoint('releases/epel-6-fedora-NEXT-updates', 'GET', {})
+        pdc.add_endpoint('releases/fedora-24', 'GET', {})
+        pdc.add_endpoint('releases/fedora-23-updates', 'GET', {})
+        pdc.add_endpoint('releases/fedora-22-updates', 'GET', {})
+        pdc.add_endpoint('releases/fedora-21-updates', 'GET', {})
+        pdc.add_endpoint('releases/fedora-20-updates', 'GET', {})
+        pdc.add_endpoint('releases/epel-7-updates', 'GET', {})
+        pdc.add_endpoint('releases/epel-6-updates', 'GET', {})
 
         pdc.add_endpoint('persons', 'GET', {
             'count': 2,
@@ -69,7 +69,7 @@ def mock_pdc(function):
                 'version': '1.11',
                 'release': '1.el7',
                 'linked_releases': [
-                    'epel-7-fedora-NEXT-updates',
+                    'epel-7-updates',
                 ],
                 'srpm_name': 'dvisvgm',
                 'srpm_nevra': None,
@@ -80,7 +80,7 @@ def mock_pdc(function):
                 'version': '1.1.3',
                 'release': '1.el7',
                 'linked_releases': [
-                    'epel-7-fedora-NEXT-updates',
+                    'epel-7-updates',
                 ],
                 'srpm_name': 'rubygem-jmespath',
                 'srpm_nevra': 'rubygem-jmespath-1.1.3-1.el7',

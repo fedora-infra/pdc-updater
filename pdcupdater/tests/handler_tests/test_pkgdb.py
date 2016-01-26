@@ -151,7 +151,7 @@ PDC_DATA = [
         'dist_git_branch': u'master',
         'global_component': u'guake',
         'name': u'guake',
-        'release': u'fedora-24-fedora-NEXT',
+        'release': u'fedora-24',
         'type': 'rpm'
     },
     {
@@ -161,7 +161,7 @@ PDC_DATA = [
         'dist_git_branch': u'el6',
         'global_component': u'guake',
         'name': u'guake',
-        'release': u'epel-6-fedora-NEXT-updates',
+        'release': u'epel-6-updates',
         'type': 'rpm'
     },
     {
@@ -171,7 +171,7 @@ PDC_DATA = [
         'dist_git_branch': u'f20',
         'global_component': u'guake',
         'name': u'guake',
-        'release': u'fedora-20-fedora-NEXT-updates',
+        'release': u'fedora-20-updates',
         'type': 'rpm'
     },
     {
@@ -181,7 +181,7 @@ PDC_DATA = [
         'dist_git_branch': u'epel7',
         'global_component': u'guake',
         'name': u'guake',
-        'release': u'epel-7-fedora-NEXT-updates',
+        'release': u'epel-7-updates',
         'type': 'rpm'
     },
     {
@@ -191,7 +191,7 @@ PDC_DATA = [
         'dist_git_branch': u'f21',
         'global_component': u'guake',
         'name': u'guake',
-        'release': u'fedora-21-fedora-NEXT-updates',
+        'release': u'fedora-21-updates',
         'type': 'rpm'
     },
     {
@@ -201,7 +201,7 @@ PDC_DATA = [
         'dist_git_branch': u'f22',
         'global_component': u'guake',
         'name': u'guake',
-        'release': u'fedora-22-fedora-NEXT-updates',
+        'release': u'fedora-22-updates',
         'type': 'rpm'
     },
     {
@@ -211,7 +211,7 @@ PDC_DATA = [
         'dist_git_branch': u'f23',
         'global_component': u'guake',
         'name': u'guake',
-        'release': u'fedora-23-fedora-NEXT-updates',
+        'release': u'fedora-23-updates',
         'type': 'rpm'
     },
     {
@@ -221,7 +221,7 @@ PDC_DATA = [
         'dist_git_branch': u'master',
         'global_component': u'geany',
         'name': u'geany',
-        'release': u'fedora-24-fedora-NEXT',
+        'release': u'fedora-24',
         'type': 'rpm'
     },
     {
@@ -231,7 +231,7 @@ PDC_DATA = [
         'dist_git_branch': u'el6',
         'global_component': u'geany',
         'name': u'geany',
-        'release': u'epel-6-fedora-NEXT-updates',
+        'release': u'epel-6-updates',
         'type': 'rpm'
     },
     {
@@ -241,7 +241,7 @@ PDC_DATA = [
         'dist_git_branch': u'epel7',
         'global_component': u'geany',
         'name': u'geany',
-        'release': u'epel-7-fedora-NEXT-updates',
+        'release': u'epel-7-updates',
         'type': 'rpm'
     },
     {
@@ -251,7 +251,7 @@ PDC_DATA = [
         'dist_git_branch': u'f23',
         'global_component': u'geany',
         'name': u'geany',
-        'release': u'fedora-23-fedora-NEXT-updates',
+        'release': u'fedora-23-updates',
         'type': 'rpm'
     }
     ]
@@ -292,7 +292,7 @@ class TestNewPackage(BaseHandlerTest):
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
-            'releases/fedora-23-fedora-NEXT-updates': [
+            'releases/fedora-23-updates': [
                 ('GET', dict()),
             ],
             'global-components': [
@@ -304,7 +304,7 @@ class TestNewPackage(BaseHandlerTest):
                     global_component=u'perl-Lingua-Translit',
                     #bugzilla_component=u'perl-Lingua-Translit',
                     brew_package=u'perl-Lingua-Translit',
-                    release='fedora-23-fedora-NEXT-updates',
+                    release='fedora-23-updates',
                     dist_git_branch=u'f23',
                     type='rpm',
                     active=True,
@@ -462,13 +462,13 @@ class TestNewBranch(BaseHandlerTest):
                     global_component=u'perl-Lingua-Translit',
                     #bugzilla_component=u'perl-Lingua-Translit',
                     brew_package=u'perl-Lingua-Translit',
-                    release='fedora-24-fedora-NEXT',
+                    release='fedora-24',
                     dist_git_branch=u'master',
                     type='rpm',
                     active=True,
                 )),
             ],
-            'releases/fedora-24-fedora-NEXT': [('GET', {})],
+            'releases/fedora-24': [('GET', {})],
             'global-components': [('GET', {'name': u'perl-Lingua-Translit'}) ],
         })
 
@@ -588,11 +588,11 @@ class TestNewBranch(BaseHandlerTest):
             'release-components': [
                 ('POST', PDC_DATA),
             ],
-            'releases/epel-6-fedora-NEXT-updates': [('GET', {}), ('GET', {})],
-            'releases/epel-7-fedora-NEXT-updates': [('GET', {}), ('GET', {})],
-            'releases/fedora-20-fedora-NEXT-updates': [('GET', {})],
-            'releases/fedora-21-fedora-NEXT-updates': [('GET', {})],
-            'releases/fedora-22-fedora-NEXT-updates': [('GET', {})],
-            'releases/fedora-23-fedora-NEXT-updates': [('GET', {}), ('GET', {})],
-            'releases/fedora-24-fedora-NEXT': [('GET', {}), ('GET', {})],
+            'releases/epel-6-updates': [('GET', {}), ('GET', {})],
+            'releases/epel-7-updates': [('GET', {}), ('GET', {})],
+            'releases/fedora-20-updates': [('GET', {})],
+            'releases/fedora-21-updates': [('GET', {})],
+            'releases/fedora-22-updates': [('GET', {})],
+            'releases/fedora-23-updates': [('GET', {}), ('GET', {})],
+            'releases/fedora-24': [('GET', {}), ('GET', {})],
         })

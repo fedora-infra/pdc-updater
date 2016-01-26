@@ -52,7 +52,7 @@ def tag2release(tag):
             'version': tag.strip('f'),
             'release_type': 'ga',
         }
-        release_id = "{short}-{version}-fedora-NEXT".format(**release)
+        release_id = "{short}-{version}".format(**release)
     else:
         bodhi_info = {r['stable_tag']: r for r in bodhi_releases()}[tag]
         if 'EPEL' in bodhi_info['id_prefix']:
@@ -69,7 +69,7 @@ def tag2release(tag):
                 'version': bodhi_info['version'],
                 'release_type': 'updates',
             }
-        release_id = "{short}-{version}-fedora-NEXT-{release_type}".format(**release)
+        release_id = "{short}-{version}-{release_type}".format(**release)
 
     return release_id, release
 

@@ -14,10 +14,10 @@ def collection2release_id(pdc, collection):
     if collection['version'] == 'devel':
         collection['version'] = collection['dist_tag'].split('fc')[-1]
         release_type = 'ga'
-        template = "{short}-{version}-fedora-NEXT"
+        template = "{short}-{version}"
     else:
         release_type = 'updates'
-        template = "{short}-{version}-fedora-NEXT-updates"
+        template = "{short}-{version}-updates"
 
     # lowercase this for the prefix.
     release = {

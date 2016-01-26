@@ -17,31 +17,12 @@ def ensure_release_exists(pdc, release_id, release):
             raise
         log.warn("No release %r exists.  Creating." % release_id)
 
-        product = dict(
-            name='Fedora',
-            short='fedora',
-            version='NEXT',
-        )
-        product_id = "{short}-{version}".format(**product)
-        ensure_product_exists(pdc, product_id, product)
-
         release_payload = copy.copy(release)
         release_payload.update(dict(
             active=True,
-            base_product=product_id,
         ))
         pdc['releases']._(release_payload)
-
-
-def ensure_product_exists(pdc, product_id, product):
-    """ Create a product in PDC if it doesn't already exist. """
-    try:
-        pdc['base-products'][product_id]._()
-    except beanbag.bbexcept.BeanBagException as e:
-        if e.response.status_code != 404:
-            raise
-        log.warn("No product %r exists.  Creating." % product_id)
-        pdc['base-products']._(product)
+        log.info("Created %r" % release_payload)
 
 
 def ensure_global_component_exists(pdc, name):
