@@ -45,7 +45,7 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
         data = response.json()
         packages = data['packages']
 
-        release_id = 'fedora-24-fedora-NEXT' # XXX - hard-coded
+        release_id = 'fedora-24' # XXX - hard-coded
         return {
             'group_type': self.group_type,
             'release': release_id,
