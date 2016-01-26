@@ -84,6 +84,9 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
         self._update_atomic_component_group(pdc, component_group)
 
     def _update_atomic_component_group(self, pdc, component_group):
+        # Figure out the primary key for this group we have here..
+        group_pk = pdcupdater.utils.get_group_pk(pdc, component_group)
+
         # Make sure our pre-requisites exist
         pdcupdater.utils.ensure_component_group_exists(pdc, component_group)
         for component in component_group['components']:
@@ -91,4 +94,4 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
                 pdc, component['release'], component['name'])
 
         # And perform the update with a PUT
-        pdc['component-groups']._ = component_group
+        pdc['component-groups'][group_pk]._ = component_group

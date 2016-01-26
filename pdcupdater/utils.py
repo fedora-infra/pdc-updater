@@ -3,15 +3,43 @@ import contextlib
 
 import requests
 import beanbag.bbexcept
+import pdc_client
 
 import logging
 log = logging.getLogger(__name__)
 
 
+def get_group_pk(pdc, target_group):
+    """ Return the primary key int identifier for a component group. """
+    # List all of our component groups
+    groups = pdc_client.get_paged(pdc['component-groups']._)
+
+    ignored_keys = ['components']
+    for group in groups:
+        # Iterate over them until we find "the one"
+        if all([
+            group[key] == target_group[key]
+            for key in target_group
+            if key not in ignored_keys
+        ]):
+            return group['id']
+
+    # If we can't find it, then complain.
+    raise ValueError("Could not find matching group for %r" % target_group)
+
+
 def ensure_component_group_exists(pdc, component_group):
     """ Create a component_group in PDC if it doesn't already exist. """
+
+    # Scrub our input
+    if 'components' in component_group:
+        component_group = copy.copy(component_group)
+        del component_group['components']
+
+    # Check that the type exists first...
     component_group_type = component_group['group_type']
     ensure_component_group_type_exists(pdc, component_group_type)
+
     try:
         # Try to create it
         pdc['component-groups']._(component_group)
