@@ -1,4 +1,20 @@
 
+0.2.2
+-----
+
+Commits
+
+- 68895bcfc specbump.
+  https://github.com/fedora-infra/pdc-updater/commit/68895bcfc
+- 15c4017ea Not true anymore.
+  https://github.com/fedora-infra/pdc-updater/commit/15c4017ea
+- b82e2c5a7 Some more descriptive text.
+  https://github.com/fedora-infra/pdc-updater/commit/b82e2c5a7
+- 8e89162bf Update the audit script to handle atomic group discrepancies.
+  https://github.com/fedora-infra/pdc-updater/commit/8e89162bf
+- fbfac07b3 specbump.
+  https://github.com/fedora-infra/pdc-updater/commit/fbfac07b3
+
 0.2.1
 -----
 
