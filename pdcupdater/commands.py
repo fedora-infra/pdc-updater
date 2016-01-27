@@ -82,9 +82,9 @@ def _print_audit_report(results, verbose):
         fail = fail or present or absent
 
     if not fail:
-        print "OK"
+        print "Everything seems to be OK."
     else:
-        print "WARN"
+        print "WARNING - audit script detected something is wrong."
 
     print
     print "Summary"
