@@ -37,9 +37,6 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
         return True
 
     def atomic_component_groups_from_git(self, pdc):
-        # TODO -- handle mapping branches to releases.
-        # for now we just do master <-> rawhide
-
         # First, build a mapping of git branches (from the fedora-atomic
         # fedorahosted repo) to PDC release ids.
         tags = [pdcupdater.utils.rawhide_tag()]
@@ -83,7 +80,6 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
 
     def handle(self, pdc, msg):
         component_groups = self.atomic_component_groups_from_git(pdc)
-        # TODO -- use only the group associated with the branch in this message
         for group in component_groups:
             self._update_atomic_component_group(pdc, group)
 
