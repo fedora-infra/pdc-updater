@@ -123,10 +123,14 @@ def _print_audit_report(results, verbose):
             if verbose or len(present) < limit:
                 for value in present:
                     print "-", value
+                    if isinstance(present, dict):
+                        print " ", present[value]
             else:
                 present = list(present)
                 for value in present[:limit]:
                     print "-", value
+                    if isinstance(present, dict):
+                        print " ", present[value]
                 print "- (plus %i more... truncated.)" % (len(present) - limit)
         print
 
@@ -138,10 +142,14 @@ def _print_audit_report(results, verbose):
             if verbose or len(absent) < limit:
                 for value in absent:
                     print "-", value
+                    if isinstance(absent, dict):
+                        print " ", absent[value]
             else:
                 absent = list(absent)
                 for value in absent[:limit]:
                     print "-", value
+                    if isinstance(absent, dict):
+                        print " ", absent[value]
                 print "- (plus %i more... truncated.)" % (len(absent) - limit)
 
     if not fail:

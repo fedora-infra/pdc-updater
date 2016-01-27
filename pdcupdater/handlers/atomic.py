@@ -85,20 +85,37 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
 
     def audit(self, pdc):
         # Query the data sources
-        git_group = self.atomic_component_group_from_git()
+        git_groups = list(self.atomic_component_groups_from_git(pdc))
         pdc_groups = get_paged(pdc['component-groups']._)
-        pdc_group = [
-            group for group in pdc_groups
+        pdc_groups = [
+            group for group in get_paged(pdc['component-groups']._)
             if group['group_type'] == self.group_type
         ]
 
-        # normalize the two lists
-        git_group = set(git_group['components'])
-        pdc_group = set(pdc_group['components'])
+        # Invert the lists of dicts into dicts of lists
+        invert = lambda collection: dict([(
+            group['release'],
+            [component['name'] for component in group['components']]
+        ) for group in collection ])
+        git_groups = invert(git_groups)
+        pdc_groups = invert(pdc_groups)
 
-        # use set operators to determine the difference
-        present = pdc_group - git_group
-        absent = git_group - pdc_group
+        # Associate the two by release and normalize
+        present, absent = {}, {}
+        for release in set(git_groups.keys() + pdc_groups.keys()):
+            # Convert each group to a set
+            left = set(git_groups.get(release, []))
+            right = set(pdc_groups.get(release, []))
+
+            # Find and store their difference
+            present[release] = right - left
+            absent[release] = left - right
+
+            # If the diff is empty, remove the key so we don't trigger an alert
+            if not present[release]:
+                del present[release]
+            if not absent[release]:
+                del absent[release]
 
         return present, absent
 
