@@ -44,6 +44,6 @@ class TestAtomicUpdate(BaseHandlerTest):
         }
         self.handler.handle(pdc, msg)
 
-        # Check compose images
+        # Check number of groups
         self.assertEquals(len(pdc.calls['component-group-types']), 4)
         self.assertEquals(len(pdc.calls['component-groups']), 8)

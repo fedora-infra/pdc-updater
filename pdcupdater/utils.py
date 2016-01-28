@@ -12,6 +12,8 @@ import dogpile.cache
 cache = dogpile.cache.make_region()
 cache.configure('dogpile.cache.memory', expiration_time=300)
 
+session = requests.Session()
+
 
 def get_group_pk(pdc, target_group):
     """ Return the primary key int identifier for a component group. """
@@ -131,7 +133,7 @@ def compose_exists(pdc, compose_id):
 
 def get_fedmsg(idx):
     url = 'https://apps.fedoraproject.org/datagrepper/id'
-    response = requests.get(url, params=dict(id=idx))
+    response = session.get(url, params=dict(id=idx))
     if not bool(response):
         raise IOError("Failed to talk to %r %r" % (response.url, response))
     return response.json()
@@ -167,7 +169,7 @@ def handle_message(pdc, handlers, msg, verbose=False):
 def bodhi_releases():
     # TODO -- get these releases from PDC, instead of from Bodhi
     url = 'https://bodhi.fedoraproject.org/releases'
-    response = requests.get(url, params=dict(rows_per_page=100))
+    response = session.get(url, params=dict(rows_per_page=100))
     if not bool(response):
         raise IOError('Failed to talk to %r: %r' % (url, response))
     return response.json()['releases']
@@ -177,12 +179,46 @@ def bodhi_releases():
 def rawhide_tag():
     # TODO - get this tag from PDC, instead of guessing from pkgdb
     url = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
-    response = requests.get(url, params=dict(clt_status="Under Development"))
+    response = session.get(url, params=dict(clt_status="Under Development"))
     if not bool(response):
         raise IOError('Failed to talk to %r: %r' % (url, response))
     collections = response.json()['collections']
     rawhide = [c for c in collections if c['koji_name'] == 'rawhide'][0]
     return 'f' + rawhide['dist_tag'].strip('.fc')
+
+
+def release2reponame(release):
+    """ Convert a PDC release to an mdapi repo name lexicographically. """
+    # TODO -- we should be able to do this by querying the pdc releases
+    # themselves and getting a repo url and parsing that.
+    if 'f' + release['version'] == rawhide_tag():
+        return 'rawhide'
+    if release['short'] == 'fedora':
+        return 'f' + release['version']
+    if release['name'] == 'EPEL':
+        pass
+
+def subpackage2parent(package, pdc_release):
+    """ Use mdapi to return the parent package of a given subpackage """
+
+    repo = release2reponame(pdc_release)
+    url = 'https://apps.fedoraproject.org/mdapi/{repo}/pkg/{package}'
+    url = url.format(repo=repo, package=package)
+    response = session.get(url)
+    if not bool(response):
+        log.warn("Could not talk to mdapi %r %r" % (response.url, response))
+        return package
+    data = response.json()
+    return data['basename']
+
+
+def pkgdb2release(collection):
+    if collection['branchname'] == 'master':
+        return "fedora-" + collection['dist_tag'][-2:]
+    release = collection['name'].lower().split()[-1:] + [collection['version']]
+    if collection['status'] != 'Under Development':
+        release += ['updates']
+    return "-".join(release)
 
 
 def tag2release(tag):
