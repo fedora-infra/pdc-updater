@@ -55,6 +55,12 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         release_id, release = tag2release(tag)
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
+        # Go to sleep due to a race condition that is koji's fault.
+        # It publishes a fedmsg message before the task is actually done and
+        # committed to their database.  In the next step, we try to query
+        # them -- but if the task isn't done, we get an exception.
+        time.sleep(1)
+
         build, rpms = pdcupdater.services.koji_rpms_from_build(
             self.koji_url, msg['msg']['build_id'])
 
