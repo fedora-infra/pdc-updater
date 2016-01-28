@@ -206,7 +206,7 @@ def subpackage2parent(package, pdc_release):
     url = url.format(repo=repo, package=package)
     response = session.get(url)
     if not bool(response):
-        log.warn("Could not talk to mdapi %r %r" % (response.url, response))
+        log.debug("Could not talk to mdapi %r %r" % (response.url, response))
         return package
     data = response.json()
     return data['basename']
