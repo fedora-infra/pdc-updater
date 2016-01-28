@@ -187,6 +187,31 @@ def rawhide_tag():
     return 'f' + rawhide['dist_tag'].strip('.fc')
 
 
+def release2reponame(release):
+    """ Convert a PDC release to an mdapi repo name lexicographically. """
+    # TODO -- we should be able to do this by querying the pdc releases
+    # themselves and getting a repo url and parsing that.
+    if 'f' + release['version'] == rawhide_tag():
+        return 'rawhide'
+    if release['short'] == 'fedora':
+        return 'f' + release['version']
+    if release['name'] == 'EPEL':
+        pass
+
+def subpackage2parent(package, pdc_release):
+    """ Use mdapi to return the parent package of a given subpackage """
+
+    repo = release2reponame(pdc_release)
+    url = 'https://apps.fedoraproject.org/mdapi/{repo}/pkg/{package}'
+    url = url.format(repo=repo, package=package)
+    response = session.get(url)
+    if not bool(response):
+        log.warn("Could not talk to mdapi %r %r" % (response.url, response))
+        return package
+    data = response.json()
+    return data['basename']
+
+
 def pkgdb2release(collection):
     if collection['branchname'] == 'master':
         return "fedora-" + collection['dist_tag'][-2:]

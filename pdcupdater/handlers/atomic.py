@@ -63,8 +63,15 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
             response = requests.get(self.git_url + filename, params=params)
             data = response.json()
 
+            # Some of the packages listed *could* be sub-packages, but in the
+            # PDC component group we want to deal with parent srpms.  So, use
+            # mdapi to convert based on whatevers in the repos right now.
+            packages = [
+                pdcupdater.utils.subpackage2parent(package, release)
+                for package in data['packages']
+            ]
+
             # And return formatted component group data
-            packages = data['packages']
             yield {
                 'group_type': self.group_type,
                 'release': release_id,
