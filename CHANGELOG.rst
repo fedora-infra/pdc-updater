@@ -1,4 +1,18 @@
 
+0.2.3
+-----
+
+Commits
+
+- 6020cfcf2 Fix the pkgdb audit code.
+  https://github.com/fedora-infra/pdc-updater/commit/6020cfcf2
+- ddc8a7d41 Use a common requests session.
+  https://github.com/fedora-infra/pdc-updater/commit/ddc8a7d41
+- c51fa8954 Use mdapi to map atomic components to parent srpms.
+  https://github.com/fedora-infra/pdc-updater/commit/c51fa8954
+- e947678dc specbump.
+  https://github.com/fedora-infra/pdc-updater/commit/e947678dc
+
 0.2.2
 -----
 
