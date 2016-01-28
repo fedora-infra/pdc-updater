@@ -508,7 +508,7 @@ class TestNewBranch(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([('guake', 'rawhide', 'master')]))
+        self.assertSetEqual(present, set([('guake', 'fedora-24', 'master')]))
         self.assertSetEqual(absent, set())
 
     @mock_pdc
@@ -539,7 +539,7 @@ class TestNewBranch(BaseHandlerTest):
 
         # Check the results.
         self.assertSetEqual(present, set())
-        self.assertSetEqual(absent, set([('guake', 'dist-f18', 'f18')]))
+        self.assertSetEqual(absent, set([('guake', 'fedora-18-updates', 'f18')]))
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')
@@ -569,8 +569,8 @@ class TestNewBranch(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([('guake', 'rawhide', 'master')]))
-        self.assertSetEqual(absent, set([('guake', 'dist-f18', 'f18')]))
+        self.assertSetEqual(present, set([('guake', 'fedora-24', 'master')]))
+        self.assertSetEqual(absent, set([('guake', 'fedora-18-updates', 'f18')]))
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')

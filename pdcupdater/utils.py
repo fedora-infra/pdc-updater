@@ -185,6 +185,15 @@ def rawhide_tag():
     return 'f' + rawhide['dist_tag'].strip('.fc')
 
 
+def pkgdb2release(collection):
+    if collection['branchname'] == 'master':
+        return "fedora-" + collection['dist_tag'][-2:]
+    release = collection['name'].lower().split()[-1:] + [collection['version']]
+    if collection['status'] != 'Under Development':
+        release += ['updates']
+    return "-".join(release)
+
+
 def tag2release(tag):
     if tag == rawhide_tag():
         release = {

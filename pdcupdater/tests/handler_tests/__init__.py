@@ -128,7 +128,9 @@ def mock_pdc(function):
                'dist_git_branch': u'master',
                'global_component': u'guake',
                'name': u'guake',
-               'release': u'rawhide',
+               'release': {
+                    'release_id': u'fedora-24',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'guake',
@@ -136,7 +138,9 @@ def mock_pdc(function):
                'dist_git_branch': u'el6',
                'global_component': u'guake',
                'name': u'guake',
-               'release': u'dist-6E-epel',
+               'release': {
+                    'release_id': u'epel-6-updates',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'guake',
@@ -144,7 +148,9 @@ def mock_pdc(function):
                'dist_git_branch': u'f20',
                'global_component': u'guake',
                'name': u'guake',
-               'release': u'f20',
+               'release': {
+                    'release_id': u'fedora-20-updates',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'guake',
@@ -152,7 +158,9 @@ def mock_pdc(function):
                'dist_git_branch': u'epel7',
                'global_component': u'guake',
                'name': u'guake',
-               'release': u'epel7',
+               'release': {
+                    'release_id': u'epel-7-updates',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'guake',
@@ -160,7 +168,9 @@ def mock_pdc(function):
                'dist_git_branch': u'f21',
                'global_component': u'guake',
                'name': u'guake',
-               'release': u'f21',
+               'release': {
+                    'release_id': u'fedora-21-updates',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'guake',
@@ -168,7 +178,9 @@ def mock_pdc(function):
                'dist_git_branch': u'f22',
                'global_component': u'guake',
                'name': u'guake',
-               'release': u'f22',
+               'release': {
+                    'release_id': u'fedora-22-updates',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'guake',
@@ -176,7 +188,9 @@ def mock_pdc(function):
                'dist_git_branch': u'f23',
                'global_component': u'guake',
                'name': u'guake',
-               'release': u'f23',
+               'release': {
+                    'release_id': u'fedora-23-updates',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'geany',
@@ -184,7 +198,9 @@ def mock_pdc(function):
                'dist_git_branch': u'master',
                'global_component': u'geany',
                'name': u'geany',
-               'release': u'rawhide',
+               'release': {
+                    'release_id': u'fedora-24',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'geany',
@@ -192,7 +208,9 @@ def mock_pdc(function):
                'dist_git_branch': u'el6',
                'global_component': u'geany',
                'name': u'geany',
-               'release': u'dist-6E-epel',
+               'release': {
+                    'release_id': u'epel-6-updates',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'geany',
@@ -200,7 +218,9 @@ def mock_pdc(function):
                'dist_git_branch': u'epel7',
                'global_component': u'geany',
                'name': u'geany',
-               'release': u'epel7',
+               'release': {
+                    'release_id': u'epel-7-updates',
+               },
                'type': 'srpm'},
               {'active': True,
                'brew_package': u'geany',
@@ -208,7 +228,9 @@ def mock_pdc(function):
                'dist_git_branch': u'f23',
                'global_component': u'geany',
                'name': u'geany',
-               'release': u'f23',
+               'release': {
+                    'release_id': u'fedora-23-updates',
+               },
                'type': 'srpm'},
             ]
         })

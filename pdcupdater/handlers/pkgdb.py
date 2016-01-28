@@ -68,16 +68,16 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
         pdc['release-components']._(data)
 
     def audit(self, pdc):
-        packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url)
-        pdc_pkgs = get_paged(pdc['global-components']._)
+        pkgdb_packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url)
+        pdc_packages = get_paged(pdc['global-components']._)
 
         # normalize the two lists
-        pkg_package = set([p['name'] for p in packages])
-        pdc_package = set([p['name'] for p in pdc_pkgs])
+        pkgdb_packages = set([p['name'] for p in pkgdb_packages])
+        pdc_packages = set([p['name'] for p in pdc_packages])
 
         # use set operators to determine the difference
-        present = pdc_package - pkg_package
-        absent = pkg_package - pdc_package
+        present = pdc_packages - pkgdb_packages
+        absent = pkgdb_packages - pdc_packages
 
         return present, absent
 
@@ -129,28 +129,28 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         pdc['release-components']._(data)
 
     def audit(self, pdc):
-        packages = pdcupdater.services.pkgdb_packages(
+        pkgdb_packages = pdcupdater.services.pkgdb_packages(
             self.pkgdb_url, extra=True)
-        pdc_pkgs = get_paged(pdc['release-components']._)
+        pdc_packages = get_paged(pdc['release-components']._)
 
         # normalize the two lists
-        pkg_package = set(
+        pkgdb_packages = set(
             (
                 package['name'],
-                collection['koji_name'],
+                pdcupdater.utils.pkgdb2release(collection),
                 collection['branchname']
             )
-            for package in packages
+            for package in pkgdb_packages
             for collection in package['collections']
         )
-        pdc_package = set(
-            (p['name'], p['release'], p['dist_git_branch'])
-            for p in pdc_pkgs
+        pdc_packages = set(
+            (p['name'], p['release']['release_id'], p['dist_git_branch'])
+            for p in pdc_packages
         )
 
         # use set operators to determine the difference
-        present = pdc_package - pkg_package
-        absent = pkg_package - pdc_package
+        present = pdc_packages - pkgdb_packages
+        absent = pkgdb_packages - pdc_packages
 
         return present, absent
 
