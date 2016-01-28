@@ -12,6 +12,8 @@ import dogpile.cache
 cache = dogpile.cache.make_region()
 cache.configure('dogpile.cache.memory', expiration_time=300)
 
+session = requests.Session()
+
 
 def get_group_pk(pdc, target_group):
     """ Return the primary key int identifier for a component group. """
@@ -131,7 +133,7 @@ def compose_exists(pdc, compose_id):
 
 def get_fedmsg(idx):
     url = 'https://apps.fedoraproject.org/datagrepper/id'
-    response = requests.get(url, params=dict(id=idx))
+    response = session.get(url, params=dict(id=idx))
     if not bool(response):
         raise IOError("Failed to talk to %r %r" % (response.url, response))
     return response.json()
@@ -167,7 +169,7 @@ def handle_message(pdc, handlers, msg, verbose=False):
 def bodhi_releases():
     # TODO -- get these releases from PDC, instead of from Bodhi
     url = 'https://bodhi.fedoraproject.org/releases'
-    response = requests.get(url, params=dict(rows_per_page=100))
+    response = session.get(url, params=dict(rows_per_page=100))
     if not bool(response):
         raise IOError('Failed to talk to %r: %r' % (url, response))
     return response.json()['releases']
@@ -177,7 +179,7 @@ def bodhi_releases():
 def rawhide_tag():
     # TODO - get this tag from PDC, instead of guessing from pkgdb
     url = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
-    response = requests.get(url, params=dict(clt_status="Under Development"))
+    response = session.get(url, params=dict(clt_status="Under Development"))
     if not bool(response):
         raise IOError('Failed to talk to %r: %r' % (url, response))
     collections = response.json()['collections']

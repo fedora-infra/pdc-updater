@@ -10,6 +10,7 @@ from pdc_client import get_paged
 
 
 log = logging.getLogger(__name__)
+session = requests.Session()
 
 
 class NewComposeHandler(pdcupdater.handlers.BaseHandler):
@@ -79,7 +80,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         base = compose_url + "/compose/metadata"
 
         url = base + '/composeinfo.json'
-        response = requests.get(url)
+        response = session.get(url)
         if not bool(response):
             raise IOError("Failed to get %r: %r" % (url, response))
         composeinfo = response.json()
@@ -95,13 +96,13 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
 
         # OK, go ahead and pull down these gigantic files.
         url = base + '/images.json'
-        response = requests.get(url)
+        response = session.get(url)
         if not bool(response):
             raise IOError("Failed to get %r: %r" % (url, response))
         images = response.json()
 
         url = base + '/rpms.json'
-        response = requests.get(url)
+        response = session.get(url)
         if not bool(response):
             raise IOError("Failed to get %r: %r" % (url, response))
         rpms = response.json()
