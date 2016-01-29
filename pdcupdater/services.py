@@ -62,6 +62,13 @@ def old_composes(base_url):
             if not good:
                 continue
 
+            # But really, the real check is to see if the status is good.
+            response = session.get(compose_link + '/STATUS')
+            if not bool(response):
+                continue
+            if not response.text.strip() == 'FINISHED':
+                continue
+
             # If we got this far, then return it
             log.info("  found %s/%s" % (branch, compose))
             yield branch, compose, compose_link
