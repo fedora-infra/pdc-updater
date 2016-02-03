@@ -63,7 +63,7 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
             type='rpm',
         )
         pdcupdater.utils.ensure_global_component_exists(pdc, name)
-        # https://pdc.fedorainfracloud.org/rest_api/v1/release-components/
+        # https://pdc.fedoraproject.org/rest_api/v1/release-components/
         log.info("Creating release component %s for %s" % (name, release_id))
         pdc['release-components']._(data)
 
@@ -123,7 +123,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
             active=True,
             type='rpm',
         )
-        # https://pdc.fedorainfracloud.org/rest_api/v1/release-components/
+        # https://pdc.fedoraproject.org/rest_api/v1/release-components/
         pdcupdater.utils.ensure_global_component_exists(pdc, name)
         log.info("Creating release component %s for %s" % (name, release_id))
         pdc['release-components']._(data)
