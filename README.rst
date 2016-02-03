@@ -20,6 +20,7 @@ Setup pdc-updater and its dependencies::
 
 Try running the test suite::
 
+    $ dnf install libyaml-devel
     $ pip install -r test-requirements.txt
     $ nosetests
 
