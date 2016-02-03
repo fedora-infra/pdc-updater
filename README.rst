@@ -32,10 +32,10 @@ Check test suite coverage::
 Getting an authentication token
 -------------------------------
 
-...from https://pdc.fedorainfracloud.org/
+...from https://pdc.fedoraproject.org/
 
-- go to https://pdc.fedorainfracloud.org/ in your browser and login.
-- go to https://pdc.fedorainfracloud.org/rest_api/v1/auth/token/obtain/
+- go to https://pdc.fedoraproject.org/ in your browser and login.
+- go to https://pdc.fedoraproject.org/rest_api/v1/auth/token/obtain/
 - open up the devtools console in your browser, and find the request for the current page.
 - right click to open a context menu and select 'copy as cURL'
 - paste that into a terminal.  It should have your saml cookie.

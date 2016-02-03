@@ -116,13 +116,13 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
         # https://github.com/product-definition-center/product-definition-center/issues/228
-        # https://pdc.fedorainfracloud.org/rest_api/v1/compose-images/
+        # https://pdc.fedoraproject.org/rest_api/v1/compose-images/
         pdc['compose-images']._(dict(
             release_id=release_id,
             composeinfo=composeinfo,
             image_manifest=images,
         ))
-        # https://pdc.fedorainfracloud.org/rest_api/v1/compose-rpms/
+        # https://pdc.fedoraproject.org/rest_api/v1/compose-rpms/
         pdc['compose-rpms']._(dict(
             release_id=release_id,
             composeinfo=composeinfo,
