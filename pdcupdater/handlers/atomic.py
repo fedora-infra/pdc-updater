@@ -93,7 +93,6 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
     def audit(self, pdc):
         # Query the data sources
         git_groups = list(self.atomic_component_groups_from_git(pdc))
-        pdc_groups = get_paged(pdc['component-groups']._)
         pdc_groups = [
             group for group in get_paged(pdc['component-groups']._)
             if group['group_type'] == self.group_type
