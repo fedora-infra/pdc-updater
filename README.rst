@@ -39,10 +39,9 @@ Getting an authentication token
 - open up the devtools console in your browser, and find the request for the current page.
 - right click to open a context menu and select 'copy as cURL'
 - paste that into a terminal.  It should have your saml cookie.
-- before hitting enter, edit the command to add the following two options:
+- before hitting enter, edit the command to add the following option:
 
   - ``-H 'Accept: application/json'``, to tell the API you want data
-  - ``--insecure``, because we have a self-signed cert
 
 - the command should print out your token.
 
