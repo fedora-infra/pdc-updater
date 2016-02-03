@@ -65,7 +65,7 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         build, rpms = pdcupdater.services.koji_rpms_from_build(
             self.koji_url, msg['msg']['build_id'])
 
-        # https://pdc.fedorainfracloud.org/rest_api/v1/rpms/
+        # https://pdc.fedoraproject.org/rest_api/v1/rpms/
         for rpm in rpms:
             # Start with podofo-0.9.1-17.el7.ppc64.rpm
             name, version, release = rpm.rsplit('-', 2)

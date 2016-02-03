@@ -5,12 +5,12 @@ config = {
 
     # Credentials to talk to PDC
     'pdcupdater.pdc': {
-        'server': 'https://pdc.fedorainfracloud.org/rest_api/v1/',
+        'server': 'https://pdc.fedoraproject.org/rest_api/v1/',
         'insecure': True,  # Just because we have a self-signed cert in the cloud
         'token': 'AWESOME_SECRET_STRING_GOES_HERE',
         # XXX - getting the token is a bit of a pain, but here's a walk through
-        # 1) go to https://pdc.fedorainfracloud.org/ in your browser and login.
-        # 2) go to https://pdc.fedorainfracloud.org/rest_api/v1/auth/token/obtain/
+        # 1) go to https://pdc.fedoraproject.org/ in your browser and login.
+        # 2) go to https://pdc.fedoraproject.org/rest_api/v1/auth/token/obtain/
         # 3) open up the devtools console in your browser, and find the request for the current page.
         # 4) right click to open a context menu and select 'copy as cURL'
         # 5) paste that into a terminal.  It should have your saml cookie.
