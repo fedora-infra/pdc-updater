@@ -5,6 +5,8 @@ import socket
 import bs4
 import requests
 
+import pdcupdater.handlers.compose
+
 log = logging.getLogger(__name__)
 
 def with_ridiculous_timeout(function):
@@ -66,7 +68,7 @@ def old_composes(base_url):
             response = session.get(compose_link + '/STATUS')
             if not bool(response):
                 continue
-            if not response.text.strip() == 'FINISHED':
+            if not response.text.strip() in pdcupdater.handlers.compose.final:
                 continue
 
             # If we got this far, then return it

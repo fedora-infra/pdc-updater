@@ -12,6 +12,11 @@ from pdc_client import get_paged
 log = logging.getLogger(__name__)
 session = requests.Session()
 
+final = [
+    'FINISHED',
+    'FINISHED_INCOMPLETE',
+]
+
 
 class NewComposeHandler(pdcupdater.handlers.BaseHandler):
     """ When pungi-koji finishes a new compose. """
@@ -29,12 +34,12 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
     def can_handle(self, msg):
         if not msg['topic'].endswith('pungi.compose.status.change'):
             return False
-        if msg['msg']['status'] != 'FINISHED':
+        if not msg['msg']['status'] in final:
             return False
         return True
 
     def handle(self, pdc, msg):
-        # This is something like Fedora-24-20151130.n.2
+        # This is something like Fedora-24-20151130.n.2 or Fedora-Rawhide-201..
         compose_id = msg['msg']['compose_id']
 
         # The URL given looks like
