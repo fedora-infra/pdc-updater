@@ -27,7 +27,7 @@ BuildRequires:      python-requests
 BuildRequires:      python-dogpile-cache
 BuildRequires:      python-fedora
 BuildRequires:      packagedb-cli
-BuildRequires:      pdc-client
+#BuildRequires:      pdc-client
 
 # For the tests
 BuildRequires:      python-nose
@@ -52,6 +52,8 @@ the Product Definition Center database in response.
 
 # Remove bundled egg-info in case it exists
 rm -rf %{name}.egg-info
+
+sed -i '/pdc-client/d' setup.py
 
 %build
 %{__python2} setup.py build
