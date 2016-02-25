@@ -1,4 +1,47 @@
 
+0.2.4
+-----
+
+Pull Requests
+
+- (@lmacken)        #2, s/fedorainfracloud/fedoraproject/g
+  https://github.com/fedora-infra/pdc-updater/pull/2
+- (@lmacken)        #3, We don't need the --insecure option anymore.
+  https://github.com/fedora-infra/pdc-updater/pull/3
+- (@ralphbean)      #5, libyaml-devel makes the tests 10x faster.
+  https://github.com/fedora-infra/pdc-updater/pull/5
+- (@lmacken)        #4, atomic: Remove a duplicate component-groups query
+  https://github.com/fedora-infra/pdc-updater/pull/4
+- (@ralphbean)      #6, Allow in both FINISHED and FINISHED_INCOMPLETE composes.
+  https://github.com/fedora-infra/pdc-updater/pull/6
+
+Commits
+
+- 22d8bbc3b Demote this log statement.
+  https://github.com/fedora-infra/pdc-updater/commit/22d8bbc3b
+- c2917594d Sleeping beauty.
+  https://github.com/fedora-infra/pdc-updater/commit/c2917594d
+- 2f3517852 Forgotten import.
+  https://github.com/fedora-infra/pdc-updater/commit/2f3517852
+- 7c4b045d7 Check to make sure a compose is really really done before considering it.
+  https://github.com/fedora-infra/pdc-updater/commit/7c4b045d7
+- eff32fa0b First stab at a diagram.
+  https://github.com/fedora-infra/pdc-updater/commit/eff32fa0b
+- 689c54949 build diagram.
+  https://github.com/fedora-infra/pdc-updater/commit/689c54949
+- b046ac7d9 Klaxon.
+  https://github.com/fedora-infra/pdc-updater/commit/b046ac7d9
+- 49a5e5d2d s/fedorainfracloud/fedoraproject/g
+  https://github.com/fedora-infra/pdc-updater/commit/49a5e5d2d
+- c06e2e4ae We don't need the --insecure option anymore.
+  https://github.com/fedora-infra/pdc-updater/commit/c06e2e4ae
+- 9105bd6c2 atomic: Remove a duplicate component-groups query
+  https://github.com/fedora-infra/pdc-updater/commit/9105bd6c2
+- bf2f59566 libyaml-devel makes the tests 10x faster.
+  https://github.com/fedora-infra/pdc-updater/commit/bf2f59566
+- 8ffdf3ccf Allow in both FINISHED and FINISHED_INCOMPLETE composes.
+  https://github.com/fedora-infra/pdc-updater/commit/8ffdf3ccf
+
 0.2.3
 -----
 
