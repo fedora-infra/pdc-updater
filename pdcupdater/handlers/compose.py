@@ -12,6 +12,8 @@ from pdc_client import get_paged
 log = logging.getLogger(__name__)
 session = requests.Session()
 
+# These are the states of a pungi4 compose that we care about.
+# There are other states that we don't care about.. like DOOMED, etc..
 final = [
     'FINISHED',
     'FINISHED_INCOMPLETE',
