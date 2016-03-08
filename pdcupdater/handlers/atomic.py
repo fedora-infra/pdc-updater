@@ -63,7 +63,8 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
             url = self.git_url + filename
             response = requests.get(url, params=params)
             if not bool(response):
-                raise IOError("Failed to get %r: %r" % (response.url, response))
+                log.warn("Failed to get %r: %r" % (response.url, response))
+                continue
             data = response.json()
 
             # Some of the packages listed *could* be sub-packages, but in the
