@@ -84,6 +84,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
                     log.exception("Failed to import %r %r" % url)
 
 
+    @pdcupdater.utils.with_ridiculous_timeout
     def _import_compose(self, pdc, compose_id, compose_url):
         base = compose_url + "/compose/metadata"
 
