@@ -60,7 +60,10 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
             # Go, get, and parse the data
             params = dict(h=branch)
             filename = 'fedora-%s.json' % self.group_type
-            response = requests.get(self.git_url + filename, params=params)
+            url = self.git_url + filename
+            response = requests.get(url, params=params)
+            if not bool(response):
+                raise IOError("Failed to get %r: %r" % (url, response))
             data = response.json()
 
             # Some of the packages listed *could* be sub-packages, but in the
