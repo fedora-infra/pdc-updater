@@ -1,5 +1,6 @@
 import copy
 import contextlib
+import functools
 
 import requests
 import beanbag.bbexcept
@@ -251,3 +252,13 @@ def tag2release(tag):
     return release_id, release
 
 
+def with_ridiculous_timeout(function):
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        original = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(600)
+        try:
+            return function(*args, **kwargs)
+        finally:
+            socket.setdefaulttimeout(original)
+    return wrapper

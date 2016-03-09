@@ -1,4 +1,3 @@
-import functools
 import logging
 import socket
 
@@ -6,20 +5,9 @@ import bs4
 import requests
 
 import pdcupdater.handlers.compose
+import pdcupdater.utils
 
 log = logging.getLogger(__name__)
-
-def with_ridiculous_timeout(function):
-    @functools.wraps(function)
-    def wrapper(*args, **kwargs):
-        original = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(600)
-        try:
-            return function(*args, **kwargs)
-        finally:
-            socket.setdefaulttimeout(original)
-    return wrapper
-
 
 
 def _scrape_links(session, url):
@@ -79,7 +67,7 @@ def old_composes(base_url):
     session.close()
 
 
-@with_ridiculous_timeout
+@pdcupdater.utils.with_ridiculous_timeout
 def fas_persons(base_url, username, password):
     """ Return the list of users in the Fedora Account System. """
 
