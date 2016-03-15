@@ -76,7 +76,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         # things which appears in PDC but do not appear on kojipkgs.  releng
         # will periodically clean up the old unused composes from kojipkgs.. so
         # we'll just silence ourselves here on that matter.
-        absent = set()  # This is fine ☕
+        present = set()  # This is fine ☕
 
         return present, absent
 
