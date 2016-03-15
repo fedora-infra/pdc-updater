@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import copy
 import logging
 import requests
@@ -68,6 +70,13 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         # use set operators to determine the difference
         present = pdc_composes - old_composes
         absent = old_composes - pdc_composes
+
+        # XXX - HACK - we're only interested (really) in things that exist on
+        # kojipkgs but which do not exist in PDC.  We are not interested in
+        # things which appears in PDC but do not appear on kojipkgs.  releng
+        # will periodically clean up the old unused composes from kojipkgs.. so
+        # we'll just silence ourselves here on that matter.
+        absent = set()  # This is fine ☕
 
         return present, absent
 
