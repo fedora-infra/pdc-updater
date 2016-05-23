@@ -90,7 +90,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
                     log.exception("Failed to import %r - %r %r" % (
                         url, e.response.url, e.response.text))
                 else:
-                    log.exception("Failed to import %r %r" % url)
+                    log.exception("Failed to import %r" % url)
 
 
     @pdcupdater.utils.with_ridiculous_timeout

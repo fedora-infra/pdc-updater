@@ -1,6 +1,7 @@
 import copy
 import contextlib
 import functools
+import socket
 
 import requests
 import beanbag.bbexcept
