@@ -121,9 +121,17 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
 
         url = base + '/rpms.json'
         response = session.get(url)
-        if not bool(response):
+        # Check first for a 404...
+        if response.status_code == 404:
+            # Not all composes have rpms.  In particular, atomic ones.
+            # https://github.com/fedora-infra/pdc-updater/issues/11
+            log.warn('Found no rpms.json file at %r' % r)
+            rpms = None
+        elif not bool(response):
+            # Something other than a 404 means real failure, so complain.
             raise IOError("Failed to get %r: %r" % (url, response))
-        rpms = response.json()
+        else:
+            rpms = response.json()
 
         # PDC demands lowercase
         composeinfo['payload']['release']['short'] = \
@@ -140,9 +148,11 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             composeinfo=composeinfo,
             image_manifest=images,
         ))
+
         # https://pdc.fedoraproject.org/rest_api/v1/compose-rpms/
-        pdc['compose-rpms']._(dict(
-            release_id=release_id,
-            composeinfo=composeinfo,
-            rpm_manifest=rpms,
-        ))
+        if rpms:
+            pdc['compose-rpms']._(dict(
+                release_id=release_id,
+                composeinfo=composeinfo,
+                rpm_manifest=rpms,
+            ))
