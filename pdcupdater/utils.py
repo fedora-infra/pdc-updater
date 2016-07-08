@@ -5,7 +5,6 @@ import socket
 
 import requests
 import beanbag.bbexcept
-import pdc_client
 
 import logging
 log = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ session = requests.Session()
 def get_group_pk(pdc, target_group):
     """ Return the primary key int identifier for a component group. """
     # List all of our component groups
-    groups = pdc_client.get_paged(pdc['component-groups']._)
+    groups = pdc.get_paged(pdc['component-groups']._)
 
     ignored_keys = ['components']
     for group in groups:

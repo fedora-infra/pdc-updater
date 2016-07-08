@@ -8,8 +8,6 @@ import pdcupdater.handlers
 import pdcupdater.services
 import pdcupdater.utils
 
-from pdc_client import get_paged
-
 
 log = logging.getLogger(__name__)
 session = requests.Session()
@@ -61,7 +59,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
     def audit(self, pdc):
         # Query the data sources
         old_composes = pdcupdater.services.old_composes(self.old_composes_url)
-        pdc_composes = get_paged(pdc['composes']._)
+        pdc_composes = pdc.get_paged(pdc['composes']._)
 
         # normalize the two lists
         old_composes = set([idx for branch, idx, url in old_composes])

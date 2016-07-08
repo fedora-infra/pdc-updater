@@ -2,8 +2,6 @@ import json
 import logging
 import time
 
-from pdc_client import get_paged
-
 import pdcupdater.handlers
 import pdcupdater.services
 from pdcupdater.utils import (
@@ -90,7 +88,7 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
     def audit(self, pdc):
         # Query the data sources
         koji_rpms = sum(self._gather_koji_rpms(), [])
-        pdc_rpms = get_paged(pdc['rpms']._)
+        pdc_rpms = pdc.get_paged(pdc['rpms']._)
 
         # Normalize the lists before comparing them.
         koji_rpms = set([json.dumps(r, sort_keys=True) for r in koji_rpms])
