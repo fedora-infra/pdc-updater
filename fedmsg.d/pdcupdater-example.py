@@ -53,6 +53,8 @@ config = {
         'pdcupdater.handlers.depchain.rpms:NewRPMBuildTimeDepChainHandler',
         'pdcupdater.handlers.depchain.rpms:NewRPMRunTimeDepChainHandler',
         'pdcupdater.handlers.depchain.containers:ContainerRPMInclusionDepChainHandler',
+
+        'pdcupdater.handlers.trees:NewTreeHandler',
     ],
 
     # Configure tags of interest for various depchain handlers here
