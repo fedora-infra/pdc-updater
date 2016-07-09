@@ -5,8 +5,6 @@ import pdcupdater.handlers
 import pdcupdater.services
 import pdcupdater.utils
 
-from pdc_client import get_paged
-
 
 log = logging.getLogger(__name__)
 
@@ -98,7 +96,7 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
         # Query the data sources
         git_groups = list(self.atomic_component_groups_from_git(pdc))
         pdc_groups = [
-            group for group in get_paged(pdc['component-groups']._)
+            group for group in pdc.get_paged(pdc['component-groups']._)
             if group['group_type'] == self.group_type
         ]
 

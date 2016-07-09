@@ -3,7 +3,6 @@ import pdcupdater.services
 import pdcupdater.utils
 
 import beanbag.bbexcept
-from pdc_client import get_paged
 
 import logging
 
@@ -69,7 +68,7 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
 
     def audit(self, pdc):
         pkgdb_packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url)
-        pdc_packages = get_paged(pdc['global-components']._)
+        pdc_packages = pdc.get_paged(pdc['global-components']._)
 
         # normalize the two lists
         pkgdb_packages = set([p['name'] for p in pkgdb_packages])
@@ -131,7 +130,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
     def audit(self, pdc):
         pkgdb_packages = pdcupdater.services.pkgdb_packages(
             self.pkgdb_url, extra=True)
-        pdc_packages = get_paged(pdc['release-components']._)
+        pdc_packages = pdc.get_paged(pdc['release-components']._)
 
         # normalize the two lists
         pkgdb_packages = set(
