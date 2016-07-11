@@ -71,11 +71,11 @@ class NewTreeHandler(pdcupdater.handlers.BaseHandler):
             tree_date[0:4] + "-" + tree_date[4:6] + "-" + tree_date[6:8])
 
         try:
-            unreleased_variant = pdc['unreleasedvariant'][variant_id]._()
+            unreleased_variant = pdc['unreleasedvariants'][variant_id]._()
         except beanbag.BeanBagException as e:
             if e.response.status_code != 404:
                 raise
-            unreleased_variant = pdc['unreleasedvariant']._({
+            unreleased_variant = pdc['unreleasedvariants']._({
                 'variant_id': variant_id,
                 'variant_uid': variant_uid,
                 'variant_name': variant_name,
@@ -86,7 +86,7 @@ class NewTreeHandler(pdcupdater.handlers.BaseHandler):
 
         # avoid adding trees twice
         try:
-            pdc['tree'][tree_id]._()
+            pdc['trees'][tree_id]._()
         except beanbag.BeanBagException as e:
             if e.response.status_code != 404:
                 raise
@@ -146,7 +146,7 @@ class NewTreeHandler(pdcupdater.handlers.BaseHandler):
                     'sigkey': sigkey
                 }
 
-            pdc['tree']._(tree_dict)
+            pdc['trees']._(tree_dict)
 
     def audit(self, pdc):
         # TODO: find out what trees exist in koji
