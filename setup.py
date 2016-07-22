@@ -10,6 +10,7 @@ requirements = [
     'python-fedora',
     'packagedb-cli',
     'pdc-client',
+    'modulemd',
 ]
 
 

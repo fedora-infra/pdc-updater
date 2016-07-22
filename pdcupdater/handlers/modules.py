@@ -2,16 +2,20 @@ import os
 import logging
 import errno
 import re
+from subprocess import check_call
 
 import beanbag
 import pdcupdater.handlers
 import pdcupdater.services
+from pdcupdater.utils import TmpDir, PushPopD
+
+import modulemd
 
 log = logging.getLogger(__name__)
 
 
-class NewTreeHandler(pdcupdater.handlers.BaseHandler):
-    """ When a new tree is created """
+class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
+    """ When the state of a module changes. """
 
     relevant_states = ('done', 'ready')
     valid_states = relevant_states + ('init', 'wait', 'building', 'failed')
@@ -24,6 +28,10 @@ class NewTreeHandler(pdcupdater.handlers.BaseHandler):
         r"(?P<name>.+)-"
         r"(?:(?P<epoch>[^:]+):)?(?P<version>[^-:]+)-(?P<release>[^-]+)."
         r"(?P<arch>[^\.]+).rpm")
+
+    scmurl_re = re.compile(
+        r"(?P<giturl>(?:(?P<scheme>git)://(?P<host>[^/]+))?"
+        r"(?P<repopath>/[^\?]+))\?(?P<modpath>[^#]*)#(?P<revision>.+)")
 
     @property
     def topic_suffixes(self):
@@ -47,19 +55,108 @@ class NewTreeHandler(pdcupdater.handlers.BaseHandler):
         return True
 
     def handle(self, pdc, msg):
-        state = msg['msg']['state']
+        body = msg['msg']
+        state = body['state']
 
         if state not in self.relevant_states:
             log.warn("Non-relevant module state '{}', skipping.".format(
                 state))
             return
 
-        koji_tag = msg['msg']['koji_tag']
-        variant_uid = variant_name = msg['msg']['module_uid']
+        unreleased_variant = self.get_or_create_unreleased_variant(pdc, body)
+
+        if 'topdir' in body:
+            self.handle_new_tree(pdc, body, unreleased_variant)
+
+    def get_mmd_from_scm(self, scmurl):
+        with TmpDir(prefix="pdcupdater-") as tmpdir, PushPopD(tmpdir):
+            m = self.scmurl_re.match(scmurl)
+            if not m:
+                raise RuntimeError("Can't parse SCM URL: {}".format(scmurl))
+            giturl = m.group('giturl')
+            repopath = m.group('repopath').rstrip("/")
+            modpath = m.group('modpath')
+            revision = m.group('revision')
+            modname = repopath.rsplit("/", 1)[1]
+            if modname.endswith(".git"):
+                modname = modname[:-4]
+
+            log.debug("Cloning {}".format(giturl))
+            check_call(["git", "clone", "-n", giturl, modname])
+            os.chdir(modname)
+
+            log.debug("Checking out revision {}".format(revision))
+            check_call(["git", "reset", "--hard", revision])
+
+            mmd_yaml = modname + ".yaml"
+            if modpath:
+                mmd_yaml = "/".join((modpath, mmd_yaml))
+            log.debug("Reading/parsing {}".format(mmd_yaml))
+            mmd = modulemd.ModuleMetadata()
+            mmd.load(mmd_yaml)
+
+            return mmd
+
+    def create_unreleased_variant(self, pdc, body):
+        """Creates an UnreleasedVariant for a module in PDC. Checks out the
+        module metadata from the supplied SCM repository (currently only
+        anonymous GIT is supported)."""
+
+        scmurl = body['scmurl']
+        mmd = self.get_mmd_from_scm(scmurl)
+
+        runtime_deps = []
+        for dep, ver in mmd.requires.items():
+            if ver is not None:
+                runtime_deps.append("{} >= {}".format(dep, ver))
+            else:
+                runtime_deps.append(dep)
+
+        build_deps = []
+        for dep, ver in mmd.buildrequires.items():
+            if ver is not None:
+                build_deps.append("{} >= {}".format(dep, ver))
+            else:
+                build_deps.append(dep)
+
+        koji_tag = body['koji_tag']
+        variant_uid = variant_name = body['module_uid']
         variant_id = variant_uid.lower()
-        variant_version = msg['msg']['module_version']
-        topdir = msg['msg']['topdir']
+        variant_version = body['module_version']
+        variant_release = body['module_release']
+
+        unreleased_variant = pdc['unreleasedvariants']._({
+            'variant_id': variant_id,
+            'variant_uid': variant_uid,
+            'variant_name': variant_name,
+            'variant_version': variant_version,
+            'variant_release': variant_release,
+            'variant_type': 'module',
+            'koji_tag': koji_tag,
+            'runtime_deps': runtime_deps,
+            'build_deps': build_deps,
+        })
+
+        return unreleased_variant
+
+    def get_or_create_unreleased_variant(self, pdc, body):
+        variant_uid = body['module_uid']
+        variant_id = variant_uid.lower()
+
+        try:
+            unreleased_variant = pdc['unreleasedvariants'][variant_id]._()
+        except beanbag.BeanBagException as e:
+            if e.response.status_code != 404:
+                raise
+            # a new module!
+            unreleased_variant = self.create_unreleased_variant(pdc, body)
+        return unreleased_variant
+
+    def handle_new_tree(self, pdc, body, unreleased_variant):
+        topdir = body['topdir']
         tree_id = os.path.basename(topdir)
+
+        log.debug("Trying to import tree from topdir '{}'".format(topdir))
 
         m = self.tree_id_re.match(tree_id)
         if not m:
@@ -69,20 +166,6 @@ class NewTreeHandler(pdcupdater.handlers.BaseHandler):
         tree_date = m.group('date')
         tree_date = (
             tree_date[0:4] + "-" + tree_date[4:6] + "-" + tree_date[6:8])
-
-        try:
-            unreleased_variant = pdc['unreleasedvariants'][variant_id]._()
-        except beanbag.BeanBagException as e:
-            if e.response.status_code != 404:
-                raise
-            unreleased_variant = pdc['unreleasedvariants']._({
-                'variant_id': variant_id,
-                'variant_uid': variant_uid,
-                'variant_name': variant_name,
-                'variant_version': variant_version,
-                'variant_type': 'module',
-                'koji_tag': koji_tag,
-            })
 
         # avoid adding trees twice
         try:

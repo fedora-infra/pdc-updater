@@ -46,7 +46,7 @@ config = {
         'pdcupdater.handlers.pkgdb:NewPackageBranchHandler',
         'pdcupdater.handlers.rpms:NewRPMHandler',
         'pdcupdater.handlers.compose:NewComposeHandler',
-        'pdcupdater.handlers.trees:NewTreeHandler',
+        'pdcupdater.handlers.modules:ModuleStateChangeHandler',
     ],
 
     # Augment the base fedmsg logging config to also handle pdcupdater loggers.
