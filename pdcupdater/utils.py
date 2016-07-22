@@ -2,6 +2,9 @@ import copy
 import contextlib
 import functools
 import socket
+import os
+import shutil
+import tempfile
 
 import requests
 import beanbag.bbexcept
@@ -262,3 +265,30 @@ def with_ridiculous_timeout(function):
         finally:
             socket.setdefaulttimeout(original)
     return wrapper
+
+
+class TmpDir(object):
+
+      def __init__(self, prefix=None):
+          self.prefix = prefix
+
+      def __enter__(self):
+          self.dir = tempfile.mkdtemp(prefix=self.prefix)
+          return self.dir
+
+      def __exit__(self, type, value, tb):
+          shutil.rmtree(self.dir)
+
+
+class PushPopD(object):
+
+      def __init__(self, pushd):
+          self.pushd = pushd
+
+      def __enter__(self):
+          self.popd = os.getcwd()
+          os.chdir(self.pushd)
+          return self
+
+      def __exit__(self, type, value, tb):
+          os.chdir(self.popd)
