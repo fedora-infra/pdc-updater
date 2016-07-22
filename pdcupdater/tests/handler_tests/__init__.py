@@ -38,6 +38,7 @@ def mock_pdc(function):
         pdc.add_endpoint('compose-rpms', 'POST', 'wat')
         pdc.add_endpoint('persons', 'POST', 'wat')
         pdc.add_endpoint('rpms', 'POST', 'wat')
+        pdc.add_endpoint('trees', 'POST', 'wat')
 
         # Mock out GET endpoints
         pdc.add_endpoint('composes/Fedora-24-20151130.n.2', 'GET', mock_404)
@@ -262,6 +263,29 @@ def mock_pdc(function):
                 "rpm_mapping_template": "some url",
                 "rtt_tested_architectures": { },
                 "sigkeys": [],
+            }],
+        })
+
+        pdc.add_endpoint('arches', 'GET', {
+            'count': 2,
+            'next': None,
+            'previous': None,
+            'results': [
+                {'name': 'x86_64'},
+                {'name': 'i386'}
+            ],
+        })
+
+        pdc.add_endpoint('unreleasedvariants', 'GET', {
+            'count': 1,
+            'next': None,
+            'previous': None,
+            'results': [{
+                'variant_id': 'tree-0',
+                'variant_uid': 'Tree-0',
+                'variant_name': 'Tree version 0',
+                'variant_type': 'module',
+                'koji_tag': 'tree-0',
             }],
         })
 
