@@ -11,6 +11,7 @@ requirements = [
     'packagedb-cli',
     'pdc-client',
     'six',
+    'modulemd',
 ]
 
 
