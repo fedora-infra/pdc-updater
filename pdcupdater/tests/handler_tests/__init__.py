@@ -39,6 +39,7 @@ def mock_pdc(function):
         pdc.add_endpoint('persons', 'POST', 'wat')
         pdc.add_endpoint('rpms', 'POST', 'wat')
         pdc.add_endpoint('trees', 'POST', 'wat')
+        pdc.add_endpoint('unreleasedvariants', 'POST', 'wat')
 
         # Mock out GET endpoints
         pdc.add_endpoint('composes/Fedora-24-20151130.n.2', 'GET', mock_404)
@@ -266,28 +267,24 @@ def mock_pdc(function):
             }],
         })
 
-        pdc.add_endpoint('arches', 'GET', {
-            'count': 2,
-            'next': None,
-            'previous': None,
-            'results': [
-                {'name': 'x86_64'},
-                {'name': 'i386'}
-            ],
-        })
+        pdc.add_endpoint('arches', 'GET', [
+            {'name': 'x86_64'},
+            {'name': 'i386'},
+        ])
 
-        pdc.add_endpoint('unreleasedvariants', 'GET', {
-            'count': 1,
-            'next': None,
-            'previous': None,
-            'results': [{
-                'variant_id': 'tree-0',
-                'variant_uid': 'Tree-0',
-                'variant_name': 'Tree version 0',
-                'variant_type': 'module',
-                'koji_tag': 'tree-0',
-            }],
-        })
+        pdc.add_endpoint('unreleasedvariants', 'GET', [
+        {
+            'variant_id': 'core-24-0',
+            'variant_uid': 'Core-24-0',
+            'variant_name': 'Core version 24',
+            'variant_type': 'module',
+            'koji_tag': 'module-core-24',
+            'runtime_deps': ['core >= 23'],
+            'build_deps': ['core >= 23', 'c-build >= 6.0'],
+        }])
+
+        pdc.add_endpoint('unreleasedvariants/core-24-0', 'GET', mock_404)
+        pdc.add_endpoint('trees/Test-0-20160712.0', 'GET', mock_404)
 
         return function(self, pdc, *args, **kwargs)
     return wrapper
