@@ -2,7 +2,7 @@ import os
 import logging
 import errno
 import re
-from subprocess import check_call
+from subprocess import check_call, STDOUT
 
 import beanbag
 import pdcupdater.handlers
@@ -69,7 +69,8 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             self.handle_new_tree(pdc, body, unreleased_variant)
 
     def get_mmd_from_scm(self, scmurl):
-        with TmpDir(prefix="pdcupdater-") as tmpdir, PushPopD(tmpdir):
+        with TmpDir(prefix="pdcupdater-") as tmpdir, PushPopD(tmpdir), \
+                open(os.devnull, "w") as devnull:
             m = self.scmurl_re.match(scmurl)
             if not m:
                 raise RuntimeError("Can't parse SCM URL: {}".format(scmurl))
@@ -82,11 +83,13 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
                 modname = modname[:-4]
 
             log.debug("Cloning {}".format(giturl))
-            check_call(["git", "clone", "-n", giturl, modname])
+            check_call(["git", "clone", "-n", giturl, modname],
+                       stdout=devnull, stderr=STDOUT)
             os.chdir(modname)
 
             log.debug("Checking out revision {}".format(revision))
-            check_call(["git", "reset", "--hard", revision])
+            check_call(["git", "reset", "--hard", revision],
+                       stdout=devnull, stderr=STDOUT)
 
             mmd_yaml = modname + ".yaml"
             if modpath:
