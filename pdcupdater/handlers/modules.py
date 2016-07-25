@@ -143,6 +143,10 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         return unreleased_variant
 
     def get_or_create_unreleased_variant(self, pdc, body):
+        """We get multiple messages for each module n-v-r. Attempts to retrieve
+        the corresponding UnreleasedVariant from PDC, or if it's missing,
+        creates it."""
+
         variant_uid = body['module_uid']
         variant_id = variant_uid.lower()
 
