@@ -128,10 +128,10 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
                 build_deps.append(dep)
 
         koji_tag = body['koji_tag']
-        variant_uid = body['uid']
         name = body['name']
         version = body['version']
         release = body['release']
+        variant_uid = "{n}-{v}-{r}".format(n=name, v=version, r=release)
         variant_id = variant_uid.lower()
 
         unreleased_variant = pdc['unreleasedvariants']._({
@@ -153,7 +153,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         the corresponding UnreleasedVariant from PDC, or if it's missing,
         creates it."""
 
-        variant_uid = body['module_uid']
+        variant_uid = "{name}-{version}-{release}".format(**body)
         variant_id = variant_uid.lower()
 
         try:
