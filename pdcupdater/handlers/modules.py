@@ -17,8 +17,11 @@ log = logging.getLogger(__name__)
 class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
     """ When the state of a module changes. """
 
-    relevant_states = ('done', 'ready')
-    valid_states = relevant_states + ('init', 'wait', 'building', 'failed')
+    tree_processing_states = set(('done', 'ready'))
+    other_states = set(('init', 'wait', 'building'))
+    relevant_states = tree_processing_states.union(other_states)
+    error_states = set(('failed',))
+    valid_states = relevant_states.union(error_states)
 
     tree_id_re = re.compile(
         r"(?P<name>[^-]+)-(?P<version>[^-]+)-"
