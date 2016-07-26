@@ -1,6 +1,7 @@
 import os
 import shutil
 import tarfile
+import copy
 
 from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
@@ -16,6 +17,24 @@ class TestModuleStateChange(BaseHandlerTest):
     foo_repo_dir = os.path.join(repo_dir, "foo")
     foo_repo_url = foo_repo_dir + '?#286f3a32f3e034508012fcbba63ed40092e4129b'
     test_tree_dir = os.path.join(test_data_dir, "trees/Test-0-20160712.0")
+
+    state_init_msg = {
+        'topic': 'org.fedoraproject.stg.buildsys.module.state.change',
+        'msg': {
+            'state': 'init',
+            'name': "Core",
+            'version': '24',
+            'release': '0',
+            'scmurl': foo_repo_url,
+        }
+    }
+
+    state_done_msg = copy.deepcopy(state_init_msg)
+    state_done_msg['topic'] = 'org.fedoraproject.stg.rida.module.state.change'
+    state_done_msg['msg'].update({
+        'state': 'done',
+        'topdir': test_tree_dir
+    })
 
     def setUp(self):
         super(TestModuleStateChange, self).setUp()
@@ -35,17 +54,9 @@ class TestModuleStateChange(BaseHandlerTest):
         shutil.rmtree(self.foo_repo_dir)
 
     @mock_pdc
-    def test_handle_module(self, pdc):
-        msg = {
-            'topic': 'buildsys.module.state.change',
-            'msg': {
-                'state': 'done',
-                'koji_tag': 'module-core-24',
-                'module_uid': 'Core-24-0',
-                'module_version': '24',
-                'module_release': '0',
-                'scmurl': self.foo_repo_url,
-                'topdir': self.test_tree_dir,
-            }
-        }
-        self.handler.handle(pdc, msg)
+    def test_create_unreleased_variant(self, pdc):
+        self.handler.handle(pdc, self.state_init_msg)
+
+    @mock_pdc
+    def test_handle_created_tree(self, pdc):
+        self.handler.handle(pdc, self.state_done_msg)
