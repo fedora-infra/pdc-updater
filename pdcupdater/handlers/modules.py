@@ -65,6 +65,8 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
         unreleased_variant = self.get_or_create_unreleased_variant(pdc, body)
 
+        # trees are only present when a module is done building, i.e. states
+        # 'done' or 'ready'
         if 'topdir' in body:
             self.handle_new_tree(pdc, body, unreleased_variant)
 
