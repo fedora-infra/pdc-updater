@@ -33,7 +33,14 @@ def mock_pdc(function):
         pdc.add_endpoint('component-group-types', 'POST', 'wat')
         pdc.add_endpoint('component-groups', 'POST', 'wat')
         pdc.add_endpoint('global-components', 'POST', 'wat')
-        pdc.add_endpoint('release-components', 'POST', 'wat')
+        pdc.add_endpoint('release-components', 'POST', {
+            "id": 1,
+            "release": {"release_id": 'fedora-26'},
+            "global_component": "wat",
+            "name": "wat",
+            "type": "rpm",
+        })
+        pdc.add_endpoint('release-component-relationships', 'POST', 'wat')
         pdc.add_endpoint('compose-images', 'POST', 'wat')
         pdc.add_endpoint('compose-rpms', 'POST', 'wat')
         pdc.add_endpoint('persons', 'POST', 'wat')
@@ -42,6 +49,8 @@ def mock_pdc(function):
         # Mock out GET endpoints
         pdc.add_endpoint('composes/Fedora-24-20151130.n.2', 'GET', mock_404)
 
+        pdc.add_endpoint('releases/fedora-26', 'GET', {})
+        pdc.add_endpoint('releases/fedora-25', 'GET', {})
         pdc.add_endpoint('releases/fedora-24', 'GET', {})
         pdc.add_endpoint('releases/fedora-23-updates', 'GET', {})
         pdc.add_endpoint('releases/fedora-22-updates', 'GET', {})
@@ -116,6 +125,21 @@ def mock_pdc(function):
                 'srpm_nevra': 'rubygem-jmespath-1.1.3-1.el7',
             }],
         })
+
+        pdc.add_endpoint('release-component-relationships', 'GET', [{
+            "from_component": {
+                "id": 1,
+                "name": "guake",
+                "release": "fedora-26"
+            },
+            "id": 1,
+            "to_component": {
+                "id": 2,
+                "name": "nethack",
+                "release": "fedora-26"
+            },
+            "type": "RPMRequires"
+        }])
 
         pdc.add_endpoint('release-components', 'GET', {
             'count': 11,
