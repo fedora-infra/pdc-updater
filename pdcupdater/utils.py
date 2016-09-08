@@ -170,6 +170,30 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
         #    raise
 
 
+def delete_release_component_relationship(pdc, parent, child, type):
+    """ Delete a release-component-relationship in PDC """
+
+    # First, make sure that it exists...
+    entries = list(pdc.get_paged(
+        pdc['release-component-relationships']._,
+        from_component_name=parent['name'],
+        from_component_release=parent['release']['release_id'],
+        type=type,
+        to_component_name=child['name'],
+        to_component_release=child['release']['release_id'],
+    ))
+    if len(entries) != 1:
+        raise ValueError("No unique relationship found for "
+                         "%r -> %r -> %r.  Found %i." % (
+                             parent, type, child, len(entries)))
+
+    # But also, we needed the primary key in order to delete it.
+    primary_key = entries[0]['id']
+
+    # Issue the DELETE request.
+    pdc['release-component-relationships'][primary_key]._("DELETE", {})
+
+
 def compose_exists(pdc, compose_id):
     """ Return True if a compose exists in PDC.  False if not. """
     try:

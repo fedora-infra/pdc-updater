@@ -130,7 +130,13 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             pdcupdater.utils.ensure_release_component_relationship_exists(
                 pdc, parent=parent, child=child, type=type)
 
-        # TODO - we also have to prune *old* relationships if they've been dropped.
+        # Lastly, go through all of the relationships that we know of now in
+        # PDC and find any that do not appear in koji.  These must be old
+        # relationships that are no longer relevant.
+        pdc_relationships = list(self._yield_pdc_relationships(pdc, release_id))
+        for entry in pdc_relationships:
+            pdcupdater.utils.delete_release_component_relationship(
+                pdc, parent=parent, child=child, type=type)
 
     def audit(self, pdc):
         present, absent = set(), set()

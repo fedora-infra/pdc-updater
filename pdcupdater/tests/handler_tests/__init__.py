@@ -46,6 +46,9 @@ def mock_pdc(function):
         pdc.add_endpoint('persons', 'POST', 'wat')
         pdc.add_endpoint('rpms', 'POST', 'wat')
 
+        # One delete endpoint...
+        pdc.add_endpoint('release-component-relationships/1', 'DELETE', 'ok')
+
         # Mock out GET endpoints
         pdc.add_endpoint('composes/Fedora-24-20151130.n.2', 'GET', mock_404)
 

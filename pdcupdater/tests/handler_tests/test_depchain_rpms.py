@@ -25,6 +25,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         expected_keys = [
             'release-component-relationships',
             'releases/fedora-26',
+            'release-component-relationships/1',
             'release-components',
             'global-components',
         ]
@@ -32,7 +33,12 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
 
         self.assertEqual(len(pdc.calls['global-components']), 53116)
         self.assertEqual(len(pdc.calls['release-components']), 53116)
-        self.assertEqual(len(pdc.calls['release-component-relationships']), 17705)
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 17709)
+
+        self.assertEqual(
+            pdc.calls['release-component-relationships/1'],
+            [('DELETE', {}), ('DELETE', {})],
+        )
 
     @mock_pdc
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
@@ -145,7 +151,7 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'release-component-relationships': [ ('GET', {
-                'page': 1, 'release': 'fedora-26', 'type': 'RPMRequires'
+                'page': 1, 'from_component_release': 'fedora-26', 'type': 'RPMRequires'
             })],
             'releases/fedora-26': [('GET', {})]
         })
@@ -176,7 +182,7 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'release-component-relationships': [ ('GET', {
-                'page': 1, 'release': 'fedora-26', 'type': 'RPMRequires'
+                'page': 1, 'from_component_release': 'fedora-26', 'type': 'RPMRequires'
             })],
             'releases/fedora-26': [('GET', {})]
         })
