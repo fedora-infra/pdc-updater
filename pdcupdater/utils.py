@@ -100,17 +100,21 @@ def ensure_global_component_exists(pdc, name):
         pdc['global-components']._(dict(name=name))
 
 
-def ensure_release_component_exists(pdc, release_id, name):
+def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
     """ Create a release-component in PDC if it doesn't already exist. """
     ensure_global_component_exists(pdc, name)
     try:
         # Try to create it
-        pdc['release-components']._({
+        data = {
             'name': name,
             'global_component': name,
             'release': release_id,
-        })
+            'type': type,
+        }
+        # If this works, then we return the primary key and other data.
+        return pdc['release-components']._(data)
     except beanbag.bbexcept.BeanBagException as e:
+        # If it failed, see what kind of failure it was.
         if e.response.status_code != 400:
             raise
         body = e.response.json()
@@ -119,6 +123,51 @@ def ensure_release_component_exists(pdc, release_id, name):
         message = u'The fields release, name must make a unique set.'
         if body['non_field_errors'] != [message]:
             raise
+
+    # But if it was just that the component already existed, then go back and
+    # query for what we tried to submit (return the primary key)
+    query = dict(name=name, release=release_id)
+    results = pdc['release-components']._(**query)
+    if not results:
+        raise IndexError("No results found for %r after submitting %r" % (
+            query, data))
+    if len(results) > 1:
+        raise IndexError("%i results found for %r after submitting %r" % (
+            len(results), query, data))
+    return results[0]
+
+
+def ensure_release_component_relationship_exists(pdc, parent, child, type):
+    """ Create a release-component-relationship in PDC
+    only if it doesn't already exist.
+    """
+
+    ensure_release_component_exists(pdc, parent['release']['release_id'], parent['name'])
+    ensure_release_component_exists(pdc, child['release']['release_id'], child['name'])
+
+    try:
+        # Try to create it
+        pdc['release-component-relationships']._({
+            'parent': parent,
+            'child': child,
+            # This may not exist, and we have no API to create it.  It must be
+            # entered by an admin in the admin panel beforehand.
+            'type': type,
+        })
+    except beanbag.bbexcept.BeanBagException as e:
+        if e.response.status_code != 400:
+            raise
+        body = e.response.json()
+        if not 'non_field_errors' in body:
+            raise
+
+        # TODO - look for any further special psuedo-error handling cases here.
+        import pprint
+        pprint.pprint(body)
+        raise
+        #message = u'The fields release, name must make a unique set.'
+        #if body['non_field_errors'] != [message]:
+        #    raise
 
 
 def compose_exists(pdc, compose_id):

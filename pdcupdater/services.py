@@ -1,5 +1,5 @@
 import logging
-import socket
+import operator
 
 import bs4
 import requests
@@ -83,6 +83,54 @@ def fas_persons(base_url, username, password):
         '/user/list', req_params={'search': '*'}, auth=True, timeout=600)
 
     return response['people']
+
+
+def koji_list_buildroot_for(url, filename):
+    """ Return the list of koji builds in the buildroot of a built rpm. """
+
+    import koji
+    session = koji.ClientSession(url)
+    rpminfo = session.getRPM(filename)
+    return session.listRPMs(componentBuildrootID=rpminfo['buildroot_id'])
+
+
+def koji_yield_rpm_requires(url, nvra):
+    """ Yield three-tuples of RPM requirements from a koji nvra.
+
+    Inspired by koschei/backend/koji_util.py by mizdebsk.
+    """
+    import koji
+    import rpm
+    session = koji.ClientSession(url)
+
+    # Set up some useful structures before we get started.
+    header_lookup = {
+        rpm.RPMSENSE_LESS: '<',
+        rpm.RPMSENSE_GREATER: '>',
+        rpm.RPMSENSE_EQUAL: '=',
+    }
+    relevant_flags = reduce(operator.ior, header_lookup.keys())
+
+    # Query koji and step over all the deps listed in the raw rpm headers.
+    deps = session.getRPMDeps(nvra, koji.DEP_REQUIRE)
+    for dep in deps:
+        flags = dep['flags']
+
+        # The rpmlib headers here contain some crazy dep flags that aren't
+        # relevant to normal humans.  Internal rpmlib dep information.
+        if flags & ~(relevant_flags):
+            continue
+
+        # Bit-shift our way through the flags to figure out how this
+        # relationship is qualified.
+        qualifier = ""
+        while flags:
+            old = flags
+            flags &= flags - 1
+            qualifier += header_lookup[old ^ flags]
+
+        # Yield back ('foo', '<=', '1.0.1')
+        yield dep['name'], qualifier, dep['version'].rstrip()
 
 
 def koji_builds_in_tag(url, tag):
