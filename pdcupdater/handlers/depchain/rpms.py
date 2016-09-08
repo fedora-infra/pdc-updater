@@ -69,6 +69,16 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         return True
 
+    def _yield_pdc_relationships(self, pdc, release_id):
+        for type in self.managed_types:
+            entries = pdc.get_paged(
+                pdc['release-component-relationships']._,
+                from_component_release=release_id,
+                type=type,
+            )
+            for entry in entries:
+                yield entry
+
     def _yield_koji_relationships(self, pdc, tag):
 
         release_id, release = tag2release(tag)
@@ -109,10 +119,12 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # them -- but if the task isn't done, we get an exception.
         time.sleep(1)
 
-        relationships = self.get_koji_relationships_from_build(
+        # First, go through all of the relationships that we learn from koji,
+        # and add them to PDC.  Some may already be present, but we may add new
+        # ones here.
+        koji_relationships = self.get_koji_relationships_from_build(
             self.koji_url, msg['msg']['build_id'])
-
-        for type, child in relationships:
+        for type, child in koji_relationships:
             child = pdcupdater.utils.ensure_release_component_exists(
                 pdc, release_id, child)
             pdcupdater.utils.ensure_release_component_relationship_exists(
@@ -130,11 +142,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
             # Query Koji and PDC to figure out their respective opinions
             koji_relationships = list(self._yield_koji_relationships(pdc, tag))
-            pdc_relationships = list()
-            for type in self.managed_types:
-                pdc_relationships += list(pdc.get_paged(
-                    pdc['release-component-relationships']._,
-                    release=release_id, type=type))
+            pdc_relationships = list(self._yield_pdc_relationships(pdc, release_id))
 
             # Filter out any irrelevant relationships (those of some type
             # managed by a different pdc updater Handler).

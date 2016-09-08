@@ -54,8 +54,16 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'release-component-relationships': [
-                ('GET', {'page': 1, 'release': 'fedora-26', 'type': 'RPMBuildRequires'}),
-                ('GET', {'page': 1, 'release': 'fedora-26', 'type': 'RPMBuildRoot'}),
+                ('GET', {
+                    'page': 1,
+                    'from_component_release': 'fedora-26',
+                    'type': 'RPMBuildRequires',
+                }),
+                ('GET', {
+                    'page': 1,
+                    'from_component_release': 'fedora-26',
+                    'type': 'RPMBuildRoot',
+                }),
             ],
             'releases/fedora-26': [('GET', {})]
         })
@@ -88,8 +96,16 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'release-component-relationships': [
-                ('GET', {'page': 1, 'release': 'fedora-26', 'type': 'RPMBuildRequires'}),
-                ('GET', {'page': 1, 'release': 'fedora-26', 'type': 'RPMBuildRoot'}),
+                ('GET', {
+                    'page': 1,
+                    'from_component_release': 'fedora-26',
+                    'type': 'RPMBuildRequires',
+                }),
+                ('GET', {
+                    'page': 1,
+                    'from_component_release': 'fedora-26',
+                    'type': 'RPMBuildRoot',
+                }),
             ],
             'releases/fedora-26': [('GET', {})]
         })
