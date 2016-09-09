@@ -59,11 +59,11 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         return True
 
     def _yield_pdc_relationships(self, pdc, release_id):
-        for type in self.managed_types:
+        for relationship_type in self.managed_types:
             entries = pdc.get_paged(
                 pdc['release-component-relationships']._,
                 from_component_release=release_id,
-                type=type,
+                type=relationship_type,
             )
             for entry in entries:
                 yield entry
@@ -87,9 +87,12 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
                 self.koji_url, build['build_id'])
             relationships = list(relationships)
 
-            for relationship, child in relationships:
-                child = {'name': child, 'release': {'release_id': release_id}}
-                yield parent, relationship, child
+            for relationship_type, child_name in relationships:
+                child = {
+                    'name': child_name,
+                    'release': {'release_id': release_id}
+                }
+                yield parent, relationship_type, child
 
     def handle(self, pdc, msg):
         tag = msg['msg']['tag']
@@ -113,11 +116,11 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # ones here.
         koji_relationships = self.get_koji_relationships_from_build(
             self.koji_url, msg['msg']['build_id'])
-        for type, child in koji_relationships:
+        for relationship_type, child_name in koji_relationships:
             child = pdcupdater.utils.ensure_release_component_exists(
-                pdc, release_id, child)
+                pdc, release_id, child_name)
             pdcupdater.utils.ensure_release_component_relationship_exists(
-                pdc, parent=parent, child=child, type=type)
+                pdc, parent=parent, child=child, type=relationship_type)
 
         # Lastly, go through all of the relationships that we know of now in
         # PDC and find any that do not appear in koji.  These must be old
@@ -150,10 +153,10 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             koji_relationships = set(["%s/%s %s %s/%s" % (
                 parent['name'],
                 parent['release']['release_id'],
-                relationship,
+                relationship_type,
                 child['name'],
                 child['release']['release_id'],
-            ) for parent, relationship, child in koji_relationships])
+            ) for parent, relationship_type, child in koji_relationships])
             pdc_relationships = set(["%s/%s %s %s/%s" % (
                 entry['from_component']['name'],
                 entry['from_component']['release'],
@@ -177,13 +180,13 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
             koji_relationships = self._yield_koji_relationships(pdc, tag)
-            for parent, type, child in koji_relationships:
+            for parent, relationship_type, child in koji_relationships:
                 pdcupdater.utils.ensure_release_component_exists(
                     pdc, parent['release']['release_id'], parent['name'])
                 pdcupdater.utils.ensure_release_component_exists(
                     pdc, child['release']['release_id'], child['name'])
                 pdcupdater.utils.ensure_release_component_relationship_exists(
-                    pdc, parent=parent, child=child, type=type)
+                    pdc, parent=parent, child=child, type=relationship_type)
 
 
 
@@ -205,14 +208,12 @@ class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
             buildroot = pdcupdater.services.koji_list_buildroot_for(
                 self.koji_url, filename)
             for entry in buildroot:
-                child = entry['name']
-
+                child_name = entry['name']
                 if entry['is_update']:
-                    type = 'RPMBuildRequires'
+                    relationship_type = 'RPMBuildRequires'
                 else:
-                    type = 'RPMBuildRoot'
-
-                yield type, child
+                    relationship_type = 'RPMBuildRoot'
+                yield relationship_type, child_name
 
 
 class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
