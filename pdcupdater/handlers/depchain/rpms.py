@@ -27,6 +27,10 @@ log = logging.getLogger(__name__)
 class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
     """ Abstract base class. """
 
+    # A list of the types of relationships this thing manages.
+    # This needs to be overridden by subclasses of this base class.
+    managed_types = None
+
     def __init__(self, *args, **kwargs):
         super(BaseRPMDepChainHandler, self).__init__(*args, **kwargs)
         self.koji_url = self.config['pdcupdater.koji_url']
