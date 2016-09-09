@@ -177,10 +177,10 @@ def delete_release_component_relationship(pdc, parent, child, type):
     entries = list(pdc.get_paged(
         pdc['release-component-relationships']._,
         from_component_name=parent['name'],
-        from_component_release=parent['release']['release_id'],
+        from_component_release=parent['release'],
         type=type,
         to_component_name=child['name'],
-        to_component_release=child['release']['release_id'],
+        to_component_release=child['release'],
     ))
     if len(entries) != 1:
         raise ValueError("No unique relationship found for "

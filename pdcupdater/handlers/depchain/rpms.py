@@ -114,8 +114,8 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # First, go through all of the relationships that we learn from koji,
         # and add them to PDC.  Some may already be present, but we may add new
         # ones here.
-        koji_relationships = self.get_koji_relationships_from_build(
-            self.koji_url, msg['msg']['build_id'])
+        koji_relationships = list(self.get_koji_relationships_from_build(
+            self.koji_url, msg['msg']['build_id']))
         for relationship_type, child_name in koji_relationships:
             child = pdcupdater.utils.ensure_release_component_exists(
                 pdc, release_id, child_name)
@@ -125,10 +125,34 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # Lastly, go through all of the relationships that we know of now in
         # PDC and find any that do not appear in koji.  These must be old
         # relationships that are no longer relevant.
+        # In order to do that, first build two easily comparable lists.
+
+        # Here's the first.  We re-format the koji_relationships list.
+        koji_relationships = [
+            (
+                dict(name=name, release=release_id),
+                relationship_type,
+                dict(name=child_name, release=release_id)
+            ) for relationship_type, child_name in koji_relationships]
+
+        # Here's the second.  Build and similarly format a PDC list.
         pdc_relationships = list(self._yield_pdc_relationships(pdc, release_id))
-        for entry in pdc_relationships:
-            pdcupdater.utils.delete_release_component_relationship(
-                pdc, parent=parent, child=child, type=type)
+        pdc_relationships = [
+            (
+                dict(name=entry['from_component']['name'],
+                     release=entry['from_component']['release']),
+                entry['type'],
+                dict(name=entry['to_component']['name'],
+                     release=entry['to_component']['release']),
+            ) for entry in pdc_relationships ]
+
+        # Now that we have those two equivalently-formatted lists, step through
+        # the list in PDC, and delete any entries that do not also appear in
+        # the koji list.
+        for pdc_parent, pdc_type, pdc_child in pdc_relationships:
+            if (pdc_parent, pdc_type, pdc_child) not in koji_relationships:
+                pdcupdater.utils.delete_release_component_relationship(
+                    pdc, parent=pdc_parent, child=pdc_child, type=pdc_type)
 
     def audit(self, pdc):
         present, absent = set(), set()
