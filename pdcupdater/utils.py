@@ -261,6 +261,17 @@ def rawhide_tag():
     return 'f' + rawhide['dist_tag'].strip('.fc')
 
 
+def interesting_tags():
+    """ Returns a list of "interesting tags".
+
+    Eventually, we should query PDC itself to figure out what tags we should be
+    concerned with.
+    """
+    releases = bodhi_releases()
+    stable_tags = [r['stable_tag'] for r in releases]
+    return stable_tags + [rawhide_tag()]
+
+
 def release2reponame(release):
     """ Convert a PDC release to an mdapi repo name lexicographically. """
     # TODO -- we should be able to do this by querying the pdc releases

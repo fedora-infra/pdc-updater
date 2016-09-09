@@ -11,20 +11,25 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
     handler_path = 'pdcupdater.handlers.depchain.rpms:NewRPMBuildTimeDepChainHandler'
     config = {}
 
-    def test_can_handle_buildsys_tag_message(self):
-        idx = '2016-5af8c0c2-9acd-4cf4-afa6-c07649bb5561'
+    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    def test_can_handle_buildsys_tag_message(self, tags):
+        tags.return_value = ['f24']
+        idx = '2016-662e75d1-5830-4c84-9855-fd07a3018f7a'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(msg)
         self.assertEquals(result, True)
 
     @mock_pdc
-    def test_handle_new_build(self, pdc):
-        idx = '2016-5af8c0c2-9acd-4cf4-afa6-c07649bb5561'
+    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    def test_handle_new_build(self, pdc, tags):
+        tags.return_value = ['f24']
+
+        idx = '2016-662e75d1-5830-4c84-9855-fd07a3018f7a'
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
         expected_keys = [
             'release-component-relationships',
-            'releases/fedora-26',
+            'releases/fedora-24',
             'release-component-relationships/1',
             'release-components',
             'global-components',
@@ -41,10 +46,12 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         )
 
     @mock_pdc
+    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_audit_empty_koji(self, pdc, builds, rpms, buildroot):
+    def test_audit_empty_koji(self, pdc, builds, rpms, buildroot, tags):
+        tags.return_value = ['f24']
 
         # Mock out koji results
         builds.return_value = [{
@@ -62,16 +69,16 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
             'release-component-relationships': [
                 ('GET', {
                     'page': 1,
-                    'from_component_release': 'fedora-26',
+                    'from_component_release': 'fedora-24',
                     'type': 'RPMBuildRequires',
                 }),
                 ('GET', {
                     'page': 1,
-                    'from_component_release': 'fedora-26',
+                    'from_component_release': 'fedora-24',
                     'type': 'RPMBuildRoot',
                 }),
             ],
-            'releases/fedora-26': [('GET', {})]
+            'releases/fedora-24': [('GET', {})]
         })
 
         # Check the results.
@@ -79,10 +86,12 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
+    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_audit_mismatch(self, pdc, builds, rpms, buildroot):
+    def test_audit_mismatch(self, pdc, builds, rpms, buildroot, tags):
+        tags.return_value = ['f24']
 
         # Mock out koji results
         _build = {
@@ -104,23 +113,23 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
             'release-component-relationships': [
                 ('GET', {
                     'page': 1,
-                    'from_component_release': 'fedora-26',
+                    'from_component_release': 'fedora-24',
                     'type': 'RPMBuildRequires',
                 }),
                 ('GET', {
                     'page': 1,
-                    'from_component_release': 'fedora-26',
+                    'from_component_release': 'fedora-24',
                     'type': 'RPMBuildRoot',
                 }),
             ],
-            'releases/fedora-26': [('GET', {})]
+            'releases/fedora-24': [('GET', {})]
         })
 
         # Check the results.
         self.assertSetEqual(present, set([]))
         self.assertSetEqual(absent, set([
-            'guake/fedora-26 RPMBuildRequires buildtimelib1/fedora-26',
-            'guake/fedora-26 RPMBuildRoot buildtimelib2/fedora-26',
+            'guake/fedora-24 RPMBuildRequires buildtimelib1/fedora-24',
+            'guake/fedora-24 RPMBuildRoot buildtimelib2/fedora-24',
         ]))
 
 
@@ -129,10 +138,12 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
     config = {}
 
     @mock_pdc
+    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_audit_mismatch(self, pdc, builds, rpms, requires):
+    def test_audit_mismatch(self, pdc, builds, rpms, requires, tags):
+        tags.return_value = ['f24']
 
         # Mock out koji results
         _build = {
@@ -151,20 +162,23 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'release-component-relationships': [ ('GET', {
-                'page': 1, 'from_component_release': 'fedora-26', 'type': 'RPMRequires'
+                'page': 1, 'from_component_release': 'fedora-24', 'type': 'RPMRequires'
             })],
-            'releases/fedora-26': [('GET', {})]
+            'releases/fedora-24': [('GET', {})]
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['guake/fedora-26 RPMRequires nethack/fedora-26']))
-        self.assertSetEqual(absent, set(['guake/fedora-26 RPMRequires runtimelib1/fedora-26']))
+        self.assertSetEqual(present, set(['guake/fedora-24 RPMRequires nethack/fedora-24']))
+        self.assertSetEqual(absent, set(['guake/fedora-24 RPMRequires runtimelib1/fedora-24']))
 
     @mock_pdc
+    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_audit_simple_match(self, pdc, builds, rpms, requires):
+    def test_audit_simple_match(self, pdc, builds, rpms, requires, tags):
+        tags.return_value = ['f24']
+
         # Mock out koji results
         _build = {
             'build_id': 'fake_build_id',
@@ -182,9 +196,9 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'release-component-relationships': [ ('GET', {
-                'page': 1, 'from_component_release': 'fedora-26', 'type': 'RPMRequires'
+                'page': 1, 'from_component_release': 'fedora-24', 'type': 'RPMRequires'
             })],
-            'releases/fedora-26': [('GET', {})]
+            'releases/fedora-24': [('GET', {})]
         })
 
         # Check the results.
@@ -192,10 +206,13 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
+    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_initialize(self, pdc, builds, rpms, requires):
+    def test_initialize(self, pdc, builds, rpms, requires, tags):
+        tags.return_value = ['f24']
+
         # Mock out koji results
         _build = {
             'build_id': 'fake_build_id',
@@ -222,32 +239,32 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
             'release-component-relationships': [
                 ('POST',
                  {'child': {'name': 'nethack',
-                            'release': {'release_id': 'fedora-26'}},
+                            'release': {'release_id': 'fedora-24'}},
                   'parent': {'name': 'guake',
-                             'release': {'release_id': 'fedora-26'}},
+                             'release': {'release_id': 'fedora-24'}},
                   'type': 'RPMRequires'})],
             'release-components': [
                 ('POST',
                  {'global_component': 'guake',
                   'name': 'guake',
-                  'release': 'fedora-26',
+                  'release': 'fedora-24',
                   'type': 'rpm'}),
                 ('POST',
                  {'global_component': 'nethack',
                   'name': 'nethack',
-                  'release': 'fedora-26',
+                  'release': 'fedora-24',
                   'type': 'rpm'}),
                 ('POST',
                  {'global_component': 'guake',
                   'name': 'guake',
-                  'release': 'fedora-26',
+                  'release': 'fedora-24',
                   'type': 'rpm'}),
                 ('POST',
                  {'global_component': 'nethack',
                   'name': 'nethack',
-                  'release': 'fedora-26',
+                  'release': 'fedora-24',
                   'type': 'rpm'})],
-            'releases/fedora-26': [('GET', {}), ('GET', {})]
+            'releases/fedora-24': [('GET', {}), ('GET', {})]
         }
 
         self.assertDictEqual(pdc.calls, expected_calls)

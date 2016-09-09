@@ -35,7 +35,7 @@ def mock_pdc(function):
         pdc.add_endpoint('global-components', 'POST', 'wat')
         pdc.add_endpoint('release-components', 'POST', {
             "id": 1,
-            "release": {"release_id": 'fedora-26'},
+            "release": {"release_id": 'fedora-24'},
             "global_component": "wat",
             "name": "wat",
             "type": "rpm",
@@ -133,13 +133,13 @@ def mock_pdc(function):
             "from_component": {
                 "id": 1,
                 "name": "guake",
-                "release": "fedora-26"
+                "release": "fedora-24"
             },
             "id": 1,
             "to_component": {
                 "id": 2,
                 "name": "nethack",
-                "release": "fedora-26"
+                "release": "fedora-24"
             },
             "type": "RPMRequires"
         }])

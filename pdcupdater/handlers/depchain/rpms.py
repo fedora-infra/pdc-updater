@@ -16,28 +16,12 @@ import time
 import pdcupdater.handlers
 import pdcupdater.services
 from pdcupdater.utils import (
-    rawhide_tag,
     tag2release,
+    interesting_tags,
 )
 
 
 log = logging.getLogger(__name__)
-
-
-def interesting_tags():
-    """ Returns a list of "interesting tags".
-
-    We have this hacked out for now for just rawhide.
-
-    Eventually, we should query PDC itself to figure out what tags we should be
-    concerned with.
-
-    """
-
-    #releases = bodhi_releases()
-    #stable_tags = [r['stable_tag'] for r in releases]
-    #return stable_tags + [rawhide_tag()]
-    return [rawhide_tag()]
 
 
 class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
