@@ -52,7 +52,8 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         return ['buildsys.tag']
 
     def can_handle(self, msg):
-        if not msg['topic'].endswith('buildsys.tag'):
+        if not any([msg['topic'].endswith(suffix)
+                    for suffix in self.topic_suffixes]):
             return False
 
         # Ignore secondary arches for now
