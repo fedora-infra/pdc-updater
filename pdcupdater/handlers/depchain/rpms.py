@@ -175,7 +175,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         tags = interesting_tags()
 
         for tag in tags:
-            log.debug("Starting audit of tag %r." % tag)
+            log.debug("Starting initialize of tag %r." % tag)
             release_id, release = tag2release(tag)
             pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
