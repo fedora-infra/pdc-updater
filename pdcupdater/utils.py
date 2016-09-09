@@ -1,6 +1,7 @@
 import copy
 import contextlib
 import functools
+import json
 import socket
 
 import requests
@@ -162,8 +163,7 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
             raise
 
         # TODO - look for any further special psuedo-error handling cases here.
-        import pprint
-        pprint.pprint(body)
+        log.warn(json.dumps(body, indent=2))
         raise
         #message = u'The fields release, name must make a unique set.'
         #if body['non_field_errors'] != [message]:
