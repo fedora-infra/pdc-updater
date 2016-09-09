@@ -11,18 +11,22 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
     handler_path = 'pdcupdater.handlers.depchain.rpms:NewRPMBuildTimeDepChainHandler'
     config = {}
 
+    @mock.patch('pdcupdater.utils.rawhide_tag')
     @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
-    def test_can_handle_buildsys_tag_message(self, tags):
+    def test_can_handle_buildsys_tag_message(self, tags, rawhide):
         tags.return_value = ['f24']
+        rawhide.return_value = 'f24'
         idx = '2016-662e75d1-5830-4c84-9855-fd07a3018f7a'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(msg)
         self.assertEquals(result, True)
 
     @mock_pdc
+    @mock.patch('pdcupdater.utils.rawhide_tag')
     @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
-    def test_handle_new_build(self, pdc, tags):
+    def test_handle_new_build(self, pdc, tags, rawhide):
         tags.return_value = ['f24']
+        rawhide.return_value = 'f24'
 
         idx = '2016-662e75d1-5830-4c84-9855-fd07a3018f7a'
         msg = pdcupdater.utils.get_fedmsg(idx)
@@ -46,12 +50,14 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         )
 
     @mock_pdc
+    @mock.patch('pdcupdater.utils.rawhide_tag')
     @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_audit_empty_koji(self, pdc, builds, rpms, buildroot, tags):
+    def test_audit_empty_koji(self, pdc, builds, rpms, buildroot, tags, rawhide):
         tags.return_value = ['f24']
+        rawhide.return_value = 'f24'
 
         # Mock out koji results
         builds.return_value = [{
@@ -86,12 +92,14 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
+    @mock.patch('pdcupdater.utils.rawhide_tag')
     @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_audit_mismatch(self, pdc, builds, rpms, buildroot, tags):
+    def test_audit_mismatch(self, pdc, builds, rpms, buildroot, tags, rawhide):
         tags.return_value = ['f24']
+        rawhide.return_value = 'f24'
 
         # Mock out koji results
         _build = {
@@ -138,12 +146,14 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
     config = {}
 
     @mock_pdc
+    @mock.patch('pdcupdater.utils.rawhide_tag')
     @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_audit_mismatch(self, pdc, builds, rpms, requires, tags):
+    def test_audit_mismatch(self, pdc, builds, rpms, requires, tags, rawhide):
         tags.return_value = ['f24']
+        rawhide.return_value = 'f24'
 
         # Mock out koji results
         _build = {
@@ -172,12 +182,14 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         self.assertSetEqual(absent, set(['guake/fedora-24 RPMRequires runtimelib1/fedora-24']))
 
     @mock_pdc
+    @mock.patch('pdcupdater.utils.rawhide_tag')
     @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_audit_simple_match(self, pdc, builds, rpms, requires, tags):
+    def test_audit_simple_match(self, pdc, builds, rpms, requires, tags, rawhide):
         tags.return_value = ['f24']
+        rawhide.return_value = 'f24'
 
         # Mock out koji results
         _build = {
@@ -206,12 +218,14 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
+    @mock.patch('pdcupdater.utils.rawhide_tag')
     @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
-    def test_initialize(self, pdc, builds, rpms, requires, tags):
+    def test_initialize(self, pdc, builds, rpms, requires, tags, rawhide):
         tags.return_value = ['f24']
+        rawhide.return_value = 'f24'
 
         # Mock out koji results
         _build = {
