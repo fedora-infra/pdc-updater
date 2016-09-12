@@ -34,7 +34,6 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         expected_keys = [
             'release-component-relationships',
             'releases/fedora-24',
-            'release-component-relationships/1',
             'release-components',
             'global-components',
         ]
@@ -42,12 +41,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
 
         self.assertEqual(len(pdc.calls['global-components']), 17706)
         self.assertEqual(len(pdc.calls['release-components']), 17706)
-        self.assertEqual(len(pdc.calls['release-component-relationships']), 17709)
-
-        self.assertEqual(
-            pdc.calls['release-component-relationships/1'],
-            [('DELETE', {}), ('DELETE', {})],
-        )
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 17707)
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')

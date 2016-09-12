@@ -58,7 +58,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         return True
 
-    def _yield_pdc_relationships(self, pdc, release_id):
+    def _yield_managed_pdc_relationships(self, pdc, release_id):
         for relationship_type in self.managed_types:
             entries = pdc.get_paged(
                 pdc['release-component-relationships']._,
@@ -66,6 +66,10 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
                 type=relationship_type,
             )
             for entry in entries:
+                # Filter out any irrelevant relationships (those of some type
+                # managed by a different pdc updater Handler).
+                if entry['type'] not in self.managed_types:
+                    continue
                 yield entry
 
     def _yield_koji_relationships(self, pdc, tag):
@@ -140,7 +144,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             ) for relationship_type, child_name in koji_relationships]
 
         # Here's the second.  Build and similarly format a PDC list.
-        pdc_relationships = list(self._yield_pdc_relationships(pdc, release_id))
+        pdc_relationships = list(self._yield_managed_pdc_relationships(pdc, release_id))
         pdc_relationships = [
             (
                 dict(name=entry['from_component']['name'],
@@ -168,14 +172,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
             # Query Koji and PDC to figure out their respective opinions
             koji_relationships = list(self._yield_koji_relationships(pdc, tag))
-            pdc_relationships = list(self._yield_pdc_relationships(pdc, release_id))
-
-            # Filter out any irrelevant relationships (those of some type
-            # managed by a different pdc updater Handler).
-            pdc_relationships = [
-                entry for entry in pdc_relationships
-                if entry['type'] in self.managed_types
-            ]
+            pdc_relationships = list(self._yield_managed_pdc_relationships(pdc, release_id))
 
             # normalize the two lists
             koji_relationships = set(["%s/%s %s %s/%s" % (
