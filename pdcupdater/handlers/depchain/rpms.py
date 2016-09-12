@@ -68,9 +68,15 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             for entry in entries:
                 # Filter out any irrelevant relationships (those of some type
                 # managed by a different pdc updater Handler).
-                if entry['type'] not in self.managed_types:
+                relationship_type = entry['type']
+                if relationship_type not in self.managed_types:
                     continue
-                yield entry
+
+                # Construct and yield a three-tuple result.
+                keys = ('name', 'release')
+                parent = dict(zip(keys, [entry['from_component'][key] for key in keys]))
+                child = dict(zip(keys, [entry['to_component'][key] for key in keys]))
+                yield parent, relationship_type, child
 
     def _yield_koji_relationships(self, pdc, tag):
 
@@ -82,20 +88,14 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
 
         for build in builds:
-            parent = {
-                'name': build['name'],
-                'release': {'release_id': release_id},
-            }
+            parent = {'name': build['name'], 'release': release_id}
 
             relationships = self.get_koji_relationships_from_build(
                 self.koji_url, build['build_id'])
             relationships = list(relationships)
 
             for relationship_type, child_name in relationships:
-                child = {
-                    'name': child_name,
-                    'release': {'release_id': release_id}
-                }
+                child = {'name': child_name, 'release': release_id}
                 yield parent, relationship_type, child
 
     def handle(self, pdc, msg):
@@ -145,14 +145,6 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         # Here's the second.  Build and similarly format a PDC list.
         pdc_relationships = list(self._yield_managed_pdc_relationships(pdc, release_id))
-        pdc_relationships = [
-            (
-                dict(name=entry['from_component']['name'],
-                     release=entry['from_component']['release']),
-                entry['type'],
-                dict(name=entry['to_component']['name'],
-                     release=entry['to_component']['release']),
-            ) for entry in pdc_relationships ]
 
         # Now that we have those two equivalently-formatted lists, step through
         # the list in PDC, and delete any entries that do not also appear in
@@ -174,21 +166,15 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             koji_relationships = list(self._yield_koji_relationships(pdc, tag))
             pdc_relationships = list(self._yield_managed_pdc_relationships(pdc, release_id))
 
-            # normalize the two lists
-            koji_relationships = set(["%s/%s %s %s/%s" % (
-                parent['name'],
-                parent['release']['release_id'],
-                relationship_type,
-                child['name'],
-                child['release']['release_id'],
-            ) for parent, relationship_type, child in koji_relationships])
-            pdc_relationships = set(["%s/%s %s %s/%s" % (
-                entry['from_component']['name'],
-                entry['from_component']['release'],
-                entry['type'],
-                entry['to_component']['name'],
-                entry['to_component']['release'],
-            ) for entry in pdc_relationships])
+            # normalize the two lists, and smash items into hashable strings.
+            def _format(parent, relationship_type, child):
+                return "%s/%s %s %s/%s" % (
+                    parent['name'], parent['release'],
+                    relationship_type,
+                    child['name'], child['release'],
+                )
+            koji_relationships = set([_format(*x) for x in koji_relationships])
+            pdc_relationships = set([_format(*x) for x in pdc_relationships])
 
             # use set operators to determine the difference
             present = present.union(pdc_relationships - koji_relationships)
@@ -207,9 +193,9 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             koji_relationships = self._yield_koji_relationships(pdc, tag)
             for parent, relationship_type, child in koji_relationships:
                 parent = pdcupdater.utils.ensure_release_component_exists(
-                    pdc, parent['release']['release_id'], parent['name'])
+                    pdc, parent['release'], parent['name'])
                 child = pdcupdater.utils.ensure_release_component_exists(
-                    pdc, child['release']['release_id'], child['name'])
+                    pdc, child['release'], child['name'])
                 pdcupdater.utils.ensure_release_component_relationship_exists(
                     pdc, parent=parent, child=child, type=relationship_type)
 
