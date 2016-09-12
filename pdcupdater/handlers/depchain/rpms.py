@@ -102,6 +102,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
         name = msg['msg']['name']
+        build_id = msg['msg']['build_id']
         parent = pdcupdater.utils.ensure_release_component_exists(
             pdc, release_id, name)
 
@@ -114,8 +115,10 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # First, go through all of the relationships that we learn from koji,
         # and add them to PDC.  Some may already be present, but we may add new
         # ones here.
+        log.info("Gathering relationships from koji for %r" % build_id)
         koji_relationships = list(self.get_koji_relationships_from_build(
-            self.koji_url, msg['msg']['build_id']))
+            self.koji_url, build_id))
+        log.info("Ensuring PDC relations are in place for %r" % build_id)
         for relationship_type, child_name in koji_relationships:
             child = pdcupdater.utils.ensure_release_component_exists(
                 pdc, release_id, child_name)
@@ -127,6 +130,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # relationships that are no longer relevant.
         # In order to do that, first build two easily comparable lists.
 
+        log.info("Pruning dropped relationships for %r" % build_id)
         # Here's the first.  We re-format the koji_relationships list.
         koji_relationships = [
             (
