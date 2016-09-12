@@ -205,9 +205,9 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
             koji_relationships = self._yield_koji_relationships(pdc, tag)
             for parent, relationship_type, child in koji_relationships:
-                pdcupdater.utils.ensure_release_component_exists(
+                parent = pdcupdater.utils.ensure_release_component_exists(
                     pdc, parent['release']['release_id'], parent['name'])
-                pdcupdater.utils.ensure_release_component_exists(
+                child = pdcupdater.utils.ensure_release_component_exists(
                     pdc, child['release']['release_id'], child['name'])
                 pdcupdater.utils.ensure_release_component_relationship_exists(
                     pdc, parent=parent, child=child, type=relationship_type)

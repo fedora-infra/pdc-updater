@@ -40,8 +40,8 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         ]
         self.assertEquals(pdc.calls.keys(), expected_keys)
 
-        self.assertEqual(len(pdc.calls['global-components']), 53116)
-        self.assertEqual(len(pdc.calls['release-components']), 53116)
+        self.assertEqual(len(pdc.calls['global-components']), 17706)
+        self.assertEqual(len(pdc.calls['release-components']), 17706)
         self.assertEqual(len(pdc.calls['release-component-relationships']), 17709)
 
         self.assertEqual(
@@ -246,28 +246,14 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         expected_calls = {
             'global-components': [
                 ('GET', {'name': 'guake'}),
-                ('GET', {'name': 'nethack'}),
-                ('GET', {'name': 'guake'}),
                 ('GET', {'name': 'nethack'})
             ],
             'release-component-relationships': [
                 ('POST',
-                 {'to_component': {'name': 'nethack',
-                                   'release': {'release_id': 'fedora-24'}},
-                  'from_component': {'name': 'guake',
-                                     'release': {'release_id': 'fedora-24'}},
+                 {'to_component': {'id': 1},
+                  'from_component': {'id': 1},
                   'type': 'RPMRequires'})],
             'release-components': [
-                ('POST',
-                 {'global_component': 'guake',
-                  'name': 'guake',
-                  'release': 'fedora-24',
-                  'type': 'rpm'}),
-                ('POST',
-                 {'global_component': 'nethack',
-                  'name': 'nethack',
-                  'release': 'fedora-24',
-                  'type': 'rpm'}),
                 ('POST',
                  {'global_component': 'guake',
                   'name': 'guake',

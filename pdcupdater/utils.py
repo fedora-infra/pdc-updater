@@ -1,7 +1,6 @@
 import copy
 import contextlib
 import functools
-import json
 import socket
 
 import requests
@@ -142,9 +141,6 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
     """ Create a release-component-relationship in PDC
     only if it doesn't already exist.
     """
-
-    ensure_release_component_exists(pdc, parent['release']['release_id'], parent['name'])
-    ensure_release_component_exists(pdc, child['release']['release_id'], child['name'])
 
     try:
         # Try to create it
