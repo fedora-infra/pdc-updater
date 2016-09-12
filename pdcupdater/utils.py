@@ -128,14 +128,14 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
     # But if it was just that the component already existed, then go back and
     # query for what we tried to submit (return the primary key)
     query = dict(name=name, release=release_id)
-    results = pdc['release-components']._(**query)
-    if not results:
+    response = pdc['release-components']._(**query)
+    if not response['count']:
         raise IndexError("No results found for %r after submitting %r" % (
             query, data))
-    if len(results) > 1:
+    if response['count'] > 1:
         raise IndexError("%i results found for %r after submitting %r" % (
-            len(results), query, data))
-    return results[0]
+            response['count'], query, data))
+    return response['results'][0]
 
 
 def ensure_release_component_relationship_exists(pdc, parent, child, type):
