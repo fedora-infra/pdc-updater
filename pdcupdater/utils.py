@@ -149,8 +149,8 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
     try:
         # Try to create it
         pdc['release-component-relationships']._({
-            'parent': parent,
-            'child': child,
+            'from_component': parent,
+            'to_component': child,
             # This may not exist, and we have no API to create it.  It must be
             # entered by an admin in the admin panel beforehand.
             'type': type,

@@ -252,10 +252,10 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
             ],
             'release-component-relationships': [
                 ('POST',
-                 {'child': {'name': 'nethack',
-                            'release': {'release_id': 'fedora-24'}},
-                  'parent': {'name': 'guake',
-                             'release': {'release_id': 'fedora-24'}},
+                 {'to_component': {'name': 'nethack',
+                                   'release': {'release_id': 'fedora-24'}},
+                  'from_component': {'name': 'guake',
+                                     'release': {'release_id': 'fedora-24'}},
                   'type': 'RPMRequires'})],
             'release-components': [
                 ('POST',
