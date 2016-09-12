@@ -58,7 +58,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         return True
 
-    def _yield_managed_pdc_relationships(self, pdc, release_id):
+    def _yield_managed_pdc_relationships_from_release(self, pdc, release_id):
         for relationship_type in self.managed_types:
             entries = pdc.get_paged(
                 pdc['release-component-relationships']._,
@@ -78,7 +78,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
                 child = dict(zip(keys, [entry['to_component'][key] for key in keys]))
                 yield parent, relationship_type, child
 
-    def _yield_koji_relationships(self, pdc, tag):
+    def _yield_koji_relationships_from_tag(self, pdc, tag):
 
         release_id, release = tag2release(tag)
         # TODO -- this tag <-> release agreement is going to break down with modularity.
@@ -144,7 +144,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             ) for relationship_type, child_name in koji_relationships]
 
         # Here's the second.  Build and similarly format a PDC list.
-        pdc_relationships = list(self._yield_managed_pdc_relationships(pdc, release_id))
+        pdc_relationships = list(self._yield_managed_pdc_relationships_from_release(pdc, release_id))
 
         # Now that we have those two equivalently-formatted lists, step through
         # the list in PDC, and delete any entries that do not also appear in
@@ -163,8 +163,8 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             release_id, release = tag2release(tag)
 
             # Query Koji and PDC to figure out their respective opinions
-            koji_relationships = list(self._yield_koji_relationships(pdc, tag))
-            pdc_relationships = list(self._yield_managed_pdc_relationships(pdc, release_id))
+            koji_relationships = list(self._yield_koji_relationships_from_tag(pdc, tag))
+            pdc_relationships = list(self._yield_managed_pdc_relationships_from_release(pdc, release_id))
 
             # normalize the two lists, and smash items into hashable strings.
             def _format(parent, relationship_type, child):
@@ -190,7 +190,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             release_id, release = tag2release(tag)
             pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
-            koji_relationships = self._yield_koji_relationships(pdc, tag)
+            koji_relationships = self._yield_koji_relationships_from_tag(pdc, tag)
             for parent, relationship_type, child in koji_relationships:
                 parent = pdcupdater.utils.ensure_release_component_exists(
                     pdc, parent['release'], parent['name'])
