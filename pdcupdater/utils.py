@@ -148,13 +148,14 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
 
     try:
         # Try to create it
-        pdc['release-component-relationships']._({
-            'from_component': parent,
-            'to_component': child,
+        data = {
+            'from_component': dict(id=parent['id']),
+            'to_component': dict(id=child['id']),
             # This may not exist, and we have no API to create it.  It must be
             # entered by an admin in the admin panel beforehand.
             'type': type,
-        })
+        }
+        pdc['release-component-relationships']._(data)
     except beanbag.bbexcept.BeanBagException as e:
         if e.response.status_code != 400:
             raise
@@ -162,12 +163,9 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
         if not 'non_field_errors' in body:
             raise
 
-        # TODO - look for any further special psuedo-error handling cases here.
-        log.warn(json.dumps(body, indent=2))
-        raise
-        #message = u'The fields release, name must make a unique set.'
-        #if body['non_field_errors'] != [message]:
-        #    raise
+        message = u'The fields relation_type, from_component, to_component must make a unique set.'
+        if body['non_field_errors'] != [message]:
+            raise
 
 
 def delete_release_component_relationship(pdc, parent, child, type):
