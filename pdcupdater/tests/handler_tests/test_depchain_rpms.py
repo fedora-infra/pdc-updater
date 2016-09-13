@@ -39,9 +39,9 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         ]
         self.assertEquals(pdc.calls.keys(), expected_keys)
 
-        self.assertEqual(len(pdc.calls['global-components']), 17706)
-        self.assertEqual(len(pdc.calls['release-components']), 17706)
-        self.assertEqual(len(pdc.calls['release-component-relationships']), 17707)
+        self.assertEqual(len(pdc.calls['global-components']), 7)
+        self.assertEqual(len(pdc.calls['release-components']), 9)
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 8)
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
@@ -238,26 +238,14 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         # Check the PDC calls..
 
         expected_calls = {
-            'global-components': [
-                ('GET', {'name': 'guake'}),
-                ('GET', {'name': 'nethack'})
-            ],
             'release-component-relationships': [
-                ('POST',
-                 {'to_component': {'id': 1},
-                  'from_component': {'id': 1},
-                  'type': 'RPMRequires'})],
-            'release-components': [
-                ('POST',
-                 {'global_component': 'guake',
-                  'name': 'guake',
-                  'release': 'fedora-24',
-                  'type': 'rpm'}),
-                ('POST',
-                 {'global_component': 'nethack',
-                  'name': 'nethack',
-                  'release': 'fedora-24',
-                  'type': 'rpm'})],
+                ('GET', {
+                    'from_component_name': 'guake',
+                    'from_component_release': 'fedora-24',
+                    'to_component_name': ['nethack'],
+                    'type': 'RPMRequires',
+                })
+            ],
             'releases/fedora-24': [('GET', {}), ('GET', {})]
         }
 

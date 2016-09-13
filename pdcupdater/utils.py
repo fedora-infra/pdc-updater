@@ -164,6 +164,137 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
             raise
 
 
+def delete_bulk_release_component_relationships(pdc, parent, relationships):
+
+    # Split things up by relationship type into a lookup keyed by type
+    relationships = list(relationships)
+    relationship_types = set([relation for relation, child in relationships])
+    relationship_lookup = dict([
+        (key, [child for relation, child in relationships if relation == key])
+        for key in relationship_types
+    ])
+
+    for relationship_type, children in relationship_lookup.items():
+        # Check to see if all the relations are all already there, first.
+        query_kwargs = dict(
+            from_component_name=parent['name'],
+            from_component_release=parent['release'],
+            type=relationship_type,
+            to_component_name=children,
+        )
+        endpoint = pdc['release-component-relationships']._
+        response = endpoint(**query_kwargs)
+
+        # Nobody can ask us to delete things that aren't there.
+        # That's unreasonable.  Sanity check.
+        assert response['count'] == len(children)
+
+        # Find the primary keys for all of these...
+        query = pdc.get_paged(endpoint, **query_kwargs)
+        identifiers = [relation['id'] for relation in query]
+
+        # Issue the DELETE request for those found primary keys.
+        log.info("Pruning %i old relationships." % len(identifiers))
+        endpoint("DELETE", identifiers)
+
+
+def ensure_bulk_release_component_relationships_exists(pdc, parent,
+                                                       relationships,
+                                                       component_type):
+    release = parent['release']
+
+    # Split things up by relationship type into a lookup keyed by type
+    relationships = list(relationships)
+    relationship_types = set([relation for relation, child in relationships])
+    relationship_lookup = dict([
+        (key, [child for relation, child in relationships if relation == key])
+        for key in relationship_types
+    ])
+
+    for relationship_type, children in relationship_lookup.items():
+        # Check to see if all the relations are all already there, first.
+        query_kwargs = dict(
+            from_component_name=parent['name'],
+            from_component_release=parent['release'],
+            type=relationship_type,
+            to_component_name=children,
+        )
+        response = pdc['release-component-relationships']._(**query_kwargs)
+
+        log.info("Of %i needed %s relationships, found %i." % (
+            len(children), relationship_type, response['count']))
+
+        if response['count'] != len(children):
+            # If they weren't all there already, figure out which ones are missing.
+            endpoint = pdc['release-component-relationships']._
+            query = pdc.get_paged(endpoint, **query_kwargs)
+            present = [relation['to_component']['name'] for relation in query]
+            absent_names = [name for name in children if name not in present]
+
+            # This creates the components themselves if they are missing, but
+            # importantly it also retrieves the primary key ids which we need
+            # in the next step.
+            absent = list(ensure_bulk_release_components_exist(
+                pdc, release, absent_names, component_type=component_type))
+
+            # Now issue a bulk create the missing ones.
+            log.info("Of %i, %i release-component-relationships missing." % (
+                len(children), len(absent)))
+            log.info("    Creating those %i now" % len(absent))
+            pdc['release-component-relationships']._([dict(
+                from_component=dict(id=parent['id']),
+                to_component=dict(id=child['id']),
+                type=key,
+            ) for child in absent])
+
+
+def ensure_bulk_release_components_exist(pdc, release, components,
+                                         component_type):
+
+    ensure_bulk_global_components_exist(pdc, components)
+
+    query_kwargs = dict(release=release, name=components, type=component_type)
+    response = pdc['release-components']._(**query_kwargs)
+
+    if response['count'] != len(components):
+        # If they weren't all there already, figure out which ones are missing.
+        query = pdc.get_paged(pdc['release-components']._, **query_kwargs)
+        present = [component['name'] for component in query]
+        absent = [name for name in components if name not in present]
+
+        # Now issue a bulk create the missing ones.
+        log.info("Of %i total needed, %i release-components missing." % (
+            len(components), len(absent)))
+        log.info("    Creating those %i now" % len(absent))
+        pdc['release-components']._([dict(
+            name=name,
+            global_component=name,
+            release=release,
+            type=component_type
+        ) for name in absent])
+
+    # Finally, return all of the present components (with all of their primary
+    # key IDs which were assigned server side.  that's why we have to query a
+    # second time here....)
+    return pdc.get_paged(pdc['release-components']._, **query_kwargs)
+
+
+def ensure_bulk_global_components_exist(pdc, components):
+    response = pdc['global-components']._(name=components)
+
+    if response['count'] != len(components):
+        # If they weren't all there already, figure out which ones are missing.
+        query = pdc.get_paged(pdc['global-components']._, name=components)
+        present = [component['name'] for component in query]
+        absent = [name for name in components if name not in present]
+
+        # Now issue a bulk create the missing ones.
+        log.info("Of %i total needed, %i global-components missing." % (
+            len(components), len(absent)))
+        log.info("    Creating those %i now" % len(absent))
+        pdc['global-components']._([dict(name=name) for name in absent])
+
+
 def delete_release_component_relationship(pdc, parent, child, type):
     """ Delete a release-component-relationship in PDC """
 

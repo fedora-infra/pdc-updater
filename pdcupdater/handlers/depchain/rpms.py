@@ -10,6 +10,7 @@ PDC with that.
 
 """
 
+import collections
 import logging
 import time
 
@@ -90,9 +91,8 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         for build in builds:
             parent = {'name': build['name'], 'release': release_id}
 
-            relationships = self.get_koji_relationships_from_build(
-                self.koji_url, build['build_id'])
-            relationships = list(relationships)
+            relationships = list(self._yield_koji_relationships_from_build(
+                self.koji_url, build['build_id']))
 
             for relationship_type, child_name in relationships:
                 child = {'name': child_name, 'release': release_id}
@@ -107,8 +107,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         name = msg['msg']['name']
         build_id = msg['msg']['build_id']
-        parent = pdcupdater.utils.ensure_release_component_exists(
-            pdc, release_id, name)
+        parent = pdcupdater.utils.ensure_release_component_exists(pdc, release_id, name)
 
         # Go to sleep due to a race condition that is koji's fault.
         # It publishes a fedmsg message before the task is actually done and
@@ -116,43 +115,27 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # them -- but if the task isn't done, we get an exception.
         time.sleep(1)
 
-        # First, go through all of the relationships that we learn from koji,
-        # and add them to PDC.  Some may already be present, but we may add new
-        # ones here.
+        # We're going to do things in terms of bulk operations, so first find
+        # all the relationships from koji, then find all the relationships from
+        # pdc.  We'll study the intersection between the two sets and act on
+        # the discrepancies.
         log.info("Gathering relationships from koji for %r" % build_id)
-        koji_relationships = list(self.get_koji_relationships_from_build(
+        koji_relationships = set(self._yield_koji_relationships_from_build(
             self.koji_url, build_id))
-        log.info("Ensuring PDC relations are in place for %r" % build_id)
-        for relationship_type, child_name in koji_relationships:
-            child = pdcupdater.utils.ensure_release_component_exists(
-                pdc, release_id, child_name)
-            pdcupdater.utils.ensure_release_component_relationship_exists(
-                pdc, parent=parent, child=child, type=relationship_type)
+        log.info("Gathering from pdc for %s/%s" % (name, release_id))
+        pdc_relationships = set(self._yield_pdc_relationships_from_build(
+            pdc, name, release_id))
 
-        # Lastly, go through all of the relationships that we know of now in
-        # PDC and find any that do not appear in koji.  These must be old
-        # relationships that are no longer relevant.
-        # In order to do that, first build two easily comparable lists.
+        to_be_created = koji_relationships - pdc_relationships
+        to_be_deleted = pdc_relationships - koji_relationships
 
-        log.info("Pruning dropped relationships for %r" % build_id)
-        # Here's the first.  We re-format the koji_relationships list.
-        koji_relationships = [
-            (
-                dict(name=name, release=release_id),
-                relationship_type,
-                dict(name=child_name, release=release_id)
-            ) for relationship_type, child_name in koji_relationships]
+        log.info("Issuing bulk create for %i entries" % len(to_be_created))
+        pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
+            pdc, parent, to_be_created, component_type='rpm')
 
-        # Here's the second.  Build and similarly format a PDC list.
-        pdc_relationships = list(self._yield_managed_pdc_relationships_from_release(pdc, release_id))
-
-        # Now that we have those two equivalently-formatted lists, step through
-        # the list in PDC, and delete any entries that do not also appear in
-        # the koji list.
-        for pdc_parent, pdc_type, pdc_child in pdc_relationships:
-            if (pdc_parent, pdc_type, pdc_child) not in koji_relationships:
-                pdcupdater.utils.delete_release_component_relationship(
-                    pdc, parent=pdc_parent, child=pdc_child, type=pdc_type)
+        log.info("Issuing bulk delete for %i entries" % len(to_be_deleted))
+        pdcupdater.utils.delete_bulk_release_component_relationships(
+            pdc, parent, to_be_deleted)
 
     def audit(self, pdc):
         present, absent = set(), set()
@@ -190,15 +173,37 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             release_id, release = tag2release(tag)
             pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
+            # Figure out everything that koji knows about this tag.
             koji_relationships = self._yield_koji_relationships_from_tag(pdc, tag)
-            for parent, relationship_type, child in koji_relationships:
-                parent = pdcupdater.utils.ensure_release_component_exists(
-                    pdc, parent['release'], parent['name'])
-                child = pdcupdater.utils.ensure_release_component_exists(
-                    pdc, child['release'], child['name'])
-                pdcupdater.utils.ensure_release_component_relationship_exists(
-                    pdc, parent=parent, child=child, type=relationship_type)
 
+            # Consolidate those by the parent/from_component
+            lookup_for_parent = {}
+            lookup_by_parent = collections.defaultdict(list)
+            for parent, relationship, child in koji_relationships:
+                key = unicode(parent)
+                lookup_for_parent[key] = parent
+                lookup_by_parent[key].append((relationship, child['name'],))
+
+            # Issue bulk create statements for each parent
+            for key, children in lookup_by_parent.items():
+                parent = lookup_for_parent[key]
+                log.info("Bulk create: %i for %r" % (len(children), parent))
+                pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
+                    pdc, parent, children, component_type='rpm')
+
+    def _yield_pdc_relationships_from_build(self, pdc, name, release):
+        for relationship_type in self.managed_types:
+            entries = pdc.get_paged(
+                pdc['release-component-relationships']._,
+                from_component_name=name,
+                from_component_release=release,
+                type=relationship_type,
+            )
+            for entry in entries:
+                # Filter out unmanaged types (just to be sure..)
+                if entry['type'] not in self.managed_types:
+                    continue
+                yield entry['type'], entry['to_component']['name']
 
 
 class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
@@ -207,7 +212,7 @@ class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
     # A list of the types of relationships this thing manages.
     managed_types = ('RPMBuildRequires', 'RPMBuildRoot')
 
-    def get_koji_relationships_from_build(self, koji_url, build_id):
+    def _yield_koji_relationships_from_build(self, koji_url, build_id):
 
         # Get all RPMs for a build..
         build, rpms = pdcupdater.services.koji_rpms_from_build(
@@ -233,7 +238,7 @@ class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
     # A list of the types of relationships this thing manages.
     managed_types = ('RPMRequires',)
 
-    def get_koji_relationships_from_build(self, koji_url, build_id):
+    def _yield_koji_relationships_from_build(self, koji_url, build_id):
 
         # Get all RPMs for a build..
         build, rpms = pdcupdater.services.koji_rpms_from_build(
