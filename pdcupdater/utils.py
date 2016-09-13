@@ -4,6 +4,7 @@ import functools
 import socket
 
 import requests
+import six
 import beanbag.bbexcept
 
 import logging
@@ -202,6 +203,8 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
                                                        relationships,
                                                        component_type):
     release = parent['release']
+    if not isinstance(release, six.string_types):
+        release = release['release_id']
 
     # Split things up by relationship type into a lookup keyed by type
     relationships = list(relationships)
