@@ -32,6 +32,9 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
     # This needs to be overridden by subclasses of this base class.
     managed_types = None
 
+    def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
+        raise NotImplementedError("Subclasses must implement this.")
+
     def __init__(self, *args, **kwargs):
         super(BaseRPMDepChainHandler, self).__init__(*args, **kwargs)
         self.koji_url = self.config['pdcupdater.koji_url']
@@ -91,8 +94,15 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         for build in builds:
             parent = {'name': build['name'], 'release': release_id}
 
+            def _format_rpm_filename(build):
+                # XXX - do we need to handle epoch here?  I don't think so.
+                return "{name}-{version}-{release}.{arch}.rpm".format(**build)
+
+            rpm = _format_rpm_filename(build)
+            log.info("Considering build %r, idx=%r" % (rpm, build['build_id']))
+
             relationships = list(self._yield_koji_relationships_from_build(
-                self.koji_url, build['build_id']))
+                self.koji_url, build['build_id'], rpms=[rpm]))
 
             for relationship_type, child_name in relationships:
                 child = {'name': child_name, 'release': release_id}
@@ -142,7 +152,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         tags = interesting_tags()
 
         for tag in tags:
-            log.debug("Starting audit of tag %r." % tag)
+            log.info("Starting audit of tag %r of %r." % (tag, tags))
             release_id, release = tag2release(tag)
 
             # Query Koji and PDC to figure out their respective opinions
@@ -169,7 +179,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         tags = interesting_tags()
 
         for tag in tags:
-            log.debug("Starting initialize of tag %r." % tag)
+            log.info("Starting initialize of tag %r of %r." % (tag, tags))
             release_id, release = tag2release(tag)
             pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
@@ -212,11 +222,12 @@ class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
     # A list of the types of relationships this thing manages.
     managed_types = ('RPMBuildRequires', 'RPMBuildRoot')
 
-    def _yield_koji_relationships_from_build(self, koji_url, build_id):
+    def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
 
-        # Get all RPMs for a build..
-        build, rpms = pdcupdater.services.koji_rpms_from_build(
-            koji_url, build_id)
+        # Get all RPMs for a build... only if they're not supplied.
+        if not rpms:
+            build, rpms = pdcupdater.services.koji_rpms_from_build(
+                koji_url, build_id)
 
         # https://pdc.fedoraproject.org/rest_api/v1/rpms/
         for filename in rpms:
@@ -238,11 +249,12 @@ class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
     # A list of the types of relationships this thing manages.
     managed_types = ('RPMRequires',)
 
-    def _yield_koji_relationships_from_build(self, koji_url, build_id):
+    def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
 
-        # Get all RPMs for a build..
-        build, rpms = pdcupdater.services.koji_rpms_from_build(
-            koji_url, build_id)
+        # Get all RPMs for a build... only if they're not supplied.
+        if not rpms:
+            build, rpms = pdcupdater.services.koji_rpms_from_build(
+                koji_url, build_id)
 
         for filename in rpms:
             # Look up the *install time* deps
