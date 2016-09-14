@@ -167,6 +167,10 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
 
 def delete_bulk_release_component_relationships(pdc, parent, relationships):
 
+    release = parent['release']
+    if not isinstance(release, six.string_types):
+        release = release['release_id']
+
     # Split things up by relationship type into a lookup keyed by type
     relationships = list(relationships)
     relationship_types = set([relation for relation, child in relationships])
@@ -179,7 +183,7 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
         # Check to see if all the relations are all already there, first.
         query_kwargs = dict(
             from_component_name=parent['name'],
-            from_component_release=parent['release'],
+            from_component_release=release,
             type=relationship_type,
             to_component_name=children,
         )
@@ -188,7 +192,8 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
 
         # Nobody can ask us to delete things that aren't there.
         # That's unreasonable.  Sanity check.
-        assert response['count'] == len(children)
+        message = "%r != %r" % (response['count'], len(children))
+        assert response['count'] == len(children), message
 
         # Find the primary keys for all of these...
         query = pdc.get_paged(endpoint, **query_kwargs)
