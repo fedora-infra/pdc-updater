@@ -91,7 +91,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
 
-        for build in builds:
+        for i, build in enumerate(builds):
             parent = {'name': build['name'], 'release': release_id}
 
             def _format_rpm_filename(build):
@@ -99,7 +99,8 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
                 return "{name}-{version}-{release}.{arch}.rpm".format(**build)
 
             rpm = _format_rpm_filename(build)
-            log.info("Considering build %r, idx=%r" % (rpm, build['build_id']))
+            log.info("Considering build %r, idx=%r, (%i of %i)" % (
+                rpm, build['build_id'], i, len(builds)))
 
             relationships = list(self._yield_koji_relationships_from_build(
                 self.koji_url, build['build_id'], rpms=[rpm]))
