@@ -123,6 +123,10 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # It publishes a fedmsg message before the task is actually done and
         # committed to their database.  In the next step, we try to query
         # them -- but if the task isn't done, we get an exception.
+        #
+        # Here's the koji branch that has some code which will ultimately let
+        # us get rid of this sleep statement:
+        # https://github.com/mikem23/koji-playground/commits/post-commit-callback
         time.sleep(1)
 
         # We're going to do things in terms of bulk operations, so first find
