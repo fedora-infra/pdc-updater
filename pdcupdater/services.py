@@ -85,6 +85,7 @@ def fas_persons(base_url, username, password):
     return response['people']
 
 
+@pdcupdater.utils.retry()
 def koji_list_buildroot_for(url, filename):
     """ Return the list of koji builds in the buildroot of a built rpm. """
 
@@ -94,6 +95,7 @@ def koji_list_buildroot_for(url, filename):
     return session.listRPMs(componentBuildrootID=rpminfo['buildroot_id'])
 
 
+@pdcupdater.utils.retry()
 def koji_yield_rpm_requires(url, nvra):
     """ Yield three-tuples of RPM requirements from a koji nvra.
 
@@ -133,6 +135,7 @@ def koji_yield_rpm_requires(url, nvra):
         yield dep['name'], qualifier, dep['version'].rstrip()
 
 
+@pdcupdater.utils.retry()
 def koji_builds_in_tag(url, tag):
     """ Return the list of koji builds in a tag. """
     import koji
@@ -150,6 +153,7 @@ def koji_builds_in_tag(url, tag):
     return rpms
 
 
+@pdcupdater.utils.retry()
 def koji_rpms_from_build(url, build_id):
     import koji
     log.info("Listing rpms in koji(%s) for %r" % (url, build_id))

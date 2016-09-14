@@ -2,6 +2,7 @@ import copy
 import contextlib
 import functools
 import socket
+import time
 
 import requests
 import six
@@ -478,4 +479,25 @@ def with_ridiculous_timeout(function):
             return function(*args, **kwargs)
         finally:
             socket.setdefaulttimeout(original)
+    return wrapper
+
+
+def retry(timeout=500, interval=20, wait_on=Exception):
+    """ A decorator that allows to retry a section of code...
+    ...until success or timeout.
+    """
+    def wrapper(function):
+        @functools.wraps(function)
+        def inner(*args, **kwargs):
+            start = time.time()
+            while True:
+                if (time.time() - start) >= timeout:
+                    raise  # This re-raises the last exception.
+                try:
+                    return function(*args, **kwargs)
+                except wait_on as e:
+                    log.warn("Exception %r raised from %r.  Retry in %rs" % (
+                        e, function, interval))
+                    time.sleep(interval)
+        return inner
     return wrapper
