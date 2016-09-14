@@ -92,7 +92,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
 
         for i, build in enumerate(builds):
-            parent = {'name': build['name'], 'release': release_id}
+            parent = {'name': build['srpm_name'], 'release': release_id}
 
             def _format_rpm_filename(build):
                 # XXX - do we need to handle epoch here?  I don't think so.
