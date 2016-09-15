@@ -1,6 +1,7 @@
 import copy
 import contextlib
 import functools
+import itertools
 import socket
 import time
 
@@ -203,6 +204,42 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
         # Issue the DELETE request for those found primary keys.
         log.info("Pruning %i old relationships." % len(identifiers))
         endpoint("DELETE", identifiers)
+
+
+def _chunked_iter(iterable, N):
+    """ Yield successive N-sized chunks from an iterable. """
+    for i in xrange(0, len(iterable), N):
+        yield iterable[i: i + N]
+
+
+def _chunked_query(pdc, endpoint, kwargs, key, iterable, count=False, N=100):
+    """ Break up a large PDC query and return consolidated results.
+
+    Given a query to PDC with a large iterable key, break that query into
+    chunks of size N each.  The results are recombined and returned.  If
+    `count` is `True`, then just the count is returned, otherwise, all the
+    paged results are returned.
+
+    See https://github.com/product-definition-center/product-definition-center/issues/421
+    """
+
+    # Set up our initial value as one of two different kinds of results
+    result = []
+    if count:
+        result = 0
+
+    # Copy our given kwargs so we don't modify them for our caller.
+    kwargs = copy.copy(kwargs)
+
+    # Step through our given iterable in chunks and make successive queries.
+    for chunk in _chunked_iter(iterable, N):
+        kwargs[key] = chunk
+        if count:
+            result = result + endpoint(**kwargs)['count']
+        else:
+            result = itertools.chain(result, pdc.get_paged(endpoint, **kwargs))
+
+    return result
 
 
 def ensure_bulk_release_component_relationships_exists(pdc, parent,
