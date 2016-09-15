@@ -10,7 +10,6 @@ PDC with that.
 
 """
 
-import collections
 import logging
 import time
 
@@ -192,19 +191,22 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             koji_relationships = self._yield_koji_relationships_from_tag(pdc, tag)
 
             # Consolidate those by the parent/from_component
-            lookup_for_parent = {}
-            lookup_by_parent = collections.defaultdict(list)
+            children = []
+            old_parent = None
             for parent, relationship, child in koji_relationships:
-                key = unicode(parent)
-                lookup_for_parent[key] = parent
-                lookup_by_parent[key].append((relationship, child['name'],))
+                # This only gets triggered the first time through the loop.
+                if not old_parent:
+                    old_parent = parent
 
-            # Issue bulk create statements for each parent
-            for key, children in lookup_by_parent.items():
-                parent = lookup_for_parent[key]
-                log.info("Bulk create: %i for %r" % (len(children), parent))
-                pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
-                    pdc, parent, children, component_type='rpm')
+                # If switching to a new parent key, then issue bulk create
+                # statements for each parent
+                if parent != old_parent:
+                    log.info("Bulk create: %i for %r" % (len(children), parent))
+                    pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
+                        pdc, parent, children, component_type='rpm')
+                    children = []
+
+                children.append((relationship, child['name'],))
 
     def _yield_pdc_relationships_from_build(self, pdc, name, release):
         for relationship_type in self.managed_types:
