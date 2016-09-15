@@ -293,9 +293,6 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
                     pdc, release, parent['name'], component_type)
 
             # Now issue a bulk create the missing ones.
-            log.info("Of %i, %i release-component-relationships missing." % (
-                len(children), len(absent)))
-            log.debug(absent_names)
             pdc['release-component-relationships']._([dict(
                 from_component=dict(id=parent['id']),
                 to_component=dict(id=child['id']),
