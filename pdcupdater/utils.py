@@ -212,6 +212,10 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
     if not isinstance(release, six.string_types):
         release = release['release_id']
 
+    # Make sure this guy exists and has a primary key id.
+    parent = ensure_release_component_exists(
+        pdc, release, parent['name'], component_type)
+
     # Split things up by relationship type into a lookup keyed by type
     relationships = list(relationships)
     relationship_types = set([relation for relation, child in relationships])
