@@ -249,10 +249,6 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
     if not isinstance(release, six.string_types):
         release = release['release_id']
 
-    # Make sure this guy exists and has a primary key id.
-    parent = ensure_release_component_exists(
-        pdc, release, parent['name'], component_type)
-
     # Split things up by relationship type into a lookup keyed by type
     relationships = list(relationships)
     relationship_types = set([relation for relation, child in relationships])
@@ -287,6 +283,15 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
             absent = list(ensure_bulk_release_components_exist(
                 pdc, release, absent_names, component_type=component_type))
 
+            if len(absent) != len(children) - count:
+                raise ValueError("Found that %i != %i" % (
+                    len(absent), len(children) - count))
+
+            # Make sure this guy exists and has a primary key id.
+            if 'id' not in parent:
+                parent = ensure_release_component_exists(
+                    pdc, release, parent['name'], component_type)
+
             # Now issue a bulk create the missing ones.
             log.info("Of %i, %i release-component-relationships missing." % (
                 len(children), len(absent)))
@@ -294,7 +299,7 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
             pdc['release-component-relationships']._([dict(
                 from_component=dict(id=parent['id']),
                 to_component=dict(id=child['id']),
-                type=key,
+                type=relationship_type,
             ) for child in absent])
 
 
