@@ -259,21 +259,26 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
 
     for relationship_type, children in relationship_lookup.items():
         # Check to see if all the relations are all already there, first.
+        endpoint = pdc['release-component-relationships']._
         query_kwargs = dict(
             from_component_name=parent['name'],
-            from_component_release=parent['release'],
+            from_component_release=release,
             type=relationship_type,
-            to_component_name=children,
         )
-        response = pdc['release-component-relationships']._(**query_kwargs)
+        count = _chunked_query(
+            pdc, endpoint, query_kwargs,
+            key='to_component_name', iterable=children,
+            count=True)
 
-        log.info("Of %i needed %s relationships, found %i." % (
-            len(children), relationship_type, response['count']))
+        log.info("Of %i needed %s relationships in koji, found %i in PDC."
+                 "  (%i are missing)" % (len(children), relationship_type,
+                                         count, len(children) - count))
 
-        if response['count'] != len(children):
+        if count != len(children):
             # If they weren't all there already, figure out which ones are missing.
-            endpoint = pdc['release-component-relationships']._
-            query = pdc.get_paged(endpoint, **query_kwargs)
+            query = _chunked_query(
+                pdc, endpoint, query_kwargs,
+                key='to_component_name', iterable=children)
             present = [relation['to_component']['name'] for relation in query]
             absent_names = [name for name in children if name not in present]
 
