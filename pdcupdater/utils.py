@@ -253,7 +253,7 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
             # Now issue a bulk create the missing ones.
             log.info("Of %i, %i release-component-relationships missing." % (
                 len(children), len(absent)))
-            log.info("    Creating those %i now" % len(absent))
+            log.debug(absent_names)
             pdc['release-component-relationships']._([dict(
                 from_component=dict(id=parent['id']),
                 to_component=dict(id=child['id']),
@@ -276,9 +276,8 @@ def ensure_bulk_release_components_exist(pdc, release, components,
         absent = [name for name in components if name not in present]
 
         # Now issue a bulk create the missing ones.
-        log.info("Of %i total needed, %i release-components missing." % (
+        log.info("Of %i needed, %i release-components missing." % (
             len(components), len(absent)))
-        log.info("    Creating those %i now" % len(absent))
         pdc['release-components']._([dict(
             name=name,
             global_component=name,
@@ -302,9 +301,8 @@ def ensure_bulk_global_components_exist(pdc, components):
         absent = [name for name in components if name not in present]
 
         # Now issue a bulk create the missing ones.
-        log.info("Of %i total needed, %i global-components missing." % (
+        log.info("Of %i needed, %i global-components missing." % (
             len(components), len(absent)))
-        log.info("    Creating those %i now" % len(absent))
         pdc['global-components']._([dict(name=name) for name in absent])
 
 

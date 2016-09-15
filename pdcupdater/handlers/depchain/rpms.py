@@ -201,7 +201,6 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
                 # If switching to a new parent key, then issue bulk create
                 # statements for each parent
                 if parent != old_parent:
-                    log.info("Bulk create: %i for %r" % (len(children), parent))
                     pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
                         pdc, parent, children, component_type='rpm')
                     children = []
