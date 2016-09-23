@@ -12,6 +12,7 @@ PDC with that.
 
 import collections
 import logging
+import multiprocessing.pool
 import time
 
 import pdcupdater.handlers
@@ -38,6 +39,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
     def __init__(self, *args, **kwargs):
         super(BaseRPMDepChainHandler, self).__init__(*args, **kwargs)
         self.koji_url = self.config['pdcupdater.koji_url']
+        self.io_threads = self.config.get('pdcupdater.koji_io_threads', 8)
 
     @property
     def topic_suffixes(self):
@@ -269,13 +271,19 @@ class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
 
         # https://pdc.fedoraproject.org/rest_api/v1/rpms/
         results = collections.defaultdict(set)
-        for filename in rpms:
-            parent = filename.rsplit('-', 2)[0]
 
-            # Look up the *build time* deps
+        def _get_buildroot(filename):
             log.debug("Looking up buildtime deps in koji for %r" % filename)
-            buildroot = pdcupdater.services.koji_list_buildroot_for(
+            return filename, pdcupdater.services.koji_list_buildroot_for(
                 self.koji_url, filename)
+
+        # Look up the *build time* deps, in parallel.  Lots of I/O wait..
+        pool = multiprocessing.pool.ThreadPool(self.io_threads)
+        buildroots = pool.map(_get_buildroot, rpms)
+        pool.close()
+
+        for filename, buildroot in buildroots:
+            parent = filename.rsplit('-', 2)[0]
 
             for entry in buildroot:
                 child = entry['name']
@@ -306,13 +314,21 @@ class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
                 koji_url, build_id)
 
         results = collections.defaultdict(set)
-        for filename in rpms:
+
+        def _get_requirements(filename):
+            log.debug("Looking up installtime deps in koji for %r" % filename)
+            return filename, pdcupdater.services.koji_yield_rpm_requires(
+                self.koji_url, filename)
+
+        # Look up the *build time* deps, in parallel.  Lots of I/O wait..
+        # Look up the *install time* deps, in parallel.  Lots of I/O wait..
+        pool = multiprocessing.pool.ThreadPool(self.io_threads)
+        requirements = pool.map(_get_requirements, rpms)
+        pool.close()
+
+        for filename, requirements in requirements:
             parent = filename.rsplit('-', 2)[0]
 
-            # Look up the *install time* deps
-            log.debug("Looking up installtime deps in koji for %r" % filename)
-            requirements = pdcupdater.services.koji_yield_rpm_requires(
-                self.koji_url, filename)
             for name, qualifier, version in requirements:
                 # XXX - we're dropping any >= or <= information here, which is
                 # OK for now.  All we need to know is that there is a

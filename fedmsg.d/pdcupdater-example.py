@@ -31,6 +31,8 @@ config = {
 
     # Koji details
     'pdcupdater.koji_url': 'http://koji.fedoraproject.org/kojihub',
+    # Use 8 threads to talk to koji in parallel.
+    'pdcupdater.koji_io_threads': 8,
 
     # Where to find composes
     'pdcupdater.old_composes_url': 'https://kojipkgs.fedoraproject.org/compose/',
