@@ -91,18 +91,30 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
 
+        working_build_id = None
+        rpms = []
         for i, build in enumerate(builds):
+            if not working_build_id:
+                working_build_id = build['build_id']
+
+            if working_build_id == build['build_id']:
+                rpms.append(build)
+                continue
 
             def _format_rpm_filename(build):
                 # XXX - do we need to handle epoch here?  I don't think so.
                 return "{name}-{version}-{release}.{arch}.rpm".format(**build)
 
-            rpm = _format_rpm_filename(build)
-            log.info("Considering build %r, idx=%r, (%i of %i)" % (
-                rpm, build['build_id'], i, len(builds)))
+            rpms = [_format_rpm_filename(rpm) for rpm in rpms]
+            log.info("Considering build idx=%r, (%i of %i) with %r" % (
+                build['build_id'], i, len(builds), rpms))
 
             relationships = list(self._yield_koji_relationships_from_build(
-                self.koji_url, build['build_id'], rpms=[rpm]))
+                self.koji_url, build['build_id'], rpms=rpms))
+
+            # Reset our loop variables.
+            rpms = []
+            working_build_id = build['build_id']
 
             for parent_name, relationship_type, child_name in relationships:
                 parent = {
@@ -256,17 +268,27 @@ class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
                 koji_url, build_id)
 
         # https://pdc.fedoraproject.org/rest_api/v1/rpms/
+        results = collections.defaultdict(set)
         for filename in rpms:
             parent = filename.rsplit('-', 2)[0]
+
             # Look up the *build time* deps
+            log.debug("Looking up buildtime deps in koji for %r" % filename)
             buildroot = pdcupdater.services.koji_list_buildroot_for(
                 self.koji_url, filename)
+
             for entry in buildroot:
                 child = entry['name']
+
                 if entry['is_update']:
                     relationship_type = 'RPMBuildRequires'
                 else:
                     relationship_type = 'RPMBuildRoot'
+
+                results[parent].add((relationship_type, child,))
+
+        for parent in results:
+            for relationship_type, child in results[parent]:
                 yield parent, relationship_type, child
 
 
@@ -283,13 +305,20 @@ class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
             build, rpms = pdcupdater.services.koji_rpms_from_build(
                 koji_url, build_id)
 
+        results = collections.defaultdict(set)
         for filename in rpms:
             parent = filename.rsplit('-', 2)[0]
+
             # Look up the *install time* deps
+            log.debug("Looking up installtime deps in koji for %r" % filename)
             requirements = pdcupdater.services.koji_yield_rpm_requires(
                 self.koji_url, filename)
             for name, qualifier, version in requirements:
                 # XXX - we're dropping any >= or <= information here, which is
                 # OK for now.  All we need to know is that there is a
                 # dependency.
-                yield parent, 'RPMRequires', name
+                results[parent].add(('RPMRequires', name,))
+
+        for parent in results:
+            for relationship_type, child in results[parent]:
+                yield parent, relationship_type, child
