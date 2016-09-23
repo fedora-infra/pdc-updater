@@ -317,12 +317,18 @@ def ensure_bulk_release_components_exist(pdc, release, components,
 
     ensure_bulk_global_components_exist(pdc, components)
 
-    query_kwargs = dict(release=release, name=components, type=component_type)
-    count = pdc['release-components']._(**query_kwargs)['count']
+    query_kwargs = dict(release=release, type=component_type)
+    endpoint = pdc['release-components']._
+    count = _chunked_query(
+        pdc, endpoint, query_kwargs,
+        key='name', iterable=components,
+        count=True)
 
     if count != len(components):
         # If they weren't all there already, figure out which ones are missing.
-        query = pdc.get_paged(pdc['release-components']._, **query_kwargs)
+        query = _chunked_query(
+            pdc, endpoint, query_kwargs,
+            key='name', iterable=components)
         present = [component['name'] for component in query]
         absent = [name for name in components if name not in present]
 
@@ -344,15 +350,20 @@ def ensure_bulk_release_components_exist(pdc, release, components,
     # Finally, return all of the present components (with all of their primary
     # key IDs which were assigned server side.  that's why we have to query a
     # second time here....)
-    return pdc.get_paged(pdc['release-components']._, **query_kwargs)
+    return _chunked_query(
+        pdc, endpoint, query_kwargs,
+        key='name', iterable=components)
 
 
 def ensure_bulk_global_components_exist(pdc, components):
-    response = pdc['global-components']._(name=components)
+    endpoint = pdc['global-components']._
+    count = _chunked_query(
+        pdc, endpoint, {}, key='name', iterable=components, count=True)
 
-    if response['count'] != len(components):
+    if count != len(components):
         # If they weren't all there already, figure out which ones are missing.
-        query = pdc.get_paged(pdc['global-components']._, name=components)
+        query = _chunked_query(
+            pdc, endpoint, {}, key='name', iterable=components)
         present = [component['name'] for component in query]
         absent = [name for name in components if name not in present]
 
