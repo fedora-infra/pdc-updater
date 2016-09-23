@@ -135,7 +135,6 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # TODO -- this tag <-> release agreement is going to break down with modularity.
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
-        global_component_name = msg['msg']['name']
         build_id = msg['msg']['build_id']
 
         # Go to sleep due to a race condition that is koji's fault.
