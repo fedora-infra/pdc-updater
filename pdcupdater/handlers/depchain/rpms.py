@@ -211,6 +211,7 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
     def initialize(self, pdc):
         tags = interesting_tags()
+        tags.reverse()
 
         for tag in tags:
             log.info("Starting initialize of tag %r of %r." % (tag, tags))
