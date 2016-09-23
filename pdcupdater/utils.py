@@ -208,6 +208,7 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
 
 def _chunked_iter(iterable, N):
     """ Yield successive N-sized chunks from an iterable. """
+    iterable = list(iterable)  # Just to make slicing simpler.
     for i in xrange(0, len(iterable), N):
         yield iterable[i: i + N]
 
@@ -253,7 +254,7 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
     relationships = list(relationships)
     relationship_types = set([relation for relation, child in relationships])
     relationship_lookup = dict([
-        (key, [child for relation, child in relationships if relation == key])
+        (key, set([child for relation, child in relationships if relation == key]))
         for key in relationship_types
     ])
 
@@ -270,9 +271,11 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
             key='to_component_name', iterable=children,
             count=True)
 
-        log.info("Of %i needed %s relationships in koji, found %i in PDC."
-                 "  (%i are missing)" % (len(children), relationship_type,
-                                         count, len(children) - count))
+        log.info("Of %i needed %s relationships for %s in koji, found %i in PDC."
+                 "  (%i are missing)" % (
+                     len(children), relationship_type,
+                     parent['name'], count,
+                     len(children) - count))
 
         if count != len(children):
             # If they weren't all there already, figure out which ones are missing.
@@ -288,8 +291,12 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
             absent = list(ensure_bulk_release_components_exist(
                 pdc, release, absent_names, component_type=component_type))
 
+            if len(absent) != len(absent_names):
+                raise ValueError("Error1 creating components: %i != %i" % (
+                    len(absent), len(absent_names)))
+
             if len(absent) != len(children) - count:
-                raise ValueError("Found that %i != %i" % (
+                raise ValueError("Error2 creating components: %i != %i" % (
                     len(absent), len(children) - count))
 
             # Make sure this guy exists and has a primary key id.
@@ -311,13 +318,18 @@ def ensure_bulk_release_components_exist(pdc, release, components,
     ensure_bulk_global_components_exist(pdc, components)
 
     query_kwargs = dict(release=release, name=components, type=component_type)
-    response = pdc['release-components']._(**query_kwargs)
+    count = pdc['release-components']._(**query_kwargs)['count']
 
-    if response['count'] != len(components):
+    if count != len(components):
         # If they weren't all there already, figure out which ones are missing.
         query = pdc.get_paged(pdc['release-components']._, **query_kwargs)
         present = [component['name'] for component in query]
         absent = [name for name in components if name not in present]
+
+        # Validate that.
+        if len(absent) != len(components) - count:
+            raise ValueError("Error creating components: %i != (%i - %i)" % (
+                len(absent), len(components), count))
 
         # Now issue a bulk create the missing ones.
         log.info("Of %i needed, %i release-components missing." % (

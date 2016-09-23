@@ -9,6 +9,13 @@ import pdcupdater.utils
 
 log = logging.getLogger(__name__)
 
+import dogpile.cache
+cache = dogpile.cache.make_region().configure(
+    "dogpile.cache.dbm",
+    expiration_time=-1,
+    arguments={"filename":"temp-cache.dbm"}
+)
+
 
 def _scrape_links(session, url):
     """ Utility to scrape links from a <pre> tag. """
@@ -153,6 +160,7 @@ def koji_builds_in_tag(url, tag):
     return rpms
 
 
+@cache.cache_on_arguments()
 @pdcupdater.utils.retry()
 def koji_rpms_from_build(url, build_id):
     import koji

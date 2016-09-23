@@ -10,6 +10,7 @@ PDC with that.
 
 """
 
+import collections
 import logging
 import time
 
@@ -91,7 +92,6 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
 
         for i, build in enumerate(builds):
-            parent = {'name': build['srpm_name'], 'release': release_id}
 
             def _format_rpm_filename(build):
                 # XXX - do we need to handle epoch here?  I don't think so.
@@ -104,8 +104,16 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
             relationships = list(self._yield_koji_relationships_from_build(
                 self.koji_url, build['build_id'], rpms=[rpm]))
 
-            for relationship_type, child_name in relationships:
-                child = {'name': child_name, 'release': release_id}
+            for parent_name, relationship_type, child_name in relationships:
+                parent = {
+                    'name': parent_name,
+                    'release': release_id,
+                    #'global_component': build['srpm_name'],  # ideally.
+                }
+                child = {
+                    'name': child_name,
+                    'release': release_id,
+                }
                 yield parent, relationship_type, child
 
     def handle(self, pdc, msg):
@@ -115,9 +123,8 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         # TODO -- this tag <-> release agreement is going to break down with modularity.
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
-        name = msg['msg']['name']
+        global_component_name = msg['msg']['name']
         build_id = msg['msg']['build_id']
-        parent = pdcupdater.utils.ensure_release_component_exists(pdc, release_id, name)
 
         # Go to sleep due to a race condition that is koji's fault.
         # It publishes a fedmsg message before the task is actually done and
@@ -136,20 +143,31 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
         log.info("Gathering relationships from koji for %r" % build_id)
         koji_relationships = set(self._yield_koji_relationships_from_build(
             self.koji_url, build_id))
-        log.info("Gathering from pdc for %s/%s" % (name, release_id))
-        pdc_relationships = set(self._yield_pdc_relationships_from_build(
-            pdc, name, release_id))
 
-        to_be_created = koji_relationships - pdc_relationships
-        to_be_deleted = pdc_relationships - koji_relationships
+        # Consolidate those by the parent/from_component
+        by_parent = collections.defaultdict(set)
+        for parent_name, relationship, child_name in koji_relationships:
+            by_parent[parent_name].add((relationship, child_name,))
 
-        log.info("Issuing bulk create for %i entries" % len(to_be_created))
-        pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
-            pdc, parent, to_be_created, component_type='rpm')
+        # Finally, iterate over all those, now grouped by parent_name
+        for parent_name, koji_relationships in by_parent.items():
+            # TODO -- pass in global_component_name to this function?
+            parent = pdcupdater.utils.ensure_release_component_exists(pdc, release_id, parent_name)
 
-        log.info("Issuing bulk delete for %i entries" % len(to_be_deleted))
-        pdcupdater.utils.delete_bulk_release_component_relationships(
-            pdc, parent, to_be_deleted)
+            log.info("Gathering from pdc for %s/%s" % (parent_name, release_id))
+            pdc_relationships = set(self._yield_pdc_relationships_from_build(
+                pdc, parent['name'], release_id))
+
+            to_be_created = koji_relationships - pdc_relationships
+            to_be_deleted = pdc_relationships - koji_relationships
+
+            log.info("Issuing bulk create for %i entries" % len(to_be_created))
+            pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
+                pdc, parent, to_be_created, component_type='rpm')
+
+            log.info("Issuing bulk delete for %i entries" % len(to_be_deleted))
+            pdcupdater.utils.delete_bulk_release_component_relationships(
+                pdc, parent, to_be_deleted)
 
     def audit(self, pdc):
         present, absent = set(), set()
@@ -203,7 +221,9 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
                 if parent != old_parent:
                     pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
                         pdc, parent, children, component_type='rpm')
+                    # Reset things...
                     children = []
+                    old_parent = parent
 
                 children.append((relationship, child['name'],))
 
@@ -237,16 +257,17 @@ class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
 
         # https://pdc.fedoraproject.org/rest_api/v1/rpms/
         for filename in rpms:
+            parent = filename.rsplit('-', 2)[0]
             # Look up the *build time* deps
             buildroot = pdcupdater.services.koji_list_buildroot_for(
                 self.koji_url, filename)
             for entry in buildroot:
-                child_name = entry['name']
+                child = entry['name']
                 if entry['is_update']:
                     relationship_type = 'RPMBuildRequires'
                 else:
                     relationship_type = 'RPMBuildRoot'
-                yield relationship_type, child_name
+                yield parent, relationship_type, child
 
 
 class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
@@ -263,6 +284,7 @@ class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
                 koji_url, build_id)
 
         for filename in rpms:
+            parent = filename.rsplit('-', 2)[0]
             # Look up the *install time* deps
             requirements = pdcupdater.services.koji_yield_rpm_requires(
                 self.koji_url, filename)
@@ -270,4 +292,4 @@ class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
                 # XXX - we're dropping any >= or <= information here, which is
                 # OK for now.  All we need to know is that there is a
                 # dependency.
-                yield 'RPMRequires', name
+                yield parent, 'RPMRequires', name

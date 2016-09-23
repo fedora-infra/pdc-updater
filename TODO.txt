@@ -1,0 +1,3 @@
+- [x] what's with all those individual statements from initialize?
+- [ ] *requires for differently arched koji rpms should be consolidated into one set.
+- [ ] the chunked query strategy needs to be applied to other bulk operations.
