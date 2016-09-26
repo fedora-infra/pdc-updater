@@ -5,19 +5,12 @@ import time
 import pdcupdater.handlers
 import pdcupdater.services
 from pdcupdater.utils import (
-    bodhi_releases,
-    rawhide_tag,
     tag2release,
+    interesting_tags,
 )
 
 
 log = logging.getLogger(__name__)
-
-
-def interesting_tags():
-    releases = bodhi_releases()
-    stable_tags = [r['stable_tag'] for r in releases]
-    return stable_tags + [rawhide_tag()]
 
 
 class NewRPMHandler(pdcupdater.handlers.BaseHandler):

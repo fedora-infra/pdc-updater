@@ -31,6 +31,8 @@ config = {
 
     # Koji details
     'pdcupdater.koji_url': 'http://koji.fedoraproject.org/kojihub',
+    # Use 8 threads to talk to koji in parallel.
+    'pdcupdater.koji_io_threads': 8,
 
     # Where to find composes
     'pdcupdater.old_composes_url': 'https://kojipkgs.fedoraproject.org/compose/',
@@ -46,6 +48,10 @@ config = {
         'pdcupdater.handlers.pkgdb:NewPackageBranchHandler',
         'pdcupdater.handlers.rpms:NewRPMHandler',
         'pdcupdater.handlers.compose:NewComposeHandler',
+
+        # https://fedoraproject.org/wiki/User:Ralph/Drafts/Infrastructure/Factory2/ModellingDeps
+        'pdcupdater.handlers.depchain.rpms:NewRPMBuildTimeDepChainHandler',
+        'pdcupdater.handlers.depchain.rpms:NewRPMRunTimeDepChainHandler',
     ],
 
     # Augment the base fedmsg logging config to also handle pdcupdater loggers.

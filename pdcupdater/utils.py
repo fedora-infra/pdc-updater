@@ -1,9 +1,12 @@
 import copy
 import contextlib
 import functools
+import itertools
 import socket
+import time
 
 import requests
+import six
 import beanbag.bbexcept
 
 import logging
@@ -100,17 +103,21 @@ def ensure_global_component_exists(pdc, name):
         pdc['global-components']._(dict(name=name))
 
 
-def ensure_release_component_exists(pdc, release_id, name):
+def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
     """ Create a release-component in PDC if it doesn't already exist. """
     ensure_global_component_exists(pdc, name)
     try:
         # Try to create it
-        pdc['release-components']._({
+        data = {
             'name': name,
             'global_component': name,
             'release': release_id,
-        })
+            'type': type,
+        }
+        # If this works, then we return the primary key and other data.
+        return pdc['release-components']._(data)
     except beanbag.bbexcept.BeanBagException as e:
+        # If it failed, see what kind of failure it was.
         if e.response.status_code != 400:
             raise
         body = e.response.json()
@@ -119,6 +126,275 @@ def ensure_release_component_exists(pdc, release_id, name):
         message = u'The fields release, name must make a unique set.'
         if body['non_field_errors'] != [message]:
             raise
+
+    # But if it was just that the component already existed, then go back and
+    # query for what we tried to submit (return the primary key)
+    query = dict(name=name, release=release_id)
+    response = pdc['release-components']._(**query)
+    if not response['count']:
+        raise IndexError("No results found for %r after submitting %r" % (
+            query, data))
+    if response['count'] > 1:
+        raise IndexError("%i results found for %r after submitting %r" % (
+            response['count'], query, data))
+    return response['results'][0]
+
+
+def ensure_release_component_relationship_exists(pdc, parent, child, type):
+    """ Create a release-component-relationship in PDC
+    only if it doesn't already exist.
+    """
+
+    try:
+        # Try to create it
+        data = {
+            'from_component': dict(id=parent['id']),
+            'to_component': dict(id=child['id']),
+            # This may not exist, and we have no API to create it.  It must be
+            # entered by an admin in the admin panel beforehand.
+            'type': type,
+        }
+        pdc['release-component-relationships']._(data)
+    except beanbag.bbexcept.BeanBagException as e:
+        if e.response.status_code != 400:
+            raise
+        body = e.response.json()
+        if not 'non_field_errors' in body:
+            raise
+
+        message = u'The fields relation_type, from_component, to_component must make a unique set.'
+        if body['non_field_errors'] != [message]:
+            raise
+
+
+def delete_bulk_release_component_relationships(pdc, parent, relationships):
+
+    release = parent['release']
+    if not isinstance(release, six.string_types):
+        release = release['release_id']
+
+    # Split things up by relationship type into a lookup keyed by type
+    relationships = list(relationships)
+    relationship_types = set([relation for relation, child in relationships])
+    relationship_lookup = dict([
+        (key, [child for relation, child in relationships if relation == key])
+        for key in relationship_types
+    ])
+
+    for relationship_type, children in relationship_lookup.items():
+        # Check to see if all the relations are all already there, first.
+        query_kwargs = dict(
+            from_component_name=parent['name'],
+            from_component_release=release,
+            type=relationship_type,
+            to_component_name=children,
+        )
+        endpoint = pdc['release-component-relationships']._
+        response = endpoint(**query_kwargs)
+
+        # Nobody can ask us to delete things that aren't there.
+        # That's unreasonable.  Sanity check.
+        message = "%r != %r" % (response['count'], len(children))
+        assert response['count'] == len(children), message
+
+        # Find the primary keys for all of these...
+        query = pdc.get_paged(endpoint, **query_kwargs)
+        identifiers = [relation['id'] for relation in query]
+
+        # Issue the DELETE request for those found primary keys.
+        log.info("Pruning %i old relationships." % len(identifiers))
+        endpoint("DELETE", identifiers)
+
+
+def _chunked_iter(iterable, N):
+    """ Yield successive N-sized chunks from an iterable. """
+    iterable = list(iterable)  # Just to make slicing simpler.
+    for i in xrange(0, len(iterable), N):
+        yield iterable[i: i + N]
+
+
+def _chunked_query(pdc, endpoint, kwargs, key, iterable, count=False, N=100):
+    """ Break up a large PDC query and return consolidated results.
+
+    Given a query to PDC with a large iterable key, break that query into
+    chunks of size N each.  The results are recombined and returned.  If
+    `count` is `True`, then just the count is returned, otherwise, all the
+    paged results are returned.
+
+    See https://github.com/product-definition-center/product-definition-center/issues/421
+    """
+
+    # Set up our initial value as one of two different kinds of results
+    result = []
+    if count:
+        result = 0
+
+    # Copy our given kwargs so we don't modify them for our caller.
+    kwargs = copy.copy(kwargs)
+
+    # Step through our given iterable in chunks and make successive queries.
+    for chunk in _chunked_iter(iterable, N):
+        kwargs[key] = chunk
+        if count:
+            result = result + endpoint(**kwargs)['count']
+        else:
+            result = itertools.chain(result, pdc.get_paged(endpoint, **kwargs))
+
+    return result
+
+
+def ensure_bulk_release_component_relationships_exists(pdc, parent,
+                                                       relationships,
+                                                       component_type):
+    release = parent['release']
+    if not isinstance(release, six.string_types):
+        release = release['release_id']
+
+    # Split things up by relationship type into a lookup keyed by type
+    relationships = list(relationships)
+    relationship_types = set([relation for relation, child in relationships])
+    relationship_lookup = dict([
+        (key, set([child for relation, child in relationships if relation == key]))
+        for key in relationship_types
+    ])
+
+    for relationship_type, children in relationship_lookup.items():
+        # Check to see if all the relations are all already there, first.
+        endpoint = pdc['release-component-relationships']._
+        query_kwargs = dict(
+            from_component_name=parent['name'],
+            from_component_release=release,
+            type=relationship_type,
+        )
+        count = _chunked_query(
+            pdc, endpoint, query_kwargs,
+            key='to_component_name', iterable=children,
+            count=True)
+
+        log.info("Of %i needed %s relationships for %s in koji, found %i in PDC."
+                 "  (%i are missing)" % (
+                     len(children), relationship_type,
+                     parent['name'], count,
+                     len(children) - count))
+
+        if count != len(children):
+            # If they weren't all there already, figure out which ones are missing.
+            query = _chunked_query(
+                pdc, endpoint, query_kwargs,
+                key='to_component_name', iterable=children)
+            present = [relation['to_component']['name'] for relation in query]
+            absent_names = [name for name in children if name not in present]
+
+            # This creates the components themselves if they are missing, but
+            # importantly it also retrieves the primary key ids which we need
+            # in the next step.
+            absent = list(ensure_bulk_release_components_exist(
+                pdc, release, absent_names, component_type=component_type))
+
+            if len(absent) != len(absent_names):
+                raise ValueError("Error1 creating components: %i != %i" % (
+                    len(absent), len(absent_names)))
+
+            if len(absent) != len(children) - count:
+                raise ValueError("Error2 creating components: %i != %i" % (
+                    len(absent), len(children) - count))
+
+            # Make sure this guy exists and has a primary key id.
+            if 'id' not in parent:
+                parent = ensure_release_component_exists(
+                    pdc, release, parent['name'], component_type)
+
+            # Now issue a bulk create the missing ones.
+            pdc['release-component-relationships']._([dict(
+                from_component=dict(id=parent['id']),
+                to_component=dict(id=child['id']),
+                type=relationship_type,
+            ) for child in absent])
+
+
+def ensure_bulk_release_components_exist(pdc, release, components,
+                                         component_type):
+
+    ensure_bulk_global_components_exist(pdc, components)
+
+    query_kwargs = dict(release=release, type=component_type)
+    endpoint = pdc['release-components']._
+    count = _chunked_query(
+        pdc, endpoint, query_kwargs,
+        key='name', iterable=components,
+        count=True)
+
+    if count != len(components):
+        # If they weren't all there already, figure out which ones are missing.
+        query = _chunked_query(
+            pdc, endpoint, query_kwargs,
+            key='name', iterable=components)
+        present = [component['name'] for component in query]
+        absent = [name for name in components if name not in present]
+
+        # Validate that.
+        if len(absent) != len(components) - count:
+            raise ValueError("Error creating components: %i != (%i - %i)" % (
+                len(absent), len(components), count))
+
+        # Now issue a bulk create the missing ones.
+        log.info("Of %i needed, %i release-components missing." % (
+            len(components), len(absent)))
+        pdc['release-components']._([dict(
+            name=name,
+            global_component=name,
+            release=release,
+            type=component_type
+        ) for name in absent])
+
+    # Finally, return all of the present components (with all of their primary
+    # key IDs which were assigned server side.  that's why we have to query a
+    # second time here....)
+    return _chunked_query(
+        pdc, endpoint, query_kwargs,
+        key='name', iterable=components)
+
+
+def ensure_bulk_global_components_exist(pdc, components):
+    endpoint = pdc['global-components']._
+    count = _chunked_query(
+        pdc, endpoint, {}, key='name', iterable=components, count=True)
+
+    if count != len(components):
+        # If they weren't all there already, figure out which ones are missing.
+        query = _chunked_query(
+            pdc, endpoint, {}, key='name', iterable=components)
+        present = [component['name'] for component in query]
+        absent = [name for name in components if name not in present]
+
+        # Now issue a bulk create the missing ones.
+        log.info("Of %i needed, %i global-components missing." % (
+            len(components), len(absent)))
+        pdc['global-components']._([dict(name=name) for name in absent])
+
+
+def delete_release_component_relationship(pdc, parent, child, type):
+    """ Delete a release-component-relationship in PDC """
+
+    # First, make sure that it exists...
+    entries = list(pdc.get_paged(
+        pdc['release-component-relationships']._,
+        from_component_name=parent['name'],
+        from_component_release=parent['release'],
+        type=type,
+        to_component_name=child['name'],
+        to_component_release=child['release'],
+    ))
+    if len(entries) != 1:
+        raise ValueError("No unique relationship found for "
+                         "%r -> %r -> %r.  Found %i." % (
+                             parent, type, child, len(entries)))
+
+    # But also, we needed the primary key in order to delete it.
+    primary_key = entries[0]['id']
+
+    # Issue the DELETE request.
+    pdc['release-component-relationships'][primary_key]._("DELETE", {})
 
 
 def compose_exists(pdc, compose_id):
@@ -186,6 +462,17 @@ def rawhide_tag():
     collections = response.json()['collections']
     rawhide = [c for c in collections if c['koji_name'] == 'rawhide'][0]
     return 'f' + rawhide['dist_tag'].strip('.fc')
+
+
+def interesting_tags():
+    """ Returns a list of "interesting tags".
+
+    Eventually, we should query PDC itself to figure out what tags we should be
+    concerned with.
+    """
+    releases = bodhi_releases()
+    stable_tags = [r['stable_tag'] for r in releases]
+    return stable_tags + [rawhide_tag()]
 
 
 def release2reponame(release):
@@ -261,4 +548,25 @@ def with_ridiculous_timeout(function):
             return function(*args, **kwargs)
         finally:
             socket.setdefaulttimeout(original)
+    return wrapper
+
+
+def retry(timeout=500, interval=20, wait_on=Exception):
+    """ A decorator that allows to retry a section of code...
+    ...until success or timeout.
+    """
+    def wrapper(function):
+        @functools.wraps(function)
+        def inner(*args, **kwargs):
+            start = time.time()
+            while True:
+                if (time.time() - start) >= timeout:
+                    raise  # This re-raises the last exception.
+                try:
+                    return function(*args, **kwargs)
+                except wait_on as e:
+                    log.warn("Exception %r raised from %r.  Retry in %rs" % (
+                        e, function, interval))
+                    time.sleep(interval)
+        return inner
     return wrapper
