@@ -150,7 +150,7 @@ def koji_builds_in_tag(url, tag):
     import koji
     log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
     session = koji.ClientSession(url)
-    rpms, builds = session.listTaggedRPMS(tag)
+    rpms, builds = session.listTaggedRPMS(tag, latest=True)
 
     # Extract some srpm-level info from the build attach it to each rpm
     builds = {build['build_id']: build for build in builds}
