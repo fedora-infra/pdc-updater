@@ -22,11 +22,15 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         self.assertEquals(result, True)
 
     @mock_pdc
+    @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.utils.rawhide_tag')
     @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
-    def test_handle_new_build(self, pdc, tags, rawhide):
+    def test_handle_new_build(self, pdc, tags, rawhide, buildroot):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
+        buildroot.return_value = [
+            {'name': 'wat', 'is_update': True},
+        ]
 
         idx = '2016-662e75d1-5830-4c84-9855-fd07a3018f7a'
         msg = pdcupdater.utils.get_fedmsg(idx)
@@ -39,9 +43,9 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         ]
         self.assertEquals(pdc.calls.keys(), expected_keys)
 
-        self.assertEqual(len(pdc.calls['global-components']), 242)
-        self.assertEqual(len(pdc.calls['release-components']), 330)
-        self.assertEqual(len(pdc.calls['release-component-relationships']), 264)
+        self.assertEqual(len(pdc.calls['global-components']), 22)
+        self.assertEqual(len(pdc.calls['release-components']), 22)
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 66)
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
