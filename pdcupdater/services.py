@@ -10,11 +10,8 @@ import pdcupdater.utils
 log = logging.getLogger(__name__)
 
 import dogpile.cache
-cache = dogpile.cache.make_region().configure(
-    "dogpile.cache.dbm",
-    expiration_time=-1,
-    arguments={"filename":"temp-cache.dbm"}
-)
+cache = dogpile.cache.make_region()
+cache.configure('dogpile.cache.memory', expiration_time=300)
 
 
 def _scrape_links(session, url):
