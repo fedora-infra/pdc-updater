@@ -10,11 +10,8 @@ import pdcupdater.utils
 log = logging.getLogger(__name__)
 
 import dogpile.cache
-cache = dogpile.cache.make_region().configure(
-    "dogpile.cache.dbm",
-    expiration_time=-1,
-    arguments={"filename":"temp-cache.dbm"}
-)
+cache = dogpile.cache.make_region()
+cache.configure('dogpile.cache.memory', expiration_time=300)
 
 
 def _scrape_links(session, url):
@@ -153,7 +150,7 @@ def koji_builds_in_tag(url, tag):
     import koji
     log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
     session = koji.ClientSession(url)
-    rpms, builds = session.listTaggedRPMS(tag)
+    rpms, builds = session.listTaggedRPMS(tag, latest=True)
 
     # Extract some srpm-level info from the build attach it to each rpm
     builds = {build['build_id']: build for build in builds}
