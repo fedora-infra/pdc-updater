@@ -93,12 +93,17 @@ def fas_persons(base_url, username, password):
 
 
 @pdcupdater.utils.retry()
-def koji_list_buildroot_for(url, filename):
+def koji_list_buildroot_for(url, filename, tries=3):
     """ Return the list of koji builds in the buildroot of a built rpm. """
 
     import koji
     session = koji.ClientSession(url)
     rpminfo = session.getRPM(filename)
+    if type(rpminfo) == list:
+        if not tries:
+            raise TypeError("Got a list back from koji.getRPM(%r)" % filename)
+        # Try again.. this is weird behavior...
+        return koji_list_buildroot_for(url, filename, tries-1)
     return session.listRPMs(componentBuildrootID=rpminfo['buildroot_id'])
 
 
