@@ -1,4 +1,14 @@
 
+0.3.1
+-----
+
+Commits
+
+- e769f842c Just make this an in-memory cache.
+  https://github.com/fedora-infra/pdc-updater/commit/e769f842c
+- eda374130 40,000 is a lot less than 120,000
+  https://github.com/fedora-infra/pdc-updater/commit/eda374130
+
 0.3.0
 -----
 

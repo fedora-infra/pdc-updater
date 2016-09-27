@@ -7,7 +7,7 @@
 %endif
 
 Name:               pdc-updater
-Version:            0.3.0
+Version:            0.3.1
 Release:            1%{?dist}
 Summary:            Update the product definition center in response to fedmsg
 
@@ -79,6 +79,9 @@ rm -rf %{buildroot}%{python2_sitelib}/tests/
 %{_bindir}/pdc-updater-initialize
 
 %changelog
+* Tue Sep 27 2016 Ralph Bean <rbean@redhat.com> - 0.3.1-1
+- new version
+
 * Tue Sep 27 2016 Ralph Bean <rbean@redhat.com> - 0.3.0-1
 - new version
 
