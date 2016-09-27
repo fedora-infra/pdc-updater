@@ -291,13 +291,13 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
             absent = list(ensure_bulk_release_components_exist(
                 pdc, release, absent_names, component_type=component_type))
 
-            if len(absent) != len(absent_names):
-                raise ValueError("Error1 creating components: %i != %i" % (
-                    len(absent), len(absent_names)))
+            #if len(absent) != len(absent_names):
+            #    raise ValueError("Error1 creating components: %i != %i" % (
+            #        len(absent), len(absent_names)))
 
-            if len(absent) != len(children) - count:
-                raise ValueError("Error2 creating components: %i != %i" % (
-                    len(absent), len(children) - count))
+            #if len(absent) != len(children) - count:
+            #    raise ValueError("Error2 creating components: %i != %i" % (
+            #        len(absent), len(children) - count))
 
             # Make sure this guy exists and has a primary key id.
             if 'id' not in parent:
@@ -332,10 +332,10 @@ def ensure_bulk_release_components_exist(pdc, release, components,
         present = [component['name'] for component in query]
         absent = [name for name in components if name not in present]
 
-        # Validate that.
-        if len(absent) != len(components) - count:
-            raise ValueError("Error creating components: %i != (%i - %i)" % (
-                len(absent), len(components), count))
+        ## Validate that.
+        #if len(absent) != len(components) - count:
+        #    raise ValueError("Error creating components: %i != (%i - %i)" % (
+        #        len(absent), len(components), count))
 
         # Now issue a bulk create the missing ones.
         log.info("Of %i needed, %i release-components missing." % (

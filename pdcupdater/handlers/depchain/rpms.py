@@ -101,7 +101,8 @@ class BaseRPMDepChainHandler(pdcupdater.handlers.BaseHandler):
 
             if working_build_id == build['build_id']:
                 rpms.append(build)
-                continue
+                if i != len(builds) - 1:
+                    continue
 
             def _format_rpm_filename(build):
                 # XXX - do we need to handle epoch here?  I don't think so.

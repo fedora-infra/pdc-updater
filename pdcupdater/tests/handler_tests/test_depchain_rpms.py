@@ -39,9 +39,9 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         ]
         self.assertEquals(pdc.calls.keys(), expected_keys)
 
-        self.assertEqual(len(pdc.calls['global-components']), 7)
-        self.assertEqual(len(pdc.calls['release-components']), 9)
-        self.assertEqual(len(pdc.calls['release-component-relationships']), 8)
+        self.assertEqual(len(pdc.calls['global-components']), 242)
+        self.assertEqual(len(pdc.calls['release-components']), 330)
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 264)
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
@@ -57,9 +57,12 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         builds.return_value = [{
             'build_id': 'fake_build_id',
             'name': 'guake',
+            'version': 1,
+            'release': 2,
+            'arch': 'foo',
         }]
         rpms.return_value = {}, []
-        buildroot.return_value = 'wat2'
+        buildroot.return_value = []
 
         # Call the auditor
         present, absent = self.handler.audit(pdc)
@@ -99,6 +102,9 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         _build = {
             'build_id': 'fake_build_id',
             'name': 'guake',
+            'version': 1,
+            'release': 2,
+            'arch': 'foo',
         }
         builds.return_value = [_build]
         rpms.return_value = _build, ['some rpm filename']
@@ -153,6 +159,9 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         _build = {
             'build_id': 'fake_build_id',
             'name': 'guake',
+            'version': 1,
+            'release': 2,
+            'arch': 'foo',
         }
         builds.return_value = [_build]
         rpms.return_value = _build, ['some rpm filename']
@@ -189,6 +198,9 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         _build = {
             'build_id': 'fake_build_id',
             'name': 'guake',
+            'version': 1,
+            'release': 2,
+            'arch': 'foo',
         }
         builds.return_value = [_build]
         rpms.return_value = _build, ['some rpm filename']
@@ -225,6 +237,9 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         _build = {
             'build_id': 'fake_build_id',
             'name': 'guake',
+            'version': 1,
+            'release': 2,
+            'arch': 'foo',
         }
         builds.return_value = [_build]
         rpms.return_value = _build, ['some rpm filename']
@@ -236,16 +251,7 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         self.handler.initialize(pdc)
 
         # Check the PDC calls..
-
         expected_calls = {
-            'release-component-relationships': [
-                ('GET', {
-                    'from_component_name': 'guake',
-                    'from_component_release': 'fedora-24',
-                    'to_component_name': ['nethack'],
-                    'type': 'RPMRequires',
-                })
-            ],
             'releases/fedora-24': [('GET', {}), ('GET', {})]
         }
 
