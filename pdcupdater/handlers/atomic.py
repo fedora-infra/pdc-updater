@@ -5,8 +5,6 @@ import pdcupdater.handlers
 import pdcupdater.services
 import pdcupdater.utils
 
-from pdc_client import get_paged
-
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +58,11 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
             # Go, get, and parse the data
             params = dict(h=branch)
             filename = 'fedora-%s.json' % self.group_type
-            response = requests.get(self.git_url + filename, params=params)
+            url = self.git_url + filename
+            response = requests.get(url, params=params)
+            if not bool(response):
+                log.warn("Failed to get %r: %r" % (response.url, response))
+                continue
             data = response.json()
 
             # Some of the packages listed *could* be sub-packages, but in the
@@ -94,7 +96,7 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
         # Query the data sources
         git_groups = list(self.atomic_component_groups_from_git(pdc))
         pdc_groups = [
-            group for group in get_paged(pdc['component-groups']._)
+            group for group in pdc.get_paged(pdc['component-groups']._)
             if group['group_type'] == self.group_type
         ]
 

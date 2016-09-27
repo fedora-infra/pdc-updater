@@ -35,7 +35,7 @@ def retry():
 def _initialize_basics(pdc):
     """ Gotta have these before we can really do anything... """
     arches = [dict(name=name) for name in ["armhfp", "i386", "x86_64"]]
-    pdc_arches = list(pdc_client.get_paged(pdc['arches']._))
+    pdc_arches = list(pdc.get_paged(pdc['arches']._))
     for arch in arches:
         if arch not in pdc_arches:
             log.info("Creating arch %r." % arch['name'])

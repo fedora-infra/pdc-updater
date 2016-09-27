@@ -1,25 +1,20 @@
-import functools
 import logging
-import socket
+import operator
 
 import bs4
 import requests
 
 import pdcupdater.handlers.compose
+import pdcupdater.utils
 
 log = logging.getLogger(__name__)
 
-def with_ridiculous_timeout(function):
-    @functools.wraps(function)
-    def wrapper(*args, **kwargs):
-        original = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(600)
-        try:
-            return function(*args, **kwargs)
-        finally:
-            socket.setdefaulttimeout(original)
-    return wrapper
-
+import dogpile.cache
+cache = dogpile.cache.make_region().configure(
+    "dogpile.cache.dbm",
+    expiration_time=-1,
+    arguments={"filename":"temp-cache.dbm"}
+)
 
 
 def _scrape_links(session, url):
@@ -79,7 +74,7 @@ def old_composes(base_url):
     session.close()
 
 
-@with_ridiculous_timeout
+@pdcupdater.utils.with_ridiculous_timeout
 def fas_persons(base_url, username, password):
     """ Return the list of users in the Fedora Account System. """
 
@@ -97,6 +92,62 @@ def fas_persons(base_url, username, password):
     return response['people']
 
 
+@pdcupdater.utils.retry()
+def koji_list_buildroot_for(url, filename, tries=3):
+    """ Return the list of koji builds in the buildroot of a built rpm. """
+
+    import koji
+    session = koji.ClientSession(url)
+    rpminfo = session.getRPM(filename)
+    if type(rpminfo) == list:
+        if not tries:
+            raise TypeError("Got a list back from koji.getRPM(%r)" % filename)
+        # Try again.. this is weird behavior...
+        return koji_list_buildroot_for(url, filename, tries-1)
+    return session.listRPMs(componentBuildrootID=rpminfo['buildroot_id'])
+
+
+@pdcupdater.utils.retry()
+def koji_yield_rpm_requires(url, nvra):
+    """ Yield three-tuples of RPM requirements from a koji nvra.
+
+    Inspired by koschei/backend/koji_util.py by mizdebsk.
+    """
+    import koji
+    import rpm
+    session = koji.ClientSession(url)
+
+    # Set up some useful structures before we get started.
+    header_lookup = {
+        rpm.RPMSENSE_LESS: '<',
+        rpm.RPMSENSE_GREATER: '>',
+        rpm.RPMSENSE_EQUAL: '=',
+    }
+    relevant_flags = reduce(operator.ior, header_lookup.keys())
+
+    # Query koji and step over all the deps listed in the raw rpm headers.
+    deps = session.getRPMDeps(nvra, koji.DEP_REQUIRE)
+    for dep in deps:
+        flags = dep['flags']
+
+        # The rpmlib headers here contain some crazy dep flags that aren't
+        # relevant to normal humans.  Internal rpmlib dep information.
+        if flags & ~(relevant_flags):
+            continue
+
+        # Bit-shift our way through the flags to figure out how this
+        # relationship is qualified.
+        qualifier = ""
+        while flags:
+            old = flags
+            flags &= flags - 1
+            qualifier += header_lookup[old ^ flags]
+
+        # Yield back ('foo', '<=', '1.0.1')
+        yield dep['name'], qualifier, dep['version'].rstrip()
+
+
+@pdcupdater.utils.retry()
 def koji_builds_in_tag(url, tag):
     """ Return the list of koji builds in a tag. """
     import koji
@@ -114,6 +165,8 @@ def koji_builds_in_tag(url, tag):
     return rpms
 
 
+@cache.cache_on_arguments()
+@pdcupdater.utils.retry()
 def koji_rpms_from_build(url, build_id):
     import koji
     log.info("Listing rpms in koji(%s) for %r" % (url, build_id))

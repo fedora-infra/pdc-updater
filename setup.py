@@ -10,6 +10,7 @@ requirements = [
     'python-fedora',
     'packagedb-cli',
     'pdc-client',
+    'six',
 ]
 
 
@@ -19,7 +20,7 @@ with open('test-requirements.txt', 'r') as f:
 
 setup(
     name='pdc-updater',
-    version='0.2.4',
+    version='0.3.0',
     description='Update the product-definition-center in response to fedmsg',
     license='GPLv2+',
     author='Ralph Bean',

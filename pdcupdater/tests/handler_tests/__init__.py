@@ -33,15 +33,29 @@ def mock_pdc(function):
         pdc.add_endpoint('component-group-types', 'POST', 'wat')
         pdc.add_endpoint('component-groups', 'POST', 'wat')
         pdc.add_endpoint('global-components', 'POST', 'wat')
-        pdc.add_endpoint('release-components', 'POST', 'wat')
+        pdc.add_endpoint('release-components', 'POST', {
+            "id": 1,
+            "release": {"release_id": 'fedora-24'},
+            "global_component": "wat",
+            "name": "wat",
+            "type": "rpm",
+        })
+        pdc.add_endpoint('release-component-relationships', 'POST', 'wat')
         pdc.add_endpoint('compose-images', 'POST', 'wat')
         pdc.add_endpoint('compose-rpms', 'POST', 'wat')
         pdc.add_endpoint('persons', 'POST', 'wat')
         pdc.add_endpoint('rpms', 'POST', 'wat')
 
+        # One delete endpoint for single deletes
+        pdc.add_endpoint('release-component-relationships/1', 'DELETE', 'ok')
+        # One delete endpoint for bulk deletes
+        pdc.add_endpoint('release-component-relationships', 'DELETE', 'ok')
+
         # Mock out GET endpoints
         pdc.add_endpoint('composes/Fedora-24-20151130.n.2', 'GET', mock_404)
 
+        pdc.add_endpoint('releases/fedora-26', 'GET', {})
+        pdc.add_endpoint('releases/fedora-25', 'GET', {})
         pdc.add_endpoint('releases/fedora-24', 'GET', {})
         pdc.add_endpoint('releases/fedora-23-updates', 'GET', {})
         pdc.add_endpoint('releases/fedora-22-updates', 'GET', {})
@@ -117,12 +131,28 @@ def mock_pdc(function):
             }],
         })
 
+        pdc.add_endpoint('release-component-relationships', 'GET', [{
+            "from_component": {
+                "id": 1,
+                "name": "guake",
+                "release": "fedora-24"
+            },
+            "id": 1,
+            "to_component": {
+                "id": 2,
+                "name": "nethack",
+                "release": "fedora-24"
+            },
+            "type": "RPMRequires"
+        }])
+
         pdc.add_endpoint('release-components', 'GET', {
             'count': 11,
             'next': None,
             'previous': None,
             'results': [
               {'active': True,
+               'id': 1,
                'brew_package': u'guake',
                'bugzilla_component': u'guake',
                'dist_git_branch': u'master',
@@ -133,6 +163,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 2,
                'brew_package': u'guake',
                'bugzilla_component': u'guake',
                'dist_git_branch': u'el6',
@@ -143,6 +174,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 3,
                'brew_package': u'guake',
                'bugzilla_component': u'guake',
                'dist_git_branch': u'f20',
@@ -153,6 +185,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 4,
                'brew_package': u'guake',
                'bugzilla_component': u'guake',
                'dist_git_branch': u'epel7',
@@ -163,6 +196,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 5,
                'brew_package': u'guake',
                'bugzilla_component': u'guake',
                'dist_git_branch': u'f21',
@@ -173,6 +207,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 6,
                'brew_package': u'guake',
                'bugzilla_component': u'guake',
                'dist_git_branch': u'f22',
@@ -183,6 +218,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 7,
                'brew_package': u'guake',
                'bugzilla_component': u'guake',
                'dist_git_branch': u'f23',
@@ -193,6 +229,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 8,
                'brew_package': u'geany',
                'bugzilla_component': u'geany',
                'dist_git_branch': u'master',
@@ -203,6 +240,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 9,
                'brew_package': u'geany',
                'bugzilla_component': u'geany',
                'dist_git_branch': u'el6',
@@ -213,6 +251,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 10,
                'brew_package': u'geany',
                'bugzilla_component': u'geany',
                'dist_git_branch': u'epel7',
@@ -223,6 +262,7 @@ def mock_pdc(function):
                },
                'type': 'srpm'},
               {'active': True,
+               'id': 11,
                'brew_package': u'geany',
                'bugzilla_component': u'geany',
                'dist_git_branch': u'f23',

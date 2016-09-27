@@ -1,8 +1,6 @@
 import pdcupdater.services
 import pdcupdater.handlers
 
-from pdc_client import get_paged
-
 
 class NewPersonHandler(pdcupdater.handlers.BaseHandler):
     """ When a new person gets added to FAS. """
@@ -26,7 +24,7 @@ class NewPersonHandler(pdcupdater.handlers.BaseHandler):
     def audit(self, pdc):
         # Query the data sources
         fas_persons = pdcupdater.services.fas_persons(**self.fas_config)
-        pdc_persons = get_paged(pdc['persons']._)
+        pdc_persons = pdc.get_paged(pdc['persons']._)
 
         # normalize the two lists
         fas_persons = set([p['username'] for p in fas_persons])

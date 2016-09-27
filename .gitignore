@@ -9,3 +9,4 @@ dist
 fedmsg.d/pdcupdater.py
 pdcupdater/tests/vcr-request-data
 .coverage
+*.dbm*

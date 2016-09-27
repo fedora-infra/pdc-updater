@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import copy
 import logging
 import requests
@@ -6,12 +8,12 @@ import pdcupdater.handlers
 import pdcupdater.services
 import pdcupdater.utils
 
-from pdc_client import get_paged
-
 
 log = logging.getLogger(__name__)
 session = requests.Session()
 
+# These are the states of a pungi4 compose that we care about.
+# There are other states that we don't care about.. like DOOMED, etc..
 final = [
     'FINISHED',
     'FINISHED_INCOMPLETE',
@@ -57,7 +59,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
     def audit(self, pdc):
         # Query the data sources
         old_composes = pdcupdater.services.old_composes(self.old_composes_url)
-        pdc_composes = get_paged(pdc['composes']._)
+        pdc_composes = pdc.get_paged(pdc['composes']._)
 
         # normalize the two lists
         old_composes = set([idx for branch, idx, url in old_composes])
@@ -66,6 +68,13 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         # use set operators to determine the difference
         present = pdc_composes - old_composes
         absent = old_composes - pdc_composes
+
+        # XXX - HACK - we're only interested (really) in things that exist on
+        # kojipkgs but which do not exist in PDC.  We are not interested in
+        # things which appears in PDC but do not appear on kojipkgs.  releng
+        # will periodically clean up the old unused composes from kojipkgs.. so
+        # we'll just silence ourselves here on that matter.
+        present = set()  # This is fine ☕
 
         return present, absent
 
@@ -76,11 +85,13 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
                 self._import_compose(pdc, compose_id, url)
             except Exception as e:
                 if hasattr(e, 'response'):
-                    log.exception("Failed to import %r %r" % (url, e.response.text))
+                    log.exception("Failed to import %r - %r %r" % (
+                        url, e.response.url, e.response.text))
                 else:
-                    log.exception("Failed to import %r %r" % url)
+                    log.exception("Failed to import %r" % url)
 
 
+    @pdcupdater.utils.with_ridiculous_timeout
     def _import_compose(self, pdc, compose_id, compose_url):
         base = compose_url + "/compose/metadata"
 
@@ -108,9 +119,17 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
 
         url = base + '/rpms.json'
         response = session.get(url)
-        if not bool(response):
+        # Check first for a 404...
+        if response.status_code == 404:
+            # Not all composes have rpms.  In particular, atomic ones.
+            # https://github.com/fedora-infra/pdc-updater/issues/11
+            log.warn('Found no rpms.json file at %r' % r)
+            rpms = None
+        elif not bool(response):
+            # Something other than a 404 means real failure, so complain.
             raise IOError("Failed to get %r: %r" % (url, response))
-        rpms = response.json()
+        else:
+            rpms = response.json()
 
         # PDC demands lowercase
         composeinfo['payload']['release']['short'] = \
@@ -127,9 +146,11 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             composeinfo=composeinfo,
             image_manifest=images,
         ))
+
         # https://pdc.fedoraproject.org/rest_api/v1/compose-rpms/
-        pdc['compose-rpms']._(dict(
-            release_id=release_id,
-            composeinfo=composeinfo,
-            rpm_manifest=rpms,
-        ))
+        if rpms:
+            pdc['compose-rpms']._(dict(
+                release_id=release_id,
+                composeinfo=composeinfo,
+                rpm_manifest=rpms,
+            ))
