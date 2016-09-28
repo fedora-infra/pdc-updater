@@ -18,6 +18,9 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
     # A list of the types of relationships this thing manages.
     # This needs to be overridden by subclasses of this base class.
     managed_types = None
+    # The types of the parents and children in our managed relationships
+    parent_type = None
+    child_type = None
 
     def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
         raise NotImplementedError("Subclasses must implement this.")
@@ -26,6 +29,13 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         raise NotImplementedError("Subclasses must implement this.")
 
     def __init__(self, *args, **kwargs):
+
+        # First, a sanity check...
+        required = ('managed_types', 'parent_type', 'child_type',)
+        for attr in required:
+            if not getattr(self, attr, None):
+                raise AttributeError("%r is required on %r" % (attr, self))
+
         super(BaseKojiDepChainHandler, self).__init__(*args, **kwargs)
         self.koji_url = self.config['pdcupdater.koji_url']
         self.io_threads = self.config.get('pdcupdater.koji_io_threads', 8)
@@ -155,7 +165,8 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         # Finally, iterate over all those, now grouped by parent_name
         for parent_name, koji_relationships in by_parent.items():
             # TODO -- pass in global_component_name to this function?
-            parent = pdcupdater.utils.ensure_release_component_exists(pdc, release_id, parent_name)
+            parent = pdcupdater.utils.ensure_release_component_exists(
+                pdc, release_id, parent_name, type=self.parent_type)
 
             log.info("Gathering from pdc for %s/%s" % (parent_name, release_id))
             pdc_relationships = set(self._yield_pdc_relationships_from_build(
@@ -166,7 +177,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
             log.info("Issuing bulk create for %i entries" % len(to_be_created))
             pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
-                pdc, parent, to_be_created, component_type='rpm')
+                pdc, parent, to_be_created, component_type=self.child_type)
 
             log.info("Issuing bulk delete for %i entries" % len(to_be_deleted))
             pdcupdater.utils.delete_bulk_release_component_relationships(

@@ -123,13 +123,19 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
         body = e.response.json()
         if not 'non_field_errors' in body:
             raise
-        message = u'The fields release, name must make a unique set.'
-        if body['non_field_errors'] != [message]:
+        allowable = [
+            # This is the old error string
+            u'The fields release, name must make a unique set.',
+            # This is the new error string, after
+            # https://github.com/product-definition-center/product-definition-center/pull/422
+            u'The fields release, name, type must make a unique set.',
+        ]
+        if not any([body['non_field_errors'] == [s] for s in allowable]):
             raise
 
     # But if it was just that the component already existed, then go back and
     # query for what we tried to submit (return the primary key)
-    query = dict(name=name, release=release_id)
+    query = dict(name=name, release=release_id, type=type)
     response = pdc['release-components']._(**query)
     if not response['count']:
         raise IndexError("No results found for %r after submitting %r" % (

@@ -29,6 +29,9 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
 
     # A list of the types of relationships this thing manages.
     managed_types = ('ContainerIncludesRPM',)
+    # The types of the parents and children in our managed relationships
+    parent_type = 'container'
+    child_type = 'rpm'
 
     def interesting_tags(self):
         return pdcupdater.utils.interesting_container_tags()

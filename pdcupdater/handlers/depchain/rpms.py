@@ -29,6 +29,9 @@ class NewRPMBuildTimeDepChainHandler(BaseKojiDepChainHandler):
 
     # A list of the types of relationships this thing manages.
     managed_types = ('RPMBuildRequires', 'RPMBuildRoot')
+    # The types of the parents and children in our managed relationships
+    parent_type = 'rpm'
+    child_type = 'rpm'
 
     def interesting_tags(self):
         return pdcupdater.utils.interesting_tags()
@@ -76,6 +79,9 @@ class NewRPMRunTimeDepChainHandler(BaseKojiDepChainHandler):
 
     # A list of the types of relationships this thing manages.
     managed_types = ('RPMRequires',)
+    # The types of the parents and children in our managed relationships
+    parent_type = 'rpm'
+    child_type = 'rpm'
 
     def interesting_tags(self):
         return pdcupdater.utils.interesting_tags()
