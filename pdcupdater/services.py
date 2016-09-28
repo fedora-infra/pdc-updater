@@ -166,7 +166,10 @@ def koji_builds_in_tag(url, tag):
 def koji_get_build(url, build_id):
     import koji
     session = koji.ClientSession(url)
-    return session.getBuild(build_id)
+    build = session.getBuild(build_id)
+    if build:
+        assert build['id'] == build_id, "%r != %r" % (build['id'], build_id)
+    return build
 
 
 @cache.cache_on_arguments()
