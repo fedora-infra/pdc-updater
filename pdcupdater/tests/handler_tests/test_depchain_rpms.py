@@ -12,7 +12,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
     config = {}
 
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     def test_can_handle_buildsys_tag_message(self, tags, rawhide):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
@@ -24,7 +24,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
     @mock_pdc
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     def test_handle_new_build(self, pdc, tags, rawhide, buildroot):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
@@ -49,7 +49,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
@@ -94,7 +94,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
@@ -151,7 +151,7 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
@@ -190,7 +190,7 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
@@ -229,7 +229,7 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
     @mock.patch('pdcupdater.services.koji_builds_in_tag')
