@@ -43,9 +43,9 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         ]
         self.assertEquals(pdc.calls.keys(), expected_keys)
 
-        self.assertEqual(len(pdc.calls['global-components']), 22)
-        self.assertEqual(len(pdc.calls['release-components']), 22)
-        self.assertEqual(len(pdc.calls['release-component-relationships']), 66)
+        self.assertEqual(len(pdc.calls['global-components']), 21)
+        self.assertEqual(len(pdc.calls['release-components']), 21)
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 63)
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
