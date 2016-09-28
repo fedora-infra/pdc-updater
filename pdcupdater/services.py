@@ -163,12 +163,33 @@ def koji_builds_in_tag(url, tag):
 
 
 @cache.cache_on_arguments()
+def koji_get_build(url, build_id):
+    import koji
+    session = koji.ClientSession(url)
+    return session.getBuild(build_id)
+
+
+@cache.cache_on_arguments()
+def koji_archives_from_build(url, build_id):
+    import koji
+    session = koji.ClientSession(url)
+    return session.listArchives(build_id)
+
+
+@cache.cache_on_arguments()
+def koji_rpms_from_archive(url, artifact):
+    import koji
+    session = koji.ClientSession(url)
+    return session.listRPMs(imageID=artifact.get('id'))
+
+
+@cache.cache_on_arguments()
 @pdcupdater.utils.retry()
 def koji_rpms_from_build(url, build_id):
     import koji
     log.info("Listing rpms in koji(%s) for %r" % (url, build_id))
     session = koji.ClientSession(url)
-    build = session.getBuild(build_id)
+    build = koji_get_build(url, build_id)
     children = session.getTaskChildren(build['task_id'])
 
     rpms = set()
