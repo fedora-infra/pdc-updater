@@ -90,33 +90,33 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
-        builds = pdcupdater.services.koji_rpms_in_tag(self.koji_url, tag)
+        rpms = pdcupdater.services.koji_rpms_in_tag(self.koji_url, tag)
 
         working_build_id = None
-        rpms = []
-        for i, build in enumerate(builds):
+        working_set = []
+        for i, rpm in enumerate(rpms):
             if not working_build_id:
-                working_build_id = build['build_id']
+                working_build_id = rpm['build_id']
 
-            if working_build_id == build['build_id']:
-                rpms.append(build)
-                if i != len(builds) - 1:
+            if working_build_id == rpm['build_id']:
+                working_set.append(rpm)
+                if i != len(rpms) - 1:
                     continue
 
-            def _format_rpm_filename(build):
+            def _format_rpm_filename(rpm):
                 # XXX - do we need to handle epoch here?  I don't think so.
-                return "{name}-{version}-{release}.{arch}.rpm".format(**build)
+                return "{name}-{version}-{release}.{arch}.rpm".format(**rpm)
 
-            rpms = [_format_rpm_filename(rpm) for rpm in rpms]
+            working_set = [_format_rpm_filename(rpm) for rpm in working_set]
             log.info("Considering build idx=%r, (%i of %i) with %r" % (
-                working_build_id, i, len(builds), rpms))
+                working_build_id, i, len(rpms), working_set))
 
             relationships = list(self._yield_koji_relationships_from_build(
-                self.koji_url, working_build_id, rpms=rpms))
+                self.koji_url, working_build_id, rpms=working_set))
 
             # Reset our loop variables.
-            rpms = []
-            working_build_id = build['build_id']
+            working_set = []
+            working_build_id = rpm['build_id']
 
             for parent_name, relationship_type, child_name in relationships:
                 parent = {
