@@ -36,18 +36,41 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
     def interesting_tags(self):
         return pdcupdater.utils.interesting_container_tags()
 
-    def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
+    def _yield_koji_relationships_from_tag(self, pdc, tag):
 
-        # TODO -- s/rpms/artifacts/g
-        artifacts = rpms
+        release_id, release = pdcupdater.utils.tag2release(tag)
+        # TODO -- this tag <-> release agreement is going to break down with modularity.
+
+        pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
+
+        builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
+
+        for i, build in enumerate(builds):
+            log.info("Considering container build idx=%r, (%i of %i)" % (
+                build['build_id'], i, len(builds)))
+
+            relationships = list(self._yield_koji_relationships_from_build(
+                self.koji_url, build['build_id']))
+
+            for parent_name, relationship_type, child_name in relationships:
+                parent = {
+                    'name': parent_name,
+                    'release': release_id,
+                    #'global_component': build['srpm_name'],  # ideally.
+                }
+                child = {
+                    'name': child_name,
+                    'release': release_id,
+                }
+                yield parent, relationship_type, child
+
+    def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
 
         build = pdcupdater.services.koji_get_build(koji_url, build_id)
         parent = build['name']
 
-        # Get all artifacts for a build... only if they're not supplied.
-        if not artifacts:
-            artifacts = pdcupdater.services.koji_archives_from_build(
-                koji_url, build_id)
+        artifacts = pdcupdater.services.koji_archives_from_build(
+            koji_url, build_id)
 
         for artifact in artifacts:
             if artifact['type_name'] in ('ks', 'cfg', 'xml'):
