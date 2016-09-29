@@ -25,6 +25,9 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
     def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
         raise NotImplementedError("Subclasses must implement this.")
 
+    def _yield_koji_relationships_from_tag(self, koji_url, tag):
+        raise NotImplementedError("Subclasses must implement this.")
+
     def interesting_tags(self):
         raise NotImplementedError("Subclasses must implement this.")
 
@@ -81,53 +84,6 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
                 keys = ('name', 'release')
                 parent = dict(zip(keys, [entry['from_component'][key] for key in keys]))
                 child = dict(zip(keys, [entry['to_component'][key] for key in keys]))
-                yield parent, relationship_type, child
-
-    def _yield_koji_relationships_from_tag(self, pdc, tag):
-
-        release_id, release = tag2release(tag)
-        # TODO -- this tag <-> release agreement is going to break down with modularity.
-
-        pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
-
-        rpms = pdcupdater.services.koji_rpms_in_tag(self.koji_url, tag)
-
-        working_build_id = None
-        working_set = []
-        for i, rpm in enumerate(rpms):
-            if not working_build_id:
-                working_build_id = rpm['build_id']
-
-            if working_build_id == rpm['build_id']:
-                working_set.append(rpm)
-                if i != len(rpms) - 1:
-                    continue
-
-            def _format_rpm_filename(rpm):
-                # XXX - do we need to handle epoch here?  I don't think so.
-                return "{name}-{version}-{release}.{arch}.rpm".format(**rpm)
-
-            working_set = [_format_rpm_filename(rpm) for rpm in working_set]
-            log.info("Considering build idx=%r, (%i of %i) with %r" % (
-                working_build_id, i, len(rpms), working_set))
-
-            relationships = list(self._yield_koji_relationships_from_build(
-                self.koji_url, working_build_id, rpms=working_set))
-
-            # Reset our loop variables.
-            working_set = []
-            working_build_id = rpm['build_id']
-
-            for parent_name, relationship_type, child_name in relationships:
-                parent = {
-                    'name': parent_name,
-                    'release': release_id,
-                    #'global_component': build['srpm_name'],  # ideally.
-                }
-                child = {
-                    'name': child_name,
-                    'release': release_id,
-                }
                 yield parent, relationship_type, child
 
     def handle(self, pdc, msg):

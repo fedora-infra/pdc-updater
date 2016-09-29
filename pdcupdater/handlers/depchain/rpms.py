@@ -24,7 +24,57 @@ from pdcupdater.handlers.depchain.base import BaseKojiDepChainHandler
 log = logging.getLogger(__name__)
 
 
-class NewRPMBuildTimeDepChainHandler(BaseKojiDepChainHandler):
+class BaseRPMDepChainHandler(BaseKojiDepChainHandler):
+    """ Intermediary base class providing common methods to rpm handlers. """
+
+    def _yield_koji_relationships_from_tag(self, pdc, tag):
+
+        release_id, release = pdcupdater.utils.tag2release(tag)
+        # TODO -- this tag <-> release agreement is going to break down with modularity.
+
+        pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
+
+        rpms = pdcupdater.services.koji_rpms_in_tag(self.koji_url, tag)
+
+        working_build_id = None
+        working_set = []
+        for i, rpm in enumerate(rpms):
+            if not working_build_id:
+                working_build_id = rpm['build_id']
+
+            if working_build_id == rpm['build_id']:
+                working_set.append(rpm)
+                if i != len(rpms) - 1:
+                    continue
+
+            def _format_rpm_filename(rpm):
+                # XXX - do we need to handle epoch here?  I don't think so.
+                return "{name}-{version}-{release}.{arch}.rpm".format(**rpm)
+
+            working_set = [_format_rpm_filename(rpm) for rpm in working_set]
+            log.info("Considering build idx=%r, (%i of %i) with %r" % (
+                working_build_id, i, len(rpms), working_set))
+
+            relationships = list(self._yield_koji_relationships_from_build(
+                self.koji_url, working_build_id, rpms=working_set))
+
+            # Reset our loop variables.
+            working_set = []
+            working_build_id = rpm['build_id']
+
+            for parent_name, relationship_type, child_name in relationships:
+                parent = {
+                    'name': parent_name,
+                    'release': release_id,
+                    #'global_component': build['srpm_name'],  # ideally.
+                }
+                child = {
+                    'name': child_name,
+                    'release': release_id,
+                }
+                yield parent, relationship_type, child
+
+class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
     """ When a build gets tagged, update PDC with buildroot info. """
 
     # A list of the types of relationships this thing manages.
@@ -74,7 +124,7 @@ class NewRPMBuildTimeDepChainHandler(BaseKojiDepChainHandler):
                 yield parent, relationship_type, child
 
 
-class NewRPMRunTimeDepChainHandler(BaseKojiDepChainHandler):
+class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
     """ When a build gets tagged, update PDC with rpm dep info. """
 
     # A list of the types of relationships this thing manages.
