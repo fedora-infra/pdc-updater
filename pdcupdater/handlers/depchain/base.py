@@ -109,10 +109,10 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
             rpms = [_format_rpm_filename(rpm) for rpm in rpms]
             log.info("Considering build idx=%r, (%i of %i) with %r" % (
-                build['build_id'], i, len(builds), rpms))
+                working_build_id, i, len(builds), rpms))
 
             relationships = list(self._yield_koji_relationships_from_build(
-                self.koji_url, build['build_id'], rpms=rpms))
+                self.koji_url, working_build_id, rpms=rpms))
 
             # Reset our loop variables.
             rpms = []
