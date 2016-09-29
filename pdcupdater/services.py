@@ -145,7 +145,7 @@ def koji_yield_rpm_requires(url, nvra):
 
 
 @pdcupdater.utils.retry()
-def koji_builds_in_tag(url, tag):
+def koji_rpms_in_tag(url, tag):
     """ Return the list of koji builds in a tag. """
     import koji
     log.info("Listing rpms in koji(%s) tag %s" % (url, tag))

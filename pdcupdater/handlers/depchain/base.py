@@ -90,7 +90,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
-        builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
+        builds = pdcupdater.services.koji_rpms_in_tag(self.koji_url, tag)
 
         working_build_id = None
         rpms = []
