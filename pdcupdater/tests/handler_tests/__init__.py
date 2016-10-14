@@ -57,6 +57,7 @@ def mock_pdc(function):
         pdc.add_endpoint('releases/fedora-26', 'GET', {})
         pdc.add_endpoint('releases/fedora-25', 'GET', {})
         pdc.add_endpoint('releases/fedora-24', 'GET', {})
+        pdc.add_endpoint('releases/fedora-24-updates', 'GET', {})
         pdc.add_endpoint('releases/fedora-23-updates', 'GET', {})
         pdc.add_endpoint('releases/fedora-22-updates', 'GET', {})
         pdc.add_endpoint('releases/fedora-21-updates', 'GET', {})

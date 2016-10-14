@@ -144,9 +144,18 @@ def koji_yield_rpm_requires(url, nvra):
         yield dep['name'], qualifier, dep['version'].rstrip()
 
 
-@pdcupdater.utils.retry()
+#@pdcupdater.utils.retry()
 def koji_builds_in_tag(url, tag):
     """ Return the list of koji builds in a tag. """
+    import koji
+    log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
+    session = koji.ClientSession(url)
+    return session.listTagged(tag, latest=True)
+
+
+@pdcupdater.utils.retry()
+def koji_rpms_in_tag(url, tag):
+    """ Return the list of koji rpms in a tag. """
     import koji
     log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
     session = koji.ClientSession(url)
@@ -163,12 +172,36 @@ def koji_builds_in_tag(url, tag):
 
 
 @cache.cache_on_arguments()
+def koji_get_build(url, build_id):
+    import koji
+    session = koji.ClientSession(url)
+    build = session.getBuild(build_id)
+    if build:
+        assert build['id'] == build_id, "%r != %r" % (build['id'], build_id)
+    return build
+
+
+@cache.cache_on_arguments()
+def koji_archives_from_build(url, build_id):
+    import koji
+    session = koji.ClientSession(url)
+    return session.listArchives(build_id)
+
+
+@cache.cache_on_arguments()
+def koji_rpms_from_archive(url, artifact):
+    import koji
+    session = koji.ClientSession(url)
+    return session.listRPMs(imageID=artifact.get('id'))
+
+
+@cache.cache_on_arguments()
 @pdcupdater.utils.retry()
 def koji_rpms_from_build(url, build_id):
     import koji
     log.info("Listing rpms in koji(%s) for %r" % (url, build_id))
     session = koji.ClientSession(url)
-    build = session.getBuild(build_id)
+    build = koji_get_build(url, build_id)
     children = session.getTaskChildren(build['task_id'])
 
     rpms = set()
