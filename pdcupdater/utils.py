@@ -123,13 +123,19 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
         body = e.response.json()
         if not 'non_field_errors' in body:
             raise
-        message = u'The fields release, name must make a unique set.'
-        if body['non_field_errors'] != [message]:
+        allowable = [
+            # This is the old error string
+            u'The fields release, name must make a unique set.',
+            # This is the new error string, after
+            # https://github.com/product-definition-center/product-definition-center/pull/422
+            u'The fields release, name, type must make a unique set.',
+        ]
+        if not any([body['non_field_errors'] == [s] for s in allowable]):
             raise
 
     # But if it was just that the component already existed, then go back and
     # query for what we tried to submit (return the primary key)
-    query = dict(name=name, release=release_id)
+    query = dict(name=name, release=release_id, type=type)
     response = pdc['release-components']._(**query)
     if not response['count']:
         raise IndexError("No results found for %r after submitting %r" % (
@@ -475,6 +481,18 @@ def interesting_tags():
     return stable_tags + [rawhide_tag()]
 
 
+def interesting_container_tags():
+    """ Returns a list of "interesting tags" relevant to containers.
+
+    Eventually, we should query PDC itself to figure out what tags we should be
+    concerned with.
+    """
+    return ['f24-docker']  # This is all we're producing for now...
+    #tags = interesting_tags()
+    #tags = [tag for tag in tags if '-' not in tag]
+    #return ['%s-docker' % tag for tag in tags]
+
+
 def release2reponame(release):
     """ Convert a PDC release to an mdapi repo name lexicographically. """
     # TODO -- we should be able to do this by querying the pdc releases
@@ -518,6 +536,14 @@ def tag2release(tag):
             'release_type': 'ga',
         }
         release_id = "{short}-{version}".format(**release)
+    elif tag.endswith('-docker'):
+        release = {
+            'name': 'Fedora Updates',
+            'short': 'fedora',
+            'version': tag.strip('-docker').strip('f'),
+            'release_type': 'updates',
+        }
+        release_id = "{short}-{version}-{release_type}".format(**release)
     else:
         bodhi_info = {r['stable_tag']: r for r in bodhi_releases()}[tag]
         if 'EPEL' in bodhi_info['id_prefix']:

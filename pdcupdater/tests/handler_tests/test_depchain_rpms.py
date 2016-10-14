@@ -12,7 +12,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
     config = {}
 
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     def test_can_handle_buildsys_tag_message(self, tags, rawhide):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
@@ -24,7 +24,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
     @mock_pdc
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     def test_handle_new_build(self, pdc, tags, rawhide, buildroot):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
@@ -43,16 +43,16 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         ]
         self.assertEquals(pdc.calls.keys(), expected_keys)
 
-        self.assertEqual(len(pdc.calls['global-components']), 22)
-        self.assertEqual(len(pdc.calls['release-components']), 22)
-        self.assertEqual(len(pdc.calls['release-component-relationships']), 66)
+        self.assertEqual(len(pdc.calls['global-components']), 21)
+        self.assertEqual(len(pdc.calls['release-components']), 21)
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 63)
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
-    @mock.patch('pdcupdater.services.koji_builds_in_tag')
+    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
     def test_audit_empty_koji(self, pdc, builds, rpms, buildroot, tags, rawhide):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
@@ -94,10 +94,10 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
-    @mock.patch('pdcupdater.services.koji_builds_in_tag')
+    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
     def test_audit_mismatch(self, pdc, builds, rpms, buildroot, tags, rawhide):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
@@ -151,10 +151,10 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
-    @mock.patch('pdcupdater.services.koji_builds_in_tag')
+    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
     def test_audit_mismatch(self, pdc, builds, rpms, requires, tags, rawhide):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
@@ -190,10 +190,10 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
-    @mock.patch('pdcupdater.services.koji_builds_in_tag')
+    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
     def test_audit_simple_match(self, pdc, builds, rpms, requires, tags, rawhide):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
@@ -229,10 +229,10 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
-    @mock.patch('pdcupdater.handlers.depchain.rpms.interesting_tags')
+    @mock.patch('pdcupdater.utils.interesting_tags')
     @mock.patch('pdcupdater.services.koji_yield_rpm_requires')
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
-    @mock.patch('pdcupdater.services.koji_builds_in_tag')
+    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
     def test_initialize(self, pdc, builds, rpms, requires, tags, rawhide):
         tags.return_value = ['f24']
         rawhide.return_value = 'f24'
