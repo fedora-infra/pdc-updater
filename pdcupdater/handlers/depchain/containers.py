@@ -1,6 +1,6 @@
 """ Handlers for a container dependency chain model.
 
-Here we're interesting in storing two thing:
+Here we're interested in storing two thing:
 
 - What rpms are installed in a given container.
 - What container images depend on what other container images.
