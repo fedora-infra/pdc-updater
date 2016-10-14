@@ -67,6 +67,8 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
     def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
 
         build = pdcupdater.services.koji_get_build(koji_url, build_id)
+        if not build:
+            raise ValueError("Unable to find build %r" % build_id)
         parent = build['name']
 
         artifacts = pdcupdater.services.koji_archives_from_build(
