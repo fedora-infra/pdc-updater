@@ -267,7 +267,7 @@ class TestNewRPM(BaseHandlerTest):
         })
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
+    @mock.patch('pdcupdater.services.koji_builds_in_tag')
     def test_initialize_from_koji(self, pdc, koji):
         koji.side_effect = mocked_koji_from_tag
 
@@ -305,7 +305,7 @@ class TestNewRPM(BaseHandlerTest):
         })
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
+    @mock.patch('pdcupdater.services.koji_builds_in_tag')
     def test_audit(self, pdc, koji):
         # Mock out koji response
         koji.side_effect = mocked_koji_from_tag
@@ -325,7 +325,7 @@ class TestNewRPM(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
+    @mock.patch('pdcupdater.services.koji_builds_in_tag')
     def test_audit_missing_one(self, pdc, koji):
         # Mock out koji response
         koji.side_effect = mocked_koji_from_tag_missing_one
@@ -357,7 +357,7 @@ class TestNewRPM(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
+    @mock.patch('pdcupdater.services.koji_builds_in_tag')
     def test_audit_adding_one(self, pdc, koji):
         # Mock out koji response
         koji.side_effect = mocked_koji_from_tag_adding_one

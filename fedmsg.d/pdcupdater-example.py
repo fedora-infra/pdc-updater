@@ -52,7 +52,6 @@ config = {
         # https://fedoraproject.org/wiki/User:Ralph/Drafts/Infrastructure/Factory2/ModellingDeps
         'pdcupdater.handlers.depchain.rpms:NewRPMBuildTimeDepChainHandler',
         'pdcupdater.handlers.depchain.rpms:NewRPMRunTimeDepChainHandler',
-        'pdcupdater.handlers.depchain.containers:ContainerRPMInclusionDepChainHandler',
     ],
 
     # Augment the base fedmsg logging config to also handle pdcupdater loggers.
