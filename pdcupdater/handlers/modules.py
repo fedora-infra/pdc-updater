@@ -38,7 +38,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
     @property
     def topic_suffixes(self):
-        return ['module.state.change']
+        return ['rida.module.state.change']
 
     def can_handle(self, msg):
         if not msg['topic'].endswith('module.state.change'):
