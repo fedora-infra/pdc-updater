@@ -58,6 +58,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         return True
 
     def handle(self, pdc, msg):
+        log.debug("handle(pdc, msg=%r)" % msg)
         body = msg['msg']
         state = body['state_name']
 
@@ -74,6 +75,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             self.handle_new_tree(pdc, body, unreleased_variant)
 
     def get_mmd_from_scm(self, scmurl):
+        log.debug("get_mmd_from_scm(scmurl=%r)" % scmurl)
         with TmpDir(prefix="pdcupdater-") as tmpdir, PushPopD(tmpdir), \
                 open(os.devnull, "w") as devnull:
             m = self.scmurl_re.match(scmurl)
@@ -109,6 +111,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         """Creates an UnreleasedVariant for a module in PDC. Checks out the
         module metadata from the supplied SCM repository (currently only
         anonymous GIT is supported)."""
+        log.debug("create_unreleased_variant(pdc, body=%r)" % body)
 
         scmurl = body['scmurl']
         mmd = self.get_mmd_from_scm(scmurl)
@@ -152,6 +155,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         """We get multiple messages for each module n-v-r. Attempts to retrieve
         the corresponding UnreleasedVariant from PDC, or if it's missing,
         creates it."""
+        log.debug("get_or_create_unreleased_variant(pdc, body=%r)" % body)
 
         variant_uid = "{name}-{version}-{release}".format(**body)
         variant_id = variant_uid.lower()
@@ -166,6 +170,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         return unreleased_variant
 
     def handle_new_tree(self, pdc, body, unreleased_variant):
+        log.debug("handle_new_tree(pdc, body, unreleased_variant=%r)" % unreleased_variant)
         topdir = body['topdir']
         tree_id = os.path.basename(topdir)
 
