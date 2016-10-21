@@ -41,7 +41,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         return ['rida.module.state.change']
 
     def can_handle(self, msg):
-        if not msg['topic'].endswith('module.state.change'):
+        if not any([msg['topic'].endswith(s) for s in self.topic_suffixes]):
             return False
 
         state = msg['msg']['state']
