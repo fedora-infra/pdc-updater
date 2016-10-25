@@ -44,7 +44,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         if not msg['topic'].endswith('module.state.change'):
             return False
 
-        state = msg['msg']['state']
+        state = msg['msg']['state_name']
 
         if state not in self.valid_states:
             log.error("Invalid module state '{}', skipping.".format(state))
@@ -60,7 +60,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
     def handle(self, pdc, msg):
         log.debug("handle(pdc, msg=%r)" % msg)
         body = msg['msg']
-        state = body['state']
+        state = body['state_name']
 
         if state not in self.relevant_states:
             log.warn("Non-relevant module state '{}', skipping.".format(
