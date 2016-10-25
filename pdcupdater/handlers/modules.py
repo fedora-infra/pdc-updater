@@ -153,11 +153,15 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         the corresponding UnreleasedVariant from PDC, or if it's missing,
         creates it."""
 
-        variant_uid = "{name}-{version}-{release}".format(**body)
-        variant_id = variant_uid.lower()
+        variant_id =  body['name'] # This is supposed to be equal to name
+        variant_version =  body['version'] # This is supposed to be equal to version
+        variant_release =  body['release'] # This is supposed to be equal to release
 
         try:
-            unreleased_variant = pdc['unreleasedvariants'][variant_id]._()
+            unreleased_variant = pdc['unreleasedvariants'][variant_id]._(
+                variant_version=variant_version,
+                variant_release=variant_release,
+            )
         except beanbag.BeanBagException as e:
             if e.response.status_code != 404:
                 raise
