@@ -35,6 +35,16 @@ config = dict(
                 "propagate": False,
                 "handlers": ["console"],
             },
+            modules={
+                "level": "DEBUG",
+                "propagate": False,
+                "handlers": ["console"],
+            },
+            pdcupdater={
+                "level": "DEBUG",
+                "propagate": False,
+                "handlers": ["console"],
+            },
         ),
     ),
 )
