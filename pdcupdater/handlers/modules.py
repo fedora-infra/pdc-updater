@@ -139,7 +139,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         variant_id = name
         koji_tag = "module-" + variant_id
 
-        unreleased_variant = pdc['unreleasedvariants']._({
+        data = {
             'variant_id': variant_id,
             'variant_uid': variant_uid,
             'variant_name': name,
@@ -149,7 +149,8 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             'koji_tag': koji_tag,
             'runtime_deps': runtime_deps,
             'build_deps': build_deps,
-        })
+        }
+        unreleased_variant = pdc['unreleasedvariants']._(data)
 
         return unreleased_variant
 
