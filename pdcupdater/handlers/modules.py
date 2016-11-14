@@ -119,16 +119,16 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         runtime_deps = []
         for dep, ver in mmd.requires.items():
             if ver is not None:
-                runtime_deps.append("{} >= {}".format(dep, ver))
+                runtime_deps.append({'dependency': "{} >= {}".format(dep, ver)})
             else:
-                runtime_deps.append(dep)
+                runtime_deps.append({'dependency': dep})
 
         build_deps = []
         for dep, ver in mmd.buildrequires.items():
             if ver is not None:
-                build_deps.append("{} >= {}".format(dep, ver))
+                build_deps.append({'dependency': "{} >= {}".format(dep, ver)})
             else:
-                build_deps.append(dep)
+                build_deps.append({'dependency': dep})
 
         name = body['name']
         # TODO: PDC has to be patched to support stream/version instead of 
