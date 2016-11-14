@@ -136,7 +136,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         version = body['stream']
         release = body['version']
         variant_uid = "{n}-{v}-{r}".format(n=name, v=version, r=release)
-        variant_id = variant_uid.lower()
+        variant_id = name
         koji_tag = "module-" + variant_id
 
         unreleased_variant = pdc['unreleasedvariants']._({
