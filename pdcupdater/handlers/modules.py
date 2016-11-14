@@ -131,7 +131,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
                 build_deps.append({'dependency': dep})
 
         name = body['name']
-        # TODO: PDC has to be patched to support stream/version instead of 
+        # TODO: PDC has to be patched to support stream/version instead of
         # version/release, but for now we just do the right mapping here...
         version = body['stream']
         release = body['version']
@@ -160,7 +160,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         log.debug("get_or_create_unreleased_variant(pdc, body=%r)" % body)
 
         variant_id =  body['name'] # This is supposed to be equal to name
-        # TODO: PDC has to be patched to support stream/version instead of 
+        # TODO: PDC has to be patched to support stream/version instead of
         # version/release, but for now we just do the right mapping here...
         variant_version =  body['stream'] # This is supposed to be equal to version
         variant_release =  body['version'] # This is supposed to be equal to release
