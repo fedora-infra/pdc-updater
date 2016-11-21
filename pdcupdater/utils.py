@@ -527,7 +527,38 @@ def pkgdb2release(collection):
     return "-".join(release)
 
 
-def tag2release(tag):
+def tag2release(tag, pdc=None):
+    if pdc:
+        return _tag2release_with_pdc(pdc, tag)
+    else:
+        return _tag2release_fedora(tag)
+
+
+def _tag2release_with_pdc(pdc, tag):
+    """ Use PDC to figure out what release is associated with this tag. """
+    releases = list(pdc.get_paged(
+        pdc['releases']._,
+        brew_allowed_tag=tag,
+    ))
+
+    if not releases:
+        raise ValueError("Could not find matching release for tag %r" % tag)
+
+    if len(releases) != 1:
+        log.error("%i different releases match tag %r, %r" % (
+            len(releases), tag, releases))
+
+    release = releases[0]
+    return release['release_id'], release
+
+
+def _tag2release_fedora(tag):
+    """ Just guess which release correspond with this koji tag.
+
+    For unknown reasons, the Fedora PDC instance doesn't have a
+    koji_allowed_tags field associated with a release that we could use to
+    determine this.  So, just guess for now until we resolve that.
+    """
     if tag == rawhide_tag():
         release = {
             'name': 'Fedora',

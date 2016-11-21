@@ -42,6 +42,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         super(BaseKojiDepChainHandler, self).__init__(*args, **kwargs)
         self.koji_url = self.config['pdcupdater.koji_url']
         self.io_threads = self.config.get('pdcupdater.koji_io_threads', 8)
+        self.pdc_tag_mapping = self.config.get('pdcupdater.pdc_tag_mapping', False)
 
     @property
     def topic_suffixes(self):
@@ -88,7 +89,10 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
     def handle(self, pdc, msg):
         tag = msg['msg']['tag']
-        release_id, release = tag2release(tag)
+        if self.pdc_tag_mapping:
+            release_id, release = tag2release(tag, pdc=pdc)
+        else:
+            release_id, release = tag2release(tag)
 
         # TODO -- this tag <-> release agreement is going to break down with modularity.
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
@@ -145,7 +149,10 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         for tag in tags:
             log.info("Starting audit of tag %r of %r." % (tag, tags))
-            release_id, release = tag2release(tag)
+            if self.pdc_tag_mapping:
+                release_id, release = tag2release(tag, pdc=pdc)
+            else:
+                release_id, release = tag2release(tag)
 
             # Query Koji and PDC to figure out their respective opinions
             koji_relationships = list(self._yield_koji_relationships_from_tag(pdc, tag))
@@ -173,7 +180,10 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         for tag in tags:
             log.info("Starting initialize of tag %r of %r." % (tag, tags))
-            release_id, release = tag2release(tag)
+            if self.pdc_tag_mapping:
+                release_id, release = tag2release(tag, pdc=pdc)
+            else:
+                release_id, release = tag2release(tag)
             pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
             # Figure out everything that koji knows about this tag.
