@@ -43,6 +43,9 @@ Requires:           python-fedora
 Requires:           packagedb-cli
 Requires:           pdc-client
 
+# For runtime
+Requires:           fedmsg-hub
+
 %description
 Fedmsg consumer that listens to activity on the Fedora message bus, and updates
 the Product Definition Center database in response.
