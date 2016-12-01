@@ -20,7 +20,7 @@ with open('test-requirements.txt', 'r') as f:
 
 setup(
     name='pdc-updater',
-    version='0.3.1',
+    version='0.4.0',
     description='Update the product-definition-center in response to fedmsg',
     license='GPLv2+',
     author='Ralph Bean',

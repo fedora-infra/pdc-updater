@@ -1,4 +1,59 @@
 
+0.4.0
+-----
+
+Pull Requests
+
+- (@ralphbean)      #16, A stab at modelling container-to-rpm deps.
+  https://github.com/fedora-infra/pdc-updater/pull/16
+- (@ralphbean)      #17, Revert 16 feature/container deps
+  https://github.com/fedora-infra/pdc-updater/pull/17
+- (@ralphbean)      #19, Handle 414 error when sanity-checking bulk delete.
+  https://github.com/fedora-infra/pdc-updater/pull/19
+
+Commits
+
+- 836a5ca84 Move the base handler out into its own module.
+  https://github.com/fedora-infra/pdc-updater/commit/836a5ca84
+- 2912b136e Hardcode "interesting" docker tags for now.
+  https://github.com/fedora-infra/pdc-updater/commit/2912b136e
+- 98f2b6041 A first stab at modelling container<->rpm deps.
+  https://github.com/fedora-infra/pdc-updater/commit/98f2b6041
+- 07e11a06e Distinguish the component type.
+  https://github.com/fedora-infra/pdc-updater/commit/07e11a06e
+- 36f8b5da4 Fix a mock in old tests.
+  https://github.com/fedora-infra/pdc-updater/commit/36f8b5da4
+- 0f19feafc Check this.. a vcr record was driving me crazy here.
+  https://github.com/fedora-infra/pdc-updater/commit/0f19feafc
+- d5b3ccbd7 Update the test suite.
+  https://github.com/fedora-infra/pdc-updater/commit/d5b3ccbd7
+- a53dc7c18 Fix a loop bug.
+  https://github.com/fedora-infra/pdc-updater/commit/a53dc7c18
+- 73e8c465e Rename this function to better reflect what it does.
+  https://github.com/fedora-infra/pdc-updater/commit/73e8c465e
+- c17d74628 Some more renaming, just to get the semantics right.
+  https://github.com/fedora-infra/pdc-updater/commit/c17d74628
+- e056bba20 Get audit/init working for containers.
+  https://github.com/fedora-infra/pdc-updater/commit/e056bba20
+- 2751391c6 Tests for the container depchain handler.
+  https://github.com/fedora-infra/pdc-updater/commit/2751391c6
+- 6ca07008a Move this rpm-centric code into an intermediary base class.
+  https://github.com/fedora-infra/pdc-updater/commit/6ca07008a
+- eadf64793 Typofix.
+  https://github.com/fedora-infra/pdc-updater/commit/eadf64793
+- 6a60b4524 Handle possible error here.
+  https://github.com/fedora-infra/pdc-updater/commit/6a60b4524
+- 6b406b2aa Revert "A stab at modelling container-to-rpm deps."
+  https://github.com/fedora-infra/pdc-updater/commit/6b406b2aa
+- c55a42feb Revert "Revert "A stab at modelling container-to-rpm deps.""
+  https://github.com/fedora-infra/pdc-updater/commit/c55a42feb
+- ddaae3704 Fix atomic git url at @puiterwijk's suggestion.
+  https://github.com/fedora-infra/pdc-updater/commit/ddaae3704
+- 6617cdaa0 Handle 414 error when sanity-checking bulk delete.
+  https://github.com/fedora-infra/pdc-updater/commit/6617cdaa0
+- 46ae92038 Require fedmsg-hub.
+  https://github.com/fedora-infra/pdc-updater/commit/46ae92038
+
 0.3.1
 -----
 
