@@ -187,21 +187,25 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
         for key in relationship_types
     ])
 
+    endpoint = pdc['release-component-relationships']._
+
     for relationship_type, children in relationship_lookup.items():
         # Check to see if all the relations are all already there, first.
         query_kwargs = dict(
             from_component_name=parent['name'],
             from_component_release=release,
             type=relationship_type,
-            to_component_name=children,
         )
-        endpoint = pdc['release-component-relationships']._
-        response = endpoint(**query_kwargs)
+        response = _chunked_query(
+            pdc, endpoint, query_kwargs,
+            key='to_component_name',
+            iterable=children,
+        )
 
         # Nobody can ask us to delete things that aren't there.
         # That's unreasonable.  Sanity check.
-        message = "%r != %r" % (response['count'], len(children))
-        assert response['count'] == len(children), message
+        message = "%r != %r" % (len(response), len(children))
+        assert len(response) == len(children), message
 
         # Find the primary keys for all of these...
         query = pdc.get_paged(endpoint, **query_kwargs)

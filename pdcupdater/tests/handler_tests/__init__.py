@@ -72,22 +72,22 @@ def mock_pdc(function):
             'previous': None,
             'results': [{
                 'release': 'fedora-24',
-                'description': 'Deps for atomic-docker-host https://git.fedorahosted.org/cgit/fedora-atomic.git/plain/',
+                'description': 'Deps for atomic-docker-host https://pagure.io/fedora-atomic/raw/master/f/',
                 'group_type': 'atomic-docker-host',
                 'id': 1,
             }, {
                 'release': 'fedora-23-updates',
-                'description': 'Deps for atomic-docker-host https://git.fedorahosted.org/cgit/fedora-atomic.git/plain/',
+                'description': 'Deps for atomic-docker-host https://pagure.io/fedora-atomic/raw/master/f/',
                 'group_type': 'atomic-docker-host',
                 'id': 2,
             }, {
                 'release': 'fedora-22-updates',
-                'description': 'Deps for atomic-docker-host https://git.fedorahosted.org/cgit/fedora-atomic.git/plain/',
+                'description': 'Deps for atomic-docker-host https://pagure.io/fedora-atomic/raw/master/f/',
                 'group_type': 'atomic-docker-host',
                 'id': 3,
             }, {
                 'release': 'fedora-21-updates',
-                'description': 'Deps for atomic-docker-host https://git.fedorahosted.org/cgit/fedora-atomic.git/plain/',
+                'description': 'Deps for atomic-docker-host https://pagure.io/fedora-atomic/raw/master/f/',
                 'group_type': 'atomic-docker-host',
                 'id': 3,
             }],
@@ -322,7 +322,7 @@ class BaseHandlerTest(unittest.TestCase):
         'pdcupdater.pkgdb_url': 'blihblihblih',
         'pdcupdater.koji_url': 'http://koji.fedoraproject.org/kojihub',
         'pdcupdater.old_composes_url': 'https://kojipkgs.fedoraproject.org/compose',
-        'pdcupdater.fedora_atomic_git_url': 'https://git.fedorahosted.org/cgit/fedora-atomic.git/plain/',
+        'pdcupdater.fedora_atomic_git_url': 'https://pagure.io/fedora-atomic/raw/master/f/',
     }
 
     def setUp(self):

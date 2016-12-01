@@ -7,7 +7,7 @@
 %endif
 
 Name:               pdc-updater
-Version:            0.3.1
+Version:            0.4.0
 Release:            1%{?dist}
 Summary:            Update the product definition center in response to fedmsg
 
@@ -42,6 +42,9 @@ Requires:           python-dogpile-cache
 Requires:           python-fedora
 Requires:           packagedb-cli
 Requires:           pdc-client
+
+# For runtime
+Requires:           fedmsg-hub
 
 %description
 Fedmsg consumer that listens to activity on the Fedora message bus, and updates
@@ -79,6 +82,9 @@ rm -rf %{buildroot}%{python2_sitelib}/tests/
 %{_bindir}/pdc-updater-initialize
 
 %changelog
+* Thu Dec 01 2016 Ralph Bean <rbean@redhat.com> - 0.4.0-1
+- new version
+
 * Tue Sep 27 2016 Ralph Bean <rbean@redhat.com> - 0.3.1-1
 - new version
 
