@@ -74,47 +74,14 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         if 'topdir' in body:
             self.handle_new_tree(pdc, body, unreleased_variant)
 
-    def get_mmd_from_scm(self, scmurl):
-        log.debug("get_mmd_from_scm(scmurl=%r)" % scmurl)
-        with TmpDir(prefix="pdcupdater-") as tmpdir, PushPopD(tmpdir), \
-                open(os.devnull, "w") as devnull:
-            m = self.scmurl_re.match(scmurl)
-            if not m:
-                raise RuntimeError("Can't parse SCM URL: {}".format(scmurl))
-            giturl = m.group('giturl')
-            repopath = m.group('repopath').rstrip("/")
-            modpath = m.group('modpath')
-            revision = m.group('revision')
-            modname = repopath.rsplit("/", 1)[1]
-            if modname.endswith(".git"):
-                modname = modname[:-4]
-
-            log.debug("Cloning {}".format(giturl))
-            check_call(["git", "clone", "-n", giturl, modname],
-                       stdout=devnull, stderr=STDOUT)
-            os.chdir(modname)
-
-            log.debug("Checking out revision {}".format(revision))
-            check_call(["git", "reset", "--hard", revision],
-                       stdout=devnull, stderr=STDOUT)
-
-            mmd_yaml = modname + ".yaml"
-            if modpath:
-                mmd_yaml = "/".join((modpath, mmd_yaml))
-            log.debug("Reading/parsing {}".format(mmd_yaml))
-            mmd = modulemd.ModuleMetadata()
-            mmd.load(mmd_yaml)
-
-            return mmd
-
     def create_unreleased_variant(self, pdc, body):
         """Creates an UnreleasedVariant for a module in PDC. Checks out the
         module metadata from the supplied SCM repository (currently only
         anonymous GIT is supported)."""
         log.debug("create_unreleased_variant(pdc, body=%r)" % body)
 
-        scmurl = body['scmurl']
-        mmd = self.get_mmd_from_scm(scmurl)
+        mmd = modulemd.ModuleMetadata()
+        mmd.loads(body['modulemd'])
 
         runtime_deps = [{'dependency': dependency, 'stream': stream}
                         for dependency, stream in mmd.requires.items()]
@@ -140,6 +107,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             'koji_tag': koji_tag,
             'runtime_deps': runtime_deps,
             'build_deps': build_deps,
+            'modulemd': body["modulemd"],
         }
         unreleased_variant = pdc['unreleasedvariants']._(data)
 
