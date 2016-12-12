@@ -1,3 +1,6 @@
+import json
+import os
+
 import mock
 
 import pdcupdater.utils
@@ -5,6 +8,10 @@ from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
 
+def load_example_message(filename):
+        here = os.path.dirname(__file__)
+        with open(os.path.join(here, 'data', filename), 'rb') as f:
+            return json.loads(f.read().decode('utf-8'))
 
 class TestBuildtimeDepIngestion(BaseHandlerTest):
     maxDiff = None
@@ -260,3 +267,33 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         }
 
         self.assertDictEqual(pdc.calls, expected_calls)
+
+    @mock.patch('pdcupdater.utils.interesting_tags')
+    def test_handle_brew_message(self, tags):
+        tags.return_value = ['rhel-9000-candidate']
+        msg = load_example_message('messagebus-example1.json')
+        result = self.handler.can_handle(msg)
+        self.assertEquals(result, True)
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.koji_list_buildroot_for')
+    @mock.patch('pdcupdater.utils.interesting_tags')
+    def test_handle_new_brew_build(self, pdc, tags, buildroot):
+        tags.return_value = ['rhel-9000-candidate']
+        buildroot.return_value = [
+            {'name': 'wat', 'is_update': True},
+        ]
+
+        msg = load_example_message('messagebus-example1.json')
+        self.handler.handle(pdc, msg)
+        expected_keys = [
+            'release-component-relationships',
+            'releases/rhel-9000-candidate',
+            'release-components',
+            'global-components',
+        ]
+        self.assertEquals(pdc.calls.keys(), expected_keys)
+
+        self.assertEqual(len(pdc.calls['global-components']), 21)
+        self.assertEqual(len(pdc.calls['release-components']), 21)
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 63)

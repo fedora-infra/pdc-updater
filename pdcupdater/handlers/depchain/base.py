@@ -46,7 +46,19 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
     @property
     def topic_suffixes(self):
-        return ['buildsys.tag']
+        return [
+            # Fedora messaging
+            'buildsys.tag',
+            # Red Hat.
+            'brew.exchange',
+        ]
+
+    @classmethod
+    def extract_tag(cls, msg):
+        if 'tag' in msg.get('msg', {}):
+            return msg['msg']['tag']
+        else:
+            return msg['headers']['tag']
 
     def can_handle(self, msg):
         if not any([msg['topic'].endswith(suffix)
@@ -54,12 +66,13 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
             return False
 
         # Ignore secondary arches for now
-        if msg['msg']['instance'] != 'primary':
-            log.debug("From %r.  Skipping." % (msg['msg']['instance']))
+        instance = msg.get('msg', {}).get('instance', 'primary')
+        if instance != 'primary':
+            log.debug("From %r.  Skipping." % instance)
             return False
 
         interesting = self.interesting_tags()
-        tag = msg['msg']['tag']
+        tag = self.extract_tag(msg)
 
         if tag not in interesting:
             log.debug("%r not in %r.  Skipping."  % (tag, interesting))
@@ -88,7 +101,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
                 yield parent, relationship_type, child
 
     def handle(self, pdc, msg):
-        tag = msg['msg']['tag']
+        tag = self.extract_tag(msg)
         if self.pdc_tag_mapping:
             release_id, release = tag2release(tag, pdc=pdc)
         else:

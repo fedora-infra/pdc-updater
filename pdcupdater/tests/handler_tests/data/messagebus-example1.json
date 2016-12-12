@@ -1,0 +1,58 @@
+{
+  "body": {
+    "tag": {
+      "maven_support": false, 
+      "arches": null, 
+      "locked": false, 
+      "name": "rhel-9000-candidate", 
+      "extra": {}, 
+      "maven_include_all": false, 
+      "id": 9895, 
+      "perm": null, 
+      "perm_id": null
+    }, 
+    "force": false, 
+    "build": {
+      "package_name": "rhel-release", 
+      "extra": null, 
+      "creation_time": "2016-12-12 16:03:37.724045", 
+      "completion_time": "2016-12-12 16:06:00.612419", 
+      "package_id": 19646, 
+      "id": 528225, 
+      "build_id": 528225, 
+      "state": 1, 
+      "source": null, 
+      "epoch": null, 
+      "version": "9000", 
+      "completion_ts": 1481558760.61242, 
+      "owner_id": 1251, 
+      "owner_name": "somebody", 
+      "nvr": "rhel-release-9000-0.el9000", 
+      "start_time": "2016-12-12 16:03:37.724045", 
+      "creation_event_id": 14538656, 
+      "start_ts": 1481558617.72405, 
+      "volume_id": 0, 
+      "creation_ts": 1481558617.72405, 
+      "name": "rhel-release", 
+      "task_id": 12224893, 
+      "volume_name": "DEFAULT", 
+      "release": "0.el9000"
+    }, 
+    "user": {
+      "status": 0, 
+      "krb_principal": "somebody@REDHAT.COM", 
+      "usertype": 0, 
+      "id": 1251, 
+      "name": "somebody"
+    }
+  }, 
+  "headers": {
+    "name": "rhel-release", 
+    "tag": "rhel-9000-candidate", 
+    "user": "somebody", 
+    "version": "9000", 
+    "release": "0.el9000", 
+    "type": "Tag"
+  },
+  "topic": "brew.exchange"
+}
