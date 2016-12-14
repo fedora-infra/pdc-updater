@@ -4,9 +4,7 @@ import time
 
 import pdcupdater.handlers
 import pdcupdater.services
-from pdcupdater.utils import (
-    tag2release,
-)
+import pdcupdater.utils
 
 
 log = logging.getLogger(__name__)
@@ -60,6 +58,13 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         else:
             return msg['headers']['tag']
 
+    @classmethod
+    def extract_build_id(cls, msg):
+        if 'build_id' in msg.get('msg', {}):
+            return msg['msg']['build_id']
+        else:
+            return msg['body']['build']['build_id']
+
     def can_handle(self, msg):
         if not any([msg['topic'].endswith(suffix)
                     for suffix in self.topic_suffixes]):
@@ -103,14 +108,14 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
     def handle(self, pdc, msg):
         tag = self.extract_tag(msg)
         if self.pdc_tag_mapping:
-            release_id, release = tag2release(tag, pdc=pdc)
+            release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
         else:
-            release_id, release = tag2release(tag)
+            release_id, release = pdcupdater.utils.tag2release(tag)
 
         # TODO -- this tag <-> release agreement is going to break down with modularity.
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
-        build_id = msg['msg']['build_id']
+        build_id = self.extract_build_id(msg)
 
         # Go to sleep due to a race condition that is koji's fault.
         # It publishes a fedmsg message before the task is actually done and
@@ -163,9 +168,9 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         for tag in tags:
             log.info("Starting audit of tag %r of %r." % (tag, tags))
             if self.pdc_tag_mapping:
-                release_id, release = tag2release(tag, pdc=pdc)
+                release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
             else:
-                release_id, release = tag2release(tag)
+                release_id, release = pdcupdater.utils.tag2release(tag)
 
             # Query Koji and PDC to figure out their respective opinions
             koji_relationships = list(self._yield_koji_relationships_from_tag(pdc, tag))
@@ -194,9 +199,9 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         for tag in tags:
             log.info("Starting initialize of tag %r of %r." % (tag, tags))
             if self.pdc_tag_mapping:
-                release_id, release = tag2release(tag, pdc=pdc)
+                release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
             else:
-                release_id, release = tag2release(tag)
+                release_id, release = pdcupdater.utils.tag2release(tag)
             pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
             # Figure out everything that koji knows about this tag.

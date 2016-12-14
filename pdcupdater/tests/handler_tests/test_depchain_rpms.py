@@ -4,6 +4,7 @@ import os
 import mock
 
 import pdcupdater.utils
+import pdcupdater.handlers.depchain.rpms
 from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
@@ -152,7 +153,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         ]))
 
 
-class TestRuntimeDepIngestion(BaseHandlerTest):
+class TestRuntimeDepIngestionFedora(BaseHandlerTest):
     handler_path = 'pdcupdater.handlers.depchain.rpms:NewRPMRunTimeDepChainHandler'
     config = {}
 
@@ -268,6 +269,17 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
 
         self.assertDictEqual(pdc.calls, expected_calls)
 
+
+class FakeHandler(pdcupdater.handlers.depchain.rpms.BaseRPMDepChainHandler):
+    # TODO -- working here.  make a fake handler so we can avoid trying to make
+    # calls to koji about rpms in RHEL 9000, which doesn't exist.
+    pass
+
+
+class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
+    handler_path = 'pdcupdater.tests.handler_tests.test_depchain_rpms:FakeHandler'
+    config = {}
+
     @mock.patch('pdcupdater.utils.interesting_tags')
     def test_handle_brew_message(self, tags):
         tags.return_value = ['rhel-9000-candidate']
@@ -277,9 +289,12 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
 
     @mock_pdc
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
+    @mock.patch('pdcupdater.utils.tag2release')
     @mock.patch('pdcupdater.utils.interesting_tags')
-    def test_handle_new_brew_build(self, pdc, tags, buildroot):
+    def test_handle_new_brew_build(self, pdc, tags, tag2release, buildroot):
         tags.return_value = ['rhel-9000-candidate']
+        tag2release.return_value = 'rhel-9000', {
+        }
         buildroot.return_value = [
             {'name': 'wat', 'is_update': True},
         ]

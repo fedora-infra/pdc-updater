@@ -64,6 +64,7 @@ def mock_pdc(function):
         pdc.add_endpoint('releases/fedora-20-updates', 'GET', {})
         pdc.add_endpoint('releases/epel-7-updates', 'GET', {})
         pdc.add_endpoint('releases/epel-6-updates', 'GET', {})
+        pdc.add_endpoint('releases/rhel-9000', 'GET', {})
 
 
         pdc.add_endpoint('component-groups', 'GET', {
