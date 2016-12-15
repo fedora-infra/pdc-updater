@@ -95,7 +95,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         release = body['version']
         variant_uid = "{n}-{v}-{r}".format(n=name, v=version, r=release)
         variant_id = name
-        koji_tag = "module-" + variant_id
+        koji_tag = "module-" + variant_uid.lower()
 
         data = {
             'variant_id': variant_id,
