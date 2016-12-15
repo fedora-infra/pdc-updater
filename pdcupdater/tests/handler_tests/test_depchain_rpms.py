@@ -271,18 +271,23 @@ class TestRuntimeDepIngestionFedora(BaseHandlerTest):
 
 
 class FakeHandler(pdcupdater.handlers.depchain.rpms.BaseRPMDepChainHandler):
-    # TODO -- working here.  make a fake handler so we can avoid trying to make
-    # calls to koji about rpms in RHEL 9000, which doesn't exist.
-    pass
+    managed_types = ('RPMBuildRequires', 'RPMBuildRoot')
+    # The types of the parents and children in our managed relationships
+    parent_type = 'rpm'
+    child_type = 'rpm'
+
+    def interesting_tags(self):
+        return ['rhel-9000-candidate']
+
+    def _yield_koji_relationships_from_build(self, url, build, rpms=None):
+        yield 'wat', 'RPMBuildRequires', 'bar'
 
 
 class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
     handler_path = 'pdcupdater.tests.handler_tests.test_depchain_rpms:FakeHandler'
     config = {}
 
-    @mock.patch('pdcupdater.utils.interesting_tags')
-    def test_handle_brew_message(self, tags):
-        tags.return_value = ['rhel-9000-candidate']
+    def test_handle_brew_message(self):
         msg = load_example_message('messagebus-example1.json')
         result = self.handler.can_handle(msg)
         self.assertEquals(result, True)
@@ -303,12 +308,12 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
         self.handler.handle(pdc, msg)
         expected_keys = [
             'release-component-relationships',
-            'releases/rhel-9000-candidate',
+            'releases/rhel-9000',
             'release-components',
             'global-components',
         ]
         self.assertEquals(pdc.calls.keys(), expected_keys)
 
-        self.assertEqual(len(pdc.calls['global-components']), 21)
-        self.assertEqual(len(pdc.calls['release-components']), 21)
-        self.assertEqual(len(pdc.calls['release-component-relationships']), 63)
+        self.assertEqual(len(pdc.calls['global-components']), 1)
+        self.assertEqual(len(pdc.calls['release-components']), 1)
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 3)
