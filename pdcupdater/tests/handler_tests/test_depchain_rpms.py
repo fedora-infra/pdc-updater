@@ -1,10 +1,18 @@
+import json
+import os
+
 import mock
 
 import pdcupdater.utils
+import pdcupdater.handlers.depchain.rpms
 from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
 
+def load_example_message(filename):
+        here = os.path.dirname(__file__)
+        with open(os.path.join(here, 'data', filename), 'rb') as f:
+            return json.loads(f.read().decode('utf-8'))
 
 class TestBuildtimeDepIngestion(BaseHandlerTest):
     maxDiff = None
@@ -145,7 +153,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         ]))
 
 
-class TestRuntimeDepIngestion(BaseHandlerTest):
+class TestRuntimeDepIngestionFedora(BaseHandlerTest):
     handler_path = 'pdcupdater.handlers.depchain.rpms:NewRPMRunTimeDepChainHandler'
     config = {}
 
@@ -260,3 +268,52 @@ class TestRuntimeDepIngestion(BaseHandlerTest):
         }
 
         self.assertDictEqual(pdc.calls, expected_calls)
+
+
+class FakeHandler(pdcupdater.handlers.depchain.rpms.BaseRPMDepChainHandler):
+    managed_types = ('RPMBuildRequires', 'RPMBuildRoot')
+    # The types of the parents and children in our managed relationships
+    parent_type = 'rpm'
+    child_type = 'rpm'
+
+    def interesting_tags(self):
+        return ['rhel-9000-candidate']
+
+    def _yield_koji_relationships_from_build(self, url, build, rpms=None):
+        yield 'wat', 'RPMBuildRequires', 'bar'
+
+
+class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
+    handler_path = 'pdcupdater.tests.handler_tests.test_depchain_rpms:FakeHandler'
+    config = {}
+
+    def test_handle_brew_message(self):
+        msg = load_example_message('messagebus-example1.json')
+        result = self.handler.can_handle(msg)
+        self.assertEquals(result, True)
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.koji_list_buildroot_for')
+    @mock.patch('pdcupdater.utils.tag2release')
+    @mock.patch('pdcupdater.utils.interesting_tags')
+    def test_handle_new_brew_build(self, pdc, tags, tag2release, buildroot):
+        tags.return_value = ['rhel-9000-candidate']
+        tag2release.return_value = 'rhel-9000', {
+        }
+        buildroot.return_value = [
+            {'name': 'wat', 'is_update': True},
+        ]
+
+        msg = load_example_message('messagebus-example1.json')
+        self.handler.handle(pdc, msg)
+        expected_keys = [
+            'release-component-relationships',
+            'releases/rhel-9000',
+            'release-components',
+            'global-components',
+        ]
+        self.assertEquals(pdc.calls.keys(), expected_keys)
+
+        self.assertEqual(len(pdc.calls['global-components']), 1)
+        self.assertEqual(len(pdc.calls['release-components']), 1)
+        self.assertEqual(len(pdc.calls['release-component-relationships']), 3)
