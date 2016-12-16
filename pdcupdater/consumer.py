@@ -50,10 +50,10 @@ class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
 
         super(PDCUpdater, self).__init__(hub)
 
-    def consume(self, msg):
+    def consume(self, envelope):
         # Remove the envelope
-        headers = msg.get('headers', {})  # https://github.com/mokshaproject/moksha/pull/35
-        topic, msg = msg['topic'], msg['body']
+        headers = envelope.get('headers', {})  # https://github.com/mokshaproject/moksha/pull/35
+        topic, msg = envelope['topic'], envelope['body']
 
         # Stuff topic and headers back into the message body, for convenience.
         msg['topic'] = topic
