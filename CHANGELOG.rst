@@ -1,4 +1,33 @@
 
+0.4.1
+-----
+
+Pull Requests
+
+- (@ralphbean)      #20, Optionally use PDC to map tags to releases.
+  https://github.com/fedora-infra/pdc-updater/pull/20
+- (@ralphbean)      #22, Backend support for other busses.
+  https://github.com/fedora-infra/pdc-updater/pull/22
+
+Commits
+
+- 6f3cb2aa7 Optionally use PDC to map tags to releases.
+  https://github.com/fedora-infra/pdc-updater/commit/6f3cb2aa7
+- ff70e226c Specfile updates based on review at https://bugzilla.redhat.com/show_bug.cgi?id=1379830
+  https://github.com/fedora-infra/pdc-updater/commit/ff70e226c
+- 49fd18ed1 Also, provides.
+  https://github.com/fedora-infra/pdc-updater/commit/49fd18ed1
+- 019b04726 Specfile moved to Fedora dist-git.  http://pkgs.fedoraproject.org/cgit/rpms/pdc-updater
+  https://github.com/fedora-infra/pdc-updater/commit/019b04726
+- a74ec296a Working on backend support for other busses.
+  https://github.com/fedora-infra/pdc-updater/commit/a74ec296a
+- 215fca14f Partial progress on the test suite for the other bus backend stuff.
+  https://github.com/fedora-infra/pdc-updater/commit/215fca14f
+- 4c74ccf46 Get the test suite working again.
+  https://github.com/fedora-infra/pdc-updater/commit/4c74ccf46
+- 0c0df0d4c Avoid renaming variables, to be less confusing.
+  https://github.com/fedora-infra/pdc-updater/commit/0c0df0d4c
+
 0.4.0
 -----
 

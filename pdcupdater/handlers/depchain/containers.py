@@ -38,7 +38,10 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
 
     def _yield_koji_relationships_from_tag(self, pdc, tag):
 
-        release_id, release = pdcupdater.utils.tag2release(tag)
+        if self.pdc_tag_mapping:
+            release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
+        else:
+            release_id, release = pdcupdater.utils.tag2release(tag)
         # TODO -- this tag <-> release agreement is going to break down with modularity.
 
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)

@@ -50,10 +50,16 @@ class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
 
         super(PDCUpdater, self).__init__(hub)
 
-    def consume(self, msg):
-        msg = msg['body']  # Remove envelope
+    def consume(self, envelope):
+        # Remove the envelope
+        headers = envelope.get('headers', {})  # https://github.com/mokshaproject/moksha/pull/35
+        topic, msg = envelope['topic'], envelope['body']
+
+        # Stuff topic and headers back into the message body, for convenience.
+        msg['topic'] = topic
+        msg['headers'] = headers
+
         idx = msg.get('msg_id', None)
-        topic = msg.get('topic', None)
         self.log.debug("Received %r, %r" % (idx, topic))
 
         pdc = pdc_client.PDCClient(**self.pdc_config)

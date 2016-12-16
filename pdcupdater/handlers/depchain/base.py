@@ -4,9 +4,7 @@ import time
 
 import pdcupdater.handlers
 import pdcupdater.services
-from pdcupdater.utils import (
-    tag2release,
-)
+import pdcupdater.utils
 
 
 log = logging.getLogger(__name__)
@@ -42,10 +40,30 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         super(BaseKojiDepChainHandler, self).__init__(*args, **kwargs)
         self.koji_url = self.config['pdcupdater.koji_url']
         self.io_threads = self.config.get('pdcupdater.koji_io_threads', 8)
+        self.pdc_tag_mapping = self.config.get('pdcupdater.pdc_tag_mapping', False)
 
     @property
     def topic_suffixes(self):
-        return ['buildsys.tag']
+        return [
+            # Fedora messaging
+            'buildsys.tag',
+            # Red Hat.
+            'brew.exchange',
+        ]
+
+    @classmethod
+    def extract_tag(cls, msg):
+        if 'tag' in msg.get('msg', {}):
+            return msg['msg']['tag']
+        else:
+            return msg['headers']['tag']
+
+    @classmethod
+    def extract_build_id(cls, msg):
+        if 'build_id' in msg.get('msg', {}):
+            return msg['msg']['build_id']
+        else:
+            return msg['body']['build']['build_id']
 
     def can_handle(self, msg):
         if not any([msg['topic'].endswith(suffix)
@@ -53,12 +71,13 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
             return False
 
         # Ignore secondary arches for now
-        if msg['msg']['instance'] != 'primary':
-            log.debug("From %r.  Skipping." % (msg['msg']['instance']))
+        instance = msg.get('msg', {}).get('instance', 'primary')
+        if instance != 'primary':
+            log.debug("From %r.  Skipping." % instance)
             return False
 
         interesting = self.interesting_tags()
-        tag = msg['msg']['tag']
+        tag = self.extract_tag(msg)
 
         if tag not in interesting:
             log.debug("%r not in %r.  Skipping."  % (tag, interesting))
@@ -87,13 +106,16 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
                 yield parent, relationship_type, child
 
     def handle(self, pdc, msg):
-        tag = msg['msg']['tag']
-        release_id, release = tag2release(tag)
+        tag = self.extract_tag(msg)
+        if self.pdc_tag_mapping:
+            release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
+        else:
+            release_id, release = pdcupdater.utils.tag2release(tag)
 
         # TODO -- this tag <-> release agreement is going to break down with modularity.
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
-        build_id = msg['msg']['build_id']
+        build_id = self.extract_build_id(msg)
 
         # Go to sleep due to a race condition that is koji's fault.
         # It publishes a fedmsg message before the task is actually done and
@@ -145,7 +167,10 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         for tag in tags:
             log.info("Starting audit of tag %r of %r." % (tag, tags))
-            release_id, release = tag2release(tag)
+            if self.pdc_tag_mapping:
+                release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
+            else:
+                release_id, release = pdcupdater.utils.tag2release(tag)
 
             # Query Koji and PDC to figure out their respective opinions
             koji_relationships = list(self._yield_koji_relationships_from_tag(pdc, tag))
@@ -173,7 +198,10 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
         for tag in tags:
             log.info("Starting initialize of tag %r of %r." % (tag, tags))
-            release_id, release = tag2release(tag)
+            if self.pdc_tag_mapping:
+                release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
+            else:
+                release_id, release = pdcupdater.utils.tag2release(tag)
             pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
             # Figure out everything that koji knows about this tag.
