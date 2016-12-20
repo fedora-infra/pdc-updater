@@ -54,5 +54,5 @@
     "release": "0.el9000", 
     "type": "Tag"
   },
-  "topic": "brew.exchange"
+  "topic": "VirtualTopic.eng.brew.build.tag"
 }

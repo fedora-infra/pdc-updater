@@ -48,7 +48,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
             # Fedora messaging
             'buildsys.tag',
             # Red Hat.
-            'brew.exchange',
+            'brew.build.tag',
         ]
 
     @classmethod
