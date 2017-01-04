@@ -11,4 +11,5 @@ pdcupdater/tests/vcr-request-data
 .coverage
 *.dbm*
 .idea
+.vagrant
 
