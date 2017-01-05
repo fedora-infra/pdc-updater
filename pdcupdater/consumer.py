@@ -59,8 +59,11 @@ class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
         msg['topic'] = topic
         msg['headers'] = headers
 
-        idx = msg.get('msg_id', None)
-        self.log.debug("Received %r, %r" % (idx, topic))
+        # If the message is internal, the message id is in the headers
+        if 'message-id' in msg['headers']:
+            msg['msg_id'] = msg['headers']['message-id']
+
+        self.log.debug("Received %r, %r" % (msg['msg_id'], topic))
 
         pdc = pdc_client.PDCClient(**self.pdc_config)
         pdcupdater.utils.handle_message(pdc, self.handlers, msg)
