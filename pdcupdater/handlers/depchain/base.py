@@ -23,7 +23,10 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
     def construct_topic(self, config):
         # Return a single hardcoded topic when using STOMP
         if config.get('stomp_uri'):
-            return ['{0}.brew.build.tag'.format(config['topic_prefix'])]
+            if config.get('zmq_enabled', False):
+                raise Exception('pdc-updater cannot support both STOMP and ZMQ being enabled')
+            else:
+                return ['{0}.brew.build.tag'.format(config['topic_prefix'])]
         else:
             return [
                 '.'.join([config['topic_prefix'], config['environment'], topic])
