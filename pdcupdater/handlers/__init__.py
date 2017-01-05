@@ -18,7 +18,7 @@ class BaseHandler(object):
     def __init__(self, config):
         self.config = config
 
-    def construct_topic(self, config):
+    def construct_topics(self, config):
         return [
             '.'.join([config['topic_prefix'], config['environment'], topic])
             for topic in self.topic_suffixes

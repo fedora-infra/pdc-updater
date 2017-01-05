@@ -20,7 +20,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
     parent_type = None
     child_type = None
 
-    def construct_topic(self, config):
+    def construct_topics(self, config):
         # Return a single hardcoded topic when using STOMP
         if config.get('stomp_uri'):
             if config.get('zmq_enabled', False):
