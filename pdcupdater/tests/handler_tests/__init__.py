@@ -1,5 +1,6 @@
-from os.path import dirname
+from os.path import dirname, exists
 import functools
+import tarfile
 import unittest
 import logging
 
@@ -16,7 +17,8 @@ import pdc_client.test_helpers
 log = logging.getLogger(__name__)
 
 
-cassette_dir = dirname(dirname(__file__)) + '/vcr-request-data/'
+base_dir = dirname(dirname(__file__))
+cassette_dir = base_dir + '/vcr-request-data/'
 
 def mock_404():
     import beanbag.bbexcept
@@ -334,6 +336,12 @@ class BaseHandlerTest(unittest.TestCase):
         if self.handler_path:
             log.info("Initializing handler %s(%r)", self.handler_path, config)
             self.handler = fedmsg.utils.load_class(self.handler_path)(config)
+
+        if not exists(cassette_dir):
+            log.info("Cassette directory not found.  Uncompressing archive.")
+            archive = cassette_dir.rstrip('/') + ".tar.gz"
+            with tarfile.open(archive, mode='r:gz') as t:
+                t.extractall(base_dir)
 
         log.info("Setting up vcr cassette in %s", cassette_dir)
         filename = cassette_dir + self.id()
