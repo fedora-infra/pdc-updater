@@ -29,6 +29,19 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         result = self.handler.can_handle(msg)
         self.assertEquals(result, True)
 
+    def test_construct_topic_fedora_message(self):
+        config = {
+            'zmq_enabled': True,
+            'environment': 'dev',
+            'topic_prefix': 'org.fedoraproject'
+        }
+        result = self.handler.construct_topic(config)
+        self.assertEqual(
+            result,
+            ['org.fedoraproject.dev.buildsys.tag',
+             'org.fedoraproject.dev.brew.build.tag']
+        )
+
     @mock_pdc
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
     @mock.patch('pdcupdater.utils.rawhide_tag')
@@ -291,6 +304,33 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
         msg = load_example_message('messagebus-example1.json')
         result = self.handler.can_handle(msg)
         self.assertEquals(result, True)
+
+    def test_construct_topic_brew_message(self):
+        config = {
+            'stomp_uri': 'message.example.local:61612',
+            'zmq_enabled': False,
+            'topic_prefix': '/queue/Consumer.pdc-updater.VirtualTopic.eng'
+        }
+        result = self.handler.construct_topic(config)
+        self.assertEqual(
+            result,
+            ['/queue/Consumer.pdc-updater.VirtualTopic.eng.brew.build.tag']
+        )
+
+    def test_construct_topic_brew_message_zmq_enabled(self):
+        config = {
+            'stomp_uri': 'message.example.local:61612',
+            'zmq_enabled': True,
+            'topic_prefix': '/queue/Consumer.pdc-updater.VirtualTopic.eng'
+        }
+        try:
+            self.handler.construct_topic(config)
+        except Exception as e:
+            self.assertEqual(type(e), Exception)
+            self.assertEqual(
+                e.message,
+                'pdc-updater cannot support both STOMP and ZMQ being enabled'
+            )
 
     @mock_pdc
     @mock.patch('pdcupdater.services.koji_list_buildroot_for')
