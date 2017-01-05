@@ -35,7 +35,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
             'environment': 'dev',
             'topic_prefix': 'org.fedoraproject'
         }
-        result = self.handler.construct_topic(config)
+        result = self.handler.construct_topics(config)
         self.assertEqual(
             result,
             ['org.fedoraproject.dev.buildsys.tag',
@@ -311,7 +311,7 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
             'zmq_enabled': False,
             'topic_prefix': '/queue/Consumer.pdc-updater.VirtualTopic.eng'
         }
-        result = self.handler.construct_topic(config)
+        result = self.handler.construct_topics(config)
         self.assertEqual(
             result,
             ['/queue/Consumer.pdc-updater.VirtualTopic.eng.brew.build.tag']
@@ -324,7 +324,7 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
             'topic_prefix': '/queue/Consumer.pdc-updater.VirtualTopic.eng'
         }
         try:
-            self.handler.construct_topic(config)
+            self.handler.construct_topics(config)
         except Exception as e:
             self.assertEqual(type(e), Exception)
             self.assertEqual(
