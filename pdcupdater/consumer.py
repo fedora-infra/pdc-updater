@@ -43,10 +43,10 @@ class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
         self.handlers = list(pdcupdater.handlers.load_handlers(config))
 
         # Tell fedmsg to only notify us about topics that our handlers want.
-        self.topic = [
-            '.'.join([config['topic_prefix'], config['environment'], topic])
-            for handler in self.handlers for topic in handler.topic_suffixes
-        ]
+        self.topic = sum([
+             handler.construct_topics(config)
+             for handler in self.handlers
+         ], [])
 
         super(PDCUpdater, self).__init__(hub)
 
