@@ -1,4 +1,17 @@
 
+0.4.3
+-----
+
+Pull Requests
+
+- (@mprahl)         #28, Fix construct_topics function typos
+  https://github.com/fedora-infra/pdc-updater/pull/28
+
+Commits
+
+- d91b95505 Fix construct_topics function typos
+  https://github.com/fedora-infra/pdc-updater/commit/d91b95505
+
 0.4.2
 -----
 
