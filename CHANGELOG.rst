@@ -1,4 +1,37 @@
 
+0.4.2
+-----
+
+Pull Requests
+
+- (@mprahl)         #23, Change Brew Suffix
+  https://github.com/fedora-infra/pdc-updater/pull/23
+- (@ralphbean)      #27, Add VCR request data in a compressed tarball.
+  https://github.com/fedora-infra/pdc-updater/pull/27
+- (@mprahl)         #25, Support STOMP topics without environment
+  https://github.com/fedora-infra/pdc-updater/pull/25
+
+Commits
+
+- 37cfa3c0e Change Brew suffix
+  https://github.com/fedora-infra/pdc-updater/commit/37cfa3c0e
+- d2871b867 Add VCR request data in a compressed tarball.
+  https://github.com/fedora-infra/pdc-updater/commit/d2871b867
+- dca8db699 Automatically extract cassette dir if it is absent.
+  https://github.com/fedora-infra/pdc-updater/commit/dca8db699
+- b7e3c875d Make a note about removing the vcr cache for the test suite.
+  https://github.com/fedora-infra/pdc-updater/commit/b7e3c875d
+- ecaa481c7 Add .idea to .gitignore
+  https://github.com/fedora-infra/pdc-updater/commit/ecaa481c7
+- 1e885a0b2 Add Vagrant for an easier testing environment
+  https://github.com/fedora-infra/pdc-updater/commit/1e885a0b2
+- 4b396679b Construct single topic for STOMP connections
+  https://github.com/fedora-infra/pdc-updater/commit/4b396679b
+- 92c67d09b Raise an exception when zmq and stomp are both enabled
+  https://github.com/fedora-infra/pdc-updater/commit/92c67d09b
+- 289da7f3f Add unit tests for construct_topic function
+  https://github.com/fedora-infra/pdc-updater/commit/289da7f3f
+
 0.4.1
 -----
 

@@ -18,6 +18,12 @@ class BaseHandler(object):
     def __init__(self, config):
         self.config = config
 
+    def construct_topic(self, config):
+        return [
+            '.'.join([config['topic_prefix'], config['environment'], topic])
+            for topic in self.topic_suffixes
+        ]
+
     @abc.abstractproperty
     def topic_suffixes(self):
         pass

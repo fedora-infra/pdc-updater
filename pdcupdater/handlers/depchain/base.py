@@ -20,6 +20,19 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
     parent_type = None
     child_type = None
 
+    def construct_topic(self, config):
+        # Return a single hardcoded topic when using STOMP
+        if config.get('stomp_uri'):
+            if config.get('zmq_enabled', False):
+                raise Exception('pdc-updater cannot support both STOMP and ZMQ being enabled')
+            else:
+                return ['{0}.brew.build.tag'.format(config['topic_prefix'])]
+        else:
+            return [
+                '.'.join([config['topic_prefix'], config['environment'], topic])
+                for topic in self.topic_suffixes
+            ]
+
     def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
         raise NotImplementedError("Subclasses must implement this.")
 
@@ -48,7 +61,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
             # Fedora messaging
             'buildsys.tag',
             # Red Hat.
-            'brew.exchange',
+            'brew.build.tag',
         ]
 
     @classmethod

@@ -29,6 +29,11 @@ Check test suite coverage::
     $ pip install coverage
     $ nosetests --with-coverage --cover-package=pdcupdater
 
+If the test suite is failing, one thing to try is to remove the VCR cassette
+data before re-running the tests::
+
+    $ rm -rf pdcupdater/tests/vcr-request-data/
+    $ nosetests
 
 Getting an authentication token
 -------------------------------
