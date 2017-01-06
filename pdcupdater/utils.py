@@ -498,9 +498,7 @@ def interesting_container_tags():
 
 
 def all_tags_from_pdc(pdc):
-    for release in pdc.get_paged(pdc['releases']._):
-        if not release['active']:
-            continue
+    for release in pdc.get_paged(pdc['releases']._, active=True):
         brew_data = release.get('brew') or {}
         for tag in brew_data.get('allowed_tags', []):
             yield tag
