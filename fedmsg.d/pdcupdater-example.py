@@ -55,6 +55,11 @@ config = {
         'pdcupdater.handlers.depchain.containers:ContainerRPMInclusionDepChainHandler',
     ],
 
+    # Configure tags of interest for various depchain handlers here
+    'pdcupdater.ContainerRPMInclusionDepChainHandler.interesting_tags': [
+        'f24-docker',
+    ],
+
     # Augment the base fedmsg logging config to also handle pdcupdater loggers.
     'logging': dict(
         loggers=dict(
