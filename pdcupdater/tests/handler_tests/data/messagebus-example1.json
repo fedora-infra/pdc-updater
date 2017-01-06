@@ -47,6 +47,7 @@
     }
   }, 
   "headers": {
+    "message-id": "ID\\cmessage.example.local-51829-1480694134970-4\\c312989\\c0\\c0\\c1",
     "name": "rhel-release", 
     "tag": "rhel-9000-candidate", 
     "user": "somebody", 
@@ -54,5 +55,6 @@
     "release": "0.el9000", 
     "type": "Tag"
   },
+  "msg-id": "ID\\cmessage.example.local-51829-1480694134970-4\\c312989\\c0\\c0\\c1",
   "topic": "VirtualTopic.eng.brew.build.tag"
 }
