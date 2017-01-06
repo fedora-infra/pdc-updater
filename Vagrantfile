@@ -13,7 +13,8 @@ $script = <<SCRIPT
         zeromq-devel \
         koji \
         swig \
-        fedmsg
+        fedmsg \
+        libyaml-devel
     cd /opt/pdc-updater/src
     python setup.py develop
     pip install -r test-requirements.txt
