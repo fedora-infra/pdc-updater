@@ -38,7 +38,10 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
 
         if not self.config.get(key):
             log.debug("config key %s has no value.  performing queries." % key)
-            return pdcupdater.utils.interesting_container_tags()
+            if self.pdc_tag_mapping:
+                return pdcupdater.utils.all_tags_from_pdc(pdc)
+            else:
+                return pdcupdater.utils.interesting_container_tags()
 
         log.debug("using value from config key %s" % key)
         return self.config[key]
@@ -52,7 +55,13 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
 
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
-        builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag)
+        # This may be None, or 'osbs' or 'containerbuild' in Fedora.
+        key = "pdcupdater.%s.container_build_user" % str(type(self))
+        owner = self.config.get(key)
+        log.debug("Found %r for config key %r" % (owner, key))
+
+        # Return builds in the tag owned by the user, if configured.
+        builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag, owner=owner)
 
         for i, build in enumerate(builds):
             log.info("Considering container build idx=%r, (%i of %i)" % (
