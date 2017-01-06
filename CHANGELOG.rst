@@ -1,4 +1,20 @@
 
+0.4.6
+-----
+
+Commits
+
+- d39b9e6a6 Extract the appropriate tag name from the headers here.
+  https://github.com/fedora-infra/pdc-updater/commit/d39b9e6a6
+- 5380697b3 Bugfix: grab the class name here.
+  https://github.com/fedora-infra/pdc-updater/commit/5380697b3
+- 8dd01e209 Flatten this to a list so that __contains__ works.
+  https://github.com/fedora-infra/pdc-updater/commit/8dd01e209
+- dfdaceca3 This is better.
+  https://github.com/fedora-infra/pdc-updater/commit/dfdaceca3
+- 10f9f676b Merge branch 'feature/generator-schmenerator' into develop
+  https://github.com/fedora-infra/pdc-updater/commit/10f9f676b
+
 0.4.5
 -----
 
