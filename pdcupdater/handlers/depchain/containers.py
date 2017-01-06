@@ -34,7 +34,7 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
     child_type = 'rpm'
 
     def interesting_tags(self, pdc):
-        key = "pdcupdater.%s.interesting_tags" % str(type(self))
+        key = "pdcupdater.%s.interesting_tags" % type(self).__name__
 
         if not self.config.get(key):
             log.debug("config key %s has no value.  performing queries." % key)
@@ -56,7 +56,7 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
         # This may be None, or 'osbs' or 'containerbuild' in Fedora.
-        key = "pdcupdater.%s.container_build_user" % str(type(self))
+        key = "pdcupdater.%s.container_build_user" % type(self).__name__
         owner = self.config.get(key)
         log.debug("Found %r for config key %r" % (owner, key))
 
