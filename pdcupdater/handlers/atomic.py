@@ -27,7 +27,7 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
             'trac.git.receive',
         ]
 
-    def can_handle(self, msg):
+    def can_handle(self, pdc, msg):
         if not msg['topic'].endswith('trac.git.receive'):
             return False
         if msg['msg']['commit']['repo'] != 'fedora-atomic':

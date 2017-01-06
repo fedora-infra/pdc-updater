@@ -1,4 +1,25 @@
 
+0.4.4
+-----
+
+Pull Requests
+
+- (@ralphbean)      #30, Gather interesting_tags from PDC if pdc_tag_mapping is True.
+  https://github.com/fedora-infra/pdc-updater/pull/30
+- (@mprahl)         #29, Parses message-id from internal messages
+  https://github.com/fedora-infra/pdc-updater/pull/29
+
+Commits
+
+- 3628d1416 Parses message-id from internal messages
+  https://github.com/fedora-infra/pdc-updater/commit/3628d1416
+- 9898491d9 Allow configuring which tags different depchain handlers should look for.
+  https://github.com/fedora-infra/pdc-updater/commit/9898491d9
+- e87223c9a Gather interesting_tags from PDC if pdc_tag_mapping is True.
+  https://github.com/fedora-infra/pdc-updater/commit/e87223c9a
+- 84993ddd3 Move this filter to the API.
+  https://github.com/fedora-infra/pdc-updater/commit/84993ddd3
+
 0.4.3
 -----
 

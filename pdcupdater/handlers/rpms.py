@@ -24,7 +24,7 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
     def topic_suffixes(self):
         return ['buildsys.tag']
 
-    def can_handle(self, msg):
+    def can_handle(self, pdc, msg):
         if not msg['topic'].endswith('buildsys.tag'):
             return False
 

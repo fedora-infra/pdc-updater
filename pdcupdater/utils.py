@@ -439,7 +439,7 @@ def handle_message(pdc, handlers, msg, verbose=False):
     idx, topic = msg['msg_id'], msg['topic']
     for handler in handlers:
         name = type(handler).__name__
-        if not handler.can_handle(msg):
+        if not handler.can_handle(pdc, msg):
             if verbose:
                 log.info("%s could not handle %s" % (name, idx))
             continue
@@ -495,6 +495,13 @@ def interesting_container_tags():
     #tags = interesting_tags()
     #tags = [tag for tag in tags if '-' not in tag]
     #return ['%s-docker' % tag for tag in tags]
+
+
+def all_tags_from_pdc(pdc):
+    for release in pdc.get_paged(pdc['releases']._, active=True):
+        brew_data = release.get('brew') or {}
+        for tag in brew_data.get('allowed_tags', []):
+            yield tag
 
 
 def release2reponame(release):

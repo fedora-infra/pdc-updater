@@ -33,11 +33,17 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
     parent_type = 'container'
     child_type = 'rpm'
 
-    def interesting_tags(self):
-        return pdcupdater.utils.interesting_container_tags()
+    def interesting_tags(self, pdc):
+        key = "pdcupdater.%s.interesting_tags" % str(type(self))
+
+        if not self.config.get(key):
+            log.debug("config key %s has no value.  performing queries." % key)
+            return pdcupdater.utils.interesting_container_tags()
+
+        log.debug("using value from config key %s" % key)
+        return self.config[key]
 
     def _yield_koji_relationships_from_tag(self, pdc, tag):
-
         if self.pdc_tag_mapping:
             release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
         else:

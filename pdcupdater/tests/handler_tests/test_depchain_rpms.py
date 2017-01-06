@@ -26,7 +26,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         rawhide.return_value = 'f24'
         idx = '2016-662e75d1-5830-4c84-9855-fd07a3018f7a'
         msg = pdcupdater.utils.get_fedmsg(idx)
-        result = self.handler.can_handle(msg)
+        result = self.handler.can_handle(None, msg)
         self.assertEquals(result, True)
 
     def test_construct_topic_fedora_message(self):
@@ -289,7 +289,7 @@ class FakeHandler(pdcupdater.handlers.depchain.rpms.BaseRPMDepChainHandler):
     parent_type = 'rpm'
     child_type = 'rpm'
 
-    def interesting_tags(self):
+    def interesting_tags(self, pdc):
         return ['rhel-9000-candidate']
 
     def _yield_koji_relationships_from_build(self, url, build, rpms=None):
@@ -302,7 +302,7 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
 
     def test_handle_brew_message(self):
         msg = load_example_message('messagebus-example1.json')
-        result = self.handler.can_handle(msg)
+        result = self.handler.can_handle(None, msg)
         self.assertEquals(result, True)
 
     def test_construct_topic_brew_message(self):

@@ -18,7 +18,7 @@ class TestInclusionDepIngestion(BaseHandlerTest):
         rawhide.return_value = 'f24'
         idx = '2016-b78e670b-e8f7-4987-868e-1260cc0f3fbd'
         msg = pdcupdater.utils.get_fedmsg(idx)
-        result = self.handler.can_handle(msg)
+        result = self.handler.can_handle(None, msg)
         self.assertEquals(result, True)
 
     @mock_pdc
