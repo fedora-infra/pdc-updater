@@ -29,7 +29,7 @@ class BaseHandler(object):
         pass
 
     @abc.abstractmethod
-    def can_handle(self, msg):
+    def can_handle(self, pdc, msg):
         """ Return True or False if this handler can handle this message. """
         pass
 

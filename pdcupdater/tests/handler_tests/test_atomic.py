@@ -15,7 +15,7 @@ class TestAtomicUpdate(BaseHandlerTest):
     def test_cannot_handle_other_git_push(self):
         idx = '2016-ab90226c-5fc3-48f8-83de-821e4fe0ade4'
         msg = pdcupdater.utils.get_fedmsg(idx)
-        result = self.handler.can_handle(msg)
+        result = self.handler.can_handle(None, msg)
         self.assertEquals(result, False)
 
     def test_can_handle_atomic_update_push(self):
@@ -28,7 +28,7 @@ class TestAtomicUpdate(BaseHandlerTest):
                 },
             },
         }
-        result = self.handler.can_handle(msg)
+        result = self.handler.can_handle(None, msg)
         self.assertEquals(result, True)
 
     @mock_pdc
