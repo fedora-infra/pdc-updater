@@ -84,7 +84,7 @@ class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
     child_type = 'rpm'
 
     def interesting_tags(self, pdc):
-        key = "pdcupdater.%s.interesting_tags" % str(type(self))
+        key = "pdcupdater.%s.interesting_tags" % type(self).__name__
 
         if not self.config.get(key):
             log.debug("config key %s has no value.  performing queries." % key)
@@ -144,7 +144,7 @@ class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
     child_type = 'rpm'
 
     def interesting_tags(self, pdc):
-        key = "pdcupdater.%s.interesting_tags" % str(type(self))
+        key = "pdcupdater.%s.interesting_tags" % type(self).__name__
 
         if not self.config.get(key):
             log.debug("config key %s has no value.  performing queries." % key)

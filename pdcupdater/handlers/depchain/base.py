@@ -66,10 +66,10 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
     @classmethod
     def extract_tag(cls, msg):
-        if 'tag' in msg.get('msg', {}):
-            return msg['msg']['tag']
-        else:
+        if 'headers' in msg:
             return msg['headers']['tag']
+        else:
+            return msg['msg']['tag']
 
     @classmethod
     def extract_build_id(cls, msg):
