@@ -497,6 +497,7 @@ def interesting_container_tags():
     #return ['%s-docker' % tag for tag in tags]
 
 
+@cache.cache_on_arguments()
 def all_tags_from_pdc(pdc):
     for release in pdc.get_paged(pdc['releases']._, active=True):
         brew_data = release.get('brew') or {}
