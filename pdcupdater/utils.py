@@ -436,12 +436,12 @@ def annotated(client, msg_id):
 
 
 def handle_message(pdc, handlers, msg, verbose=False):
+    debug = log.info if verbose else log.debug
     idx, topic = msg['msg_id'], msg['topic']
     for handler in handlers:
         name = type(handler).__name__
         if not handler.can_handle(pdc, msg):
-            if verbose:
-                log.info("%s could not handle %s" % (name, idx))
+            debug("%s could not handle %s" % (name, idx))
             continue
         log.info("%s handling %s %s" % (name, idx, topic))
         with annotated(pdc, msg['msg_id']) as client:
