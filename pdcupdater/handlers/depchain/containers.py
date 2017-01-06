@@ -33,7 +33,7 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
     parent_type = 'container'
     child_type = 'rpm'
 
-    def interesting_tags(self):
+    def interesting_tags(self, pdc):
         key = "pdcupdater.%s.interesting_tags" % str(type(self))
 
         if not self.config.get(key):

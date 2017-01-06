@@ -42,7 +42,7 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
     def topic_suffixes(self):
         return ['pkgdb.package.new']
 
-    def can_handle(self, msg):
+    def can_handle(self, pdc, msg):
         return msg['topic'].endswith('pkgdb.package.new')
 
     def handle(self, pdc, msg):
@@ -103,7 +103,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
     def topic_suffixes(self):
         return ['pkgdb.package.branch.new']
 
-    def can_handle(self, msg):
+    def can_handle(self, pdc, msg):
         return msg['topic'].endswith('pkgdb.package.branch.new')
 
     def handle(self, pdc, msg):

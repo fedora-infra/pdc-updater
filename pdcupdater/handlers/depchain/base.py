@@ -39,7 +39,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
     def _yield_koji_relationships_from_tag(self, koji_url, tag):
         raise NotImplementedError("Subclasses must implement this.")
 
-    def interesting_tags(self):
+    def interesting_tags(self, pdc):
         raise NotImplementedError("Subclasses must implement this.")
 
     def __init__(self, *args, **kwargs):
@@ -78,7 +78,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         else:
             return msg['body']['build']['build_id']
 
-    def can_handle(self, msg):
+    def can_handle(self, pdc, msg):
         if not any([msg['topic'].endswith(suffix)
                     for suffix in self.topic_suffixes]):
             return False
@@ -89,7 +89,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
             log.debug("From %r.  Skipping." % instance)
             return False
 
-        interesting = self.interesting_tags()
+        interesting = self.interesting_tags(pdc)
         tag = self.extract_tag(msg)
 
         if tag not in interesting:
@@ -176,7 +176,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
     def audit(self, pdc):
         present, absent = set(), set()
-        tags = self.interesting_tags()
+        tags = self.interesting_tags(pdc)
 
         for tag in tags:
             log.info("Starting audit of tag %r of %r." % (tag, tags))
@@ -206,7 +206,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         return present, absent
 
     def initialize(self, pdc):
-        tags = self.interesting_tags()
+        tags = self.interesting_tags(pdc)
         tags.reverse()
 
         for tag in tags:

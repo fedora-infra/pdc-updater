@@ -33,7 +33,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             'pungi.compose.status.change',
         ]
 
-    def can_handle(self, msg):
+    def can_handle(self, pdc, msg):
         if not msg['topic'].endswith('pungi.compose.status.change'):
             return False
         if not msg['msg']['status'] in final:

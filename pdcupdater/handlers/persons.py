@@ -13,7 +13,7 @@ class NewPersonHandler(pdcupdater.handlers.BaseHandler):
     def topic_suffixes(self):
         return ['fas.user.create']
 
-    def can_handle(self, msg):
+    def can_handle(self, pdc, msg):
         return msg['topic'].endswith('fas.user.create')
 
     def handle(self, pdc, msg):

@@ -31,7 +31,7 @@ class TestNewCompose(BaseHandlerTest):
     def test_cannot_handle_fedbadges(self):
         idx = '2015-6c98c8e3-0dcb-497d-a0d8-0b3d026a4cfb'
         msg = pdcupdater.utils.get_fedmsg(idx)
-        result = self.handler.can_handle(msg)
+        result = self.handler.can_handle(None, msg)
         self.assertEquals(result, False)
 
     def test_cannot_handle_new_compose_start(self):
@@ -47,7 +47,7 @@ class TestNewCompose(BaseHandlerTest):
                 'Fedora-24-20151130.n.2/compose',
             ),
         )
-        result = self.handler.can_handle(msg)
+        result = self.handler.can_handle(None, msg)
         self.assertEquals(result, False)
 
     def test_cannot_handle_new_compose_doomed(self):
@@ -63,7 +63,7 @@ class TestNewCompose(BaseHandlerTest):
                 'Fedora-24-20151130.n.2/compose',
             ),
         )
-        result = self.handler.can_handle(msg)
+        result = self.handler.can_handle(None, msg)
         self.assertEquals(result, False)
 
     def test_can_handle_new_compose_finish(self):
@@ -79,7 +79,7 @@ class TestNewCompose(BaseHandlerTest):
                 'Fedora-24-20151130.n.2/compose',
             ),
         )
-        result = self.handler.can_handle(msg)
+        result = self.handler.can_handle(None, msg)
         self.assertEquals(result, True)
 
     @mock_pdc
