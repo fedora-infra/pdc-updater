@@ -499,10 +499,13 @@ def interesting_container_tags():
 
 @cache.cache_on_arguments()
 def all_tags_from_pdc(pdc):
+    """ Return a list of allowed tags from all active PDC releases. """
+    results = []
     for release in pdc.get_paged(pdc['releases']._, active=True):
         brew_data = release.get('brew') or {}
         for tag in brew_data.get('allowed_tags', []):
-            yield tag
+            results.append(tag)
+    return results
 
 
 def release2reponame(release):
