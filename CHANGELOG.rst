@@ -1,4 +1,18 @@
 
+0.4.5
+-----
+
+Commits
+
+- fa64e0332 Some better debugging on not handling messages.
+  https://github.com/fedora-infra/pdc-updater/commit/fa64e0332
+- 83f3512ca Install libyaml-devel for speed on the test suite.
+  https://github.com/fedora-infra/pdc-updater/commit/83f3512ca
+- 89fdfb386 Use the container_build_user to find docker builds in a tag.
+  https://github.com/fedora-infra/pdc-updater/commit/89fdfb386
+- b5c2f36de Merge branch 'feature/yet-more-interesting-tags' into develop
+  https://github.com/fedora-infra/pdc-updater/commit/b5c2f36de
+
 0.4.4
 -----
 
