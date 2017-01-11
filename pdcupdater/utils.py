@@ -92,8 +92,8 @@ def ensure_release_exists(pdc, release_id, release):
         release_payload.update(dict(
             active=True,
         ))
+        log.info("Creating release %r" % release_payload)
         pdc['releases']._(release_payload)
-        log.info("Created %r" % release_payload)
 
 
 def ensure_global_component_exists(pdc, name):
