@@ -76,7 +76,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         if 'build_id' in msg.get('msg', {}):
             return msg['msg']['build_id']
         else:
-            return msg['body']['build']['build_id']
+            return msg['msg']['build']['build_id']
 
     def can_handle(self, pdc, msg):
         if not any([msg['topic'].endswith(suffix)
