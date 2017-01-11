@@ -9,10 +9,24 @@ from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
 
+
 def load_example_message(filename):
-        here = os.path.dirname(__file__)
-        with open(os.path.join(here, 'data', filename), 'rb') as f:
-            return json.loads(f.read().decode('utf-8'))
+    here = os.path.dirname(__file__)
+    with open(os.path.join(here, 'data', filename), 'rb') as f:
+        return json.loads(f.read().decode('utf-8'))
+
+
+def format_envelope(envelope):
+    # Remove the envelope
+    # https://github.com/mokshaproject/moksha/pull/35
+    headers = envelope.get('headers', {})
+    topic, msg = envelope['topic'], envelope['body']
+
+    # Stuff topic and headers back into the message body, for convenience.
+    msg['topic'] = topic
+    msg['headers'] = headers
+    return msg
+
 
 class TestBuildtimeDepIngestion(BaseHandlerTest):
     maxDiff = None
@@ -344,7 +358,7 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
             {'name': 'wat', 'is_update': True},
         ]
 
-        msg = load_example_message('messagebus-example1.json')
+        msg = format_envelope(load_example_message('messagebus-example1.json'))
         self.handler.handle(pdc, msg)
         expected_keys = [
             'release-component-relationships',
