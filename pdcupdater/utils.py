@@ -96,6 +96,7 @@ def ensure_release_exists(pdc, release_id, release):
         pdc['releases']._(release_payload)
 
 
+@cache.cache_on_arguments()
 def ensure_global_component_exists(pdc, name):
     response = pdc['global-components']._(name=name)
     if not response['results']:
