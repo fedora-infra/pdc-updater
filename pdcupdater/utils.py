@@ -57,10 +57,11 @@ def ensure_component_group_exists(pdc, component_group):
         if e.response.status_code != 400:
             raise
         body = e.response.json()
-        if not 'non_field_errors' in body:
+        if 'non_field_errors' not in body and 'detail' not in body:
             raise
         message = u'The fields group_type, release, description must make a unique set.'
-        if body['non_field_errors'] != [message]:
+        if body.get('non_field_errors') != [message] \
+                and body.get('detail') != [message]:
             raise
 
 
@@ -121,7 +122,7 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
         if e.response.status_code != 400:
             raise
         body = e.response.json()
-        if not 'non_field_errors' in body:
+        if 'non_field_errors' not in body and 'detail' not in body:
             raise
         allowable = [
             # This is the old error string
@@ -130,7 +131,14 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
             # https://github.com/product-definition-center/product-definition-center/pull/422
             u'The fields release, name, type must make a unique set.',
         ]
-        if not any([body['non_field_errors'] == [s] for s in allowable]):
+        # The old error message location
+        if 'non_field_errors' in body and not any(
+                [body.get('non_field_errors', []) == [s] for s in allowable]):
+            raise
+        # The new error message location
+        # https://github.com/product-definition-center/product-definition-center/commit/a4b17981930760238e3e2a07c10022f019bf5cf2
+        if 'detail' in body and not any(
+                [body.get('detail', []) == [s] for s in allowable]):
             raise
 
     # But if it was just that the component already existed, then go back and
@@ -165,11 +173,12 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
         if e.response.status_code != 400:
             raise
         body = e.response.json()
-        if not 'non_field_errors' in body:
+        if 'non_field_errors' not in body and 'detail' not in body:
             raise
 
         message = u'The fields relation_type, from_component, to_component must make a unique set.'
-        if body['non_field_errors'] != [message]:
+        if body.get('non_field_errors') != [message] \
+                and body.get('detail') != [message]:
             raise
 
 
