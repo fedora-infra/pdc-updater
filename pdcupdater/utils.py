@@ -369,10 +369,18 @@ def ensure_bulk_release_components_exist(pdc, release, components,
 
     # Finally, return all of the present components (with all of their primary
     # key IDs which were assigned server side.  that's why we have to query a
-    # second time here....)
-    return _chunked_query(
-        pdc, endpoint, query_kwargs,
-        key='name', iterable=components)
+    # second time here....). The retry decorator is to compensate for a bug in
+    # PDC which returns an HTTP status code before it's done writing to the
+    # database
+    @retry(timeout=300, interval=10, wait_on=AssertionError)
+    def get_present_components():
+        results = list(_chunked_query(
+            pdc, endpoint, query_kwargs,
+            key='name', iterable=components))
+        assert len(results) == len(components)
+        return results
+
+    return get_present_components()
 
 
 def ensure_bulk_global_components_exist(pdc, components):
