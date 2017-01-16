@@ -57,10 +57,11 @@ def ensure_component_group_exists(pdc, component_group):
         if e.response.status_code != 400:
             raise
         body = e.response.json()
-        if not 'non_field_errors' in body:
+        if 'non_field_errors' not in body and 'detail' not in body:
             raise
         message = u'The fields group_type, release, description must make a unique set.'
-        if body['non_field_errors'] != [message]:
+        if body.get('non_field_errors') != [message] \
+                and body.get('detail') != [message]:
             raise
 
 
@@ -92,10 +93,11 @@ def ensure_release_exists(pdc, release_id, release):
         release_payload.update(dict(
             active=True,
         ))
+        log.info("Creating release %r" % release_payload)
         pdc['releases']._(release_payload)
-        log.info("Created %r" % release_payload)
 
 
+@cache.cache_on_arguments()
 def ensure_global_component_exists(pdc, name):
     response = pdc['global-components']._(name=name)
     if not response['results']:
@@ -121,7 +123,7 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
         if e.response.status_code != 400:
             raise
         body = e.response.json()
-        if not 'non_field_errors' in body:
+        if 'non_field_errors' not in body and 'detail' not in body:
             raise
         allowable = [
             # This is the old error string
@@ -130,7 +132,14 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
             # https://github.com/product-definition-center/product-definition-center/pull/422
             u'The fields release, name, type must make a unique set.',
         ]
-        if not any([body['non_field_errors'] == [s] for s in allowable]):
+        # The old error message location
+        if 'non_field_errors' in body and not any(
+                [body.get('non_field_errors', []) == [s] for s in allowable]):
+            raise
+        # The new error message location
+        # https://github.com/product-definition-center/product-definition-center/commit/a4b17981930760238e3e2a07c10022f019bf5cf2
+        if 'detail' in body and not any(
+                [body.get('detail', []) == [s] for s in allowable]):
             raise
 
     # But if it was just that the component already existed, then go back and
@@ -165,11 +174,12 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
         if e.response.status_code != 400:
             raise
         body = e.response.json()
-        if not 'non_field_errors' in body:
+        if 'non_field_errors' not in body and 'detail' not in body:
             raise
 
         message = u'The fields relation_type, from_component, to_component must make a unique set.'
-        if body['non_field_errors'] != [message]:
+        if body.get('non_field_errors') != [message] \
+                and body.get('detail') != [message]:
             raise
 
 
@@ -359,10 +369,18 @@ def ensure_bulk_release_components_exist(pdc, release, components,
 
     # Finally, return all of the present components (with all of their primary
     # key IDs which were assigned server side.  that's why we have to query a
-    # second time here....)
-    return _chunked_query(
-        pdc, endpoint, query_kwargs,
-        key='name', iterable=components)
+    # second time here....). The retry decorator is to compensate for a bug in
+    # PDC which returns an HTTP status code before it's done writing to the
+    # database
+    @retry(timeout=300, interval=10, wait_on=AssertionError)
+    def get_present_components():
+        results = list(_chunked_query(
+            pdc, endpoint, query_kwargs,
+            key='name', iterable=components))
+        assert len(results) == len(components)
+        return results
+
+    return get_present_components()
 
 
 def ensure_bulk_global_components_exist(pdc, components):
@@ -500,11 +518,11 @@ def interesting_container_tags():
 @cache.cache_on_arguments()
 def all_tags_from_pdc(pdc):
     """ Return a list of allowed tags from all active PDC releases. """
-    results = []
+    results = set()
     for release in pdc.get_paged(pdc['releases']._, active=True):
         brew_data = release.get('brew') or {}
         for tag in brew_data.get('allowed_tags', []):
-            results.append(tag)
+            results.add(tag)
     return results
 
 
