@@ -1,4 +1,45 @@
 
+0.4.7
+-----
+
+Pull Requests
+
+- (@ralphbean)      #34, No need for duplicates here.
+  https://github.com/fedora-infra/pdc-updater/pull/34
+- (@mprahl)         #35, Pass pdc in as an argument when pdc_tag_mapping is set
+  https://github.com/fedora-infra/pdc-updater/pull/35
+- (@mprahl)         #37, Fix extract_build_id and clean up test data for Brew builds
+  https://github.com/fedora-infra/pdc-updater/pull/37
+- (@ralphbean)      #36, Log pre-emptively here.
+  https://github.com/fedora-infra/pdc-updater/pull/36
+- (@mprahl)         #40, Add compatibility for new error format in PDC
+  https://github.com/fedora-infra/pdc-updater/pull/40
+- (@mprahl)         #41, Use a retry decorator to account for a lag after an HTTP POST
+  https://github.com/fedora-infra/pdc-updater/pull/41
+- (@ralphbean)      #39, A second stab at getting the release type right from composes.
+  https://github.com/fedora-infra/pdc-updater/pull/39
+
+Commits
+
+- e2ec66e4a No need for duplicates here.
+  https://github.com/fedora-infra/pdc-updater/commit/e2ec66e4a
+- 2180afb3e Pass pdc in as an argument when pdc_tag_mapping is set
+  https://github.com/fedora-infra/pdc-updater/commit/2180afb3e
+- 41af82e3f Log pre-emptively here.
+  https://github.com/fedora-infra/pdc-updater/commit/41af82e3f
+- b51af9dda Fix extract_build_id and clean up test data for Brew builds
+  https://github.com/fedora-infra/pdc-updater/commit/b51af9dda
+- fdd447f9e A second stab at getting the release type right from composes.
+  https://github.com/fedora-infra/pdc-updater/commit/fdd447f9e
+- cf2023a71 Add compatibility for new error format in PDC
+  https://github.com/fedora-infra/pdc-updater/commit/cf2023a71
+- af3ef7d2e Cache this.
+  https://github.com/fedora-infra/pdc-updater/commit/af3ef7d2e
+- f8bc6c1b0 Merge branch 'develop' of github.com:fedora-infra/pdc-updater into develop
+  https://github.com/fedora-infra/pdc-updater/commit/f8bc6c1b0
+- 7cf87cc40 Use a retry decorator to account for a lag between an HTTP POST response and when the data is actually available
+  https://github.com/fedora-infra/pdc-updater/commit/7cf87cc40
+
 0.4.6
 -----
 
