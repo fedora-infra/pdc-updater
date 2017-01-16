@@ -1,4 +1,12 @@
 
+0.4.8
+-----
+
+Commits
+
+- c89906abf Default value for backwards compat.
+  https://github.com/fedora-infra/pdc-updater/commit/c89906abf
+
 0.4.7
 -----
 
