@@ -135,7 +135,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         composeinfo['payload']['release']['short'] = \
             composeinfo['payload']['release']['short'].lower()
         release = copy.copy(composeinfo['payload']['release'])
-        release['release_type'] = release.pop('type')
+        release['release_type'] = release.pop('type', 'ga')
         release_id = "{short}-{version}".format(**release)
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
