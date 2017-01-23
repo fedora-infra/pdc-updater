@@ -323,7 +323,7 @@ class BaseHandlerTest(unittest.TestCase):
             'password': 'whatever',
         },
         'pdcupdater.pkgdb_url': 'blihblihblih',
-        'pdcupdater.koji_url': 'http://koji.fedoraproject.org/kojihub',
+        'pdcupdater.koji_url': 'https://koji.fedoraproject.org/kojihub',
         'pdcupdater.old_composes_url': 'https://kojipkgs.fedoraproject.org/compose',
         'pdcupdater.fedora_atomic_git_url': 'https://pagure.io/fedora-atomic/raw/master/f/',
     }
