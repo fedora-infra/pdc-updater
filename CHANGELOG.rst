@@ -1,4 +1,23 @@
 
+0.4.9
+-----
+
+Pull Requests
+
+- (@ralphbean)      #43, Flatten the generator so we can check length.
+  https://github.com/fedora-infra/pdc-updater/pull/43
+- (@mprahl)         #44, Fix traceback occurring when `taskid` is `None`
+  https://github.com/fedora-infra/pdc-updater/pull/44
+
+Commits
+
+- a1238ea22 Flatten the generator so we can check length.
+  https://github.com/fedora-infra/pdc-updater/commit/a1238ea22
+- bd565a123 Use the official Fedora Vagrant box
+  https://github.com/fedora-infra/pdc-updater/commit/bd565a123
+- 0da773675 Use the `listRPMs` API function
+  https://github.com/fedora-infra/pdc-updater/commit/0da773675
+
 0.4.8
 -----
 
