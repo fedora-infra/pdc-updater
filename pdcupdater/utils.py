@@ -212,6 +212,9 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
             iterable=children,
         )
 
+        # Flatten the generator so we can check length.
+        response = list(response)
+
         # Nobody can ask us to delete things that aren't there.
         # That's unreasonable.  Sanity check.
         message = "%r != %r" % (len(response), len(children))
