@@ -159,7 +159,13 @@ def koji_rpms_in_tag(url, tag):
     import koji
     log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
     session = koji.ClientSession(url)
-    rpms, builds = session.listTaggedRPMS(tag, latest=True)
+
+    try:
+        rpms, builds = session.listTaggedRPMS(tag, latest=True)
+    except koji.GenericError as e:
+        log.exception("Failed to list rpms in tag %r" % tag)
+        # If the tag doesn't exist.. then there are no rpms in that tag.
+        return []
 
     # Extract some srpm-level info from the build attach it to each rpm
     builds = {build['build_id']: build for build in builds}
