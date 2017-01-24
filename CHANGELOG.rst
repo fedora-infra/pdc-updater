@@ -1,4 +1,17 @@
 
+0.4.10
+------
+
+Pull Requests
+
+- (@ralphbean)      #45, Gracefully fail if koji tag doesn't exist.
+  https://github.com/fedora-infra/pdc-updater/pull/45
+
+Commits
+
+- 1cd609fcb Gracefully fail if koji tag doesn't exist.
+  https://github.com/fedora-infra/pdc-updater/commit/1cd609fcb
+
 0.4.9
 -----
 
