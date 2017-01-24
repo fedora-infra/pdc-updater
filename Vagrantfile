@@ -21,8 +21,7 @@ $script = <<SCRIPT
 SCRIPT
 
 Vagrant.configure("2") do |config|
-  # config.vm.box = "fedora/24-cloud-base"
-  config.vm.box = "boxcutter/fedora24"
+  config.vm.box = "fedora/24-cloud-base"
   config.vm.provider :virtualbox do |v|
     v.customize ["modifyvm", :id, "--memory", 2048]
   end

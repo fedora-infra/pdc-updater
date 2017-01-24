@@ -202,19 +202,10 @@ def koji_rpms_from_build(url, build_id):
     log.info("Listing rpms in koji(%s) for %r" % (url, build_id))
     session = koji.ClientSession(url)
     build = koji_get_build(url, build_id)
-    children = session.getTaskChildren(build['task_id'])
 
     rpms = set()
-    for child in children:
-        results = session.getTaskResult(child['id'])
-        if not results:
-            continue
-
-        # rpm looks like 'tasks/4547/12094547/podofo-0.9.1-17.el7.ppc64.rpm'
-        for rpm in results.get('rpms', []):
-            rpms.add(rpm.split('/')[-1])
-        for rpm in results.get('srpms', []):
-            rpms.add(rpm.split('/')[-1])
+    for rpm in session.listRPMs(buildID=build_id):
+        rpms.add('{0}.{1}.rpm'.format(rpm['nvr'], rpm['arch']))
 
     # Dependable order for testing.
     rpms = list(sorted(rpms))
