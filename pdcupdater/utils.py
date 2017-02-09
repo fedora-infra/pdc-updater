@@ -4,6 +4,9 @@ import functools
 import itertools
 import socket
 import time
+import os
+import shutil
+import tempfile
 
 import requests
 import six

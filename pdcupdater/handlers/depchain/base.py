@@ -66,7 +66,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
     @classmethod
     def extract_tag(cls, msg):
-        if 'headers' in msg:
+        if msg.get('headers'):
             return msg['headers']['tag']
         else:
             return msg['msg']['tag']
