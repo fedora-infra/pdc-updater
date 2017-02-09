@@ -1,4 +1,81 @@
 
+0.5.0
+-----
+
+Pull Requests
+
+- (@ralphbean)      #47, New handler for modularity.
+  https://github.com/fedora-infra/pdc-updater/pull/47
+
+Commits
+
+- 0a0566124 Check if the headers are empty.
+  https://github.com/fedora-infra/pdc-updater/commit/0a0566124
+- 3e89667bb Import unreleased trees into PDC.
+  https://github.com/fedora-infra/pdc-updater/commit/3e89667bb
+- 9057e2a4a API end points are plural, not singular
+  https://github.com/fedora-infra/pdc-updater/commit/9057e2a4a
+- fd9e19ab1 Add unit test for tree handler.
+  https://github.com/fedora-infra/pdc-updater/commit/fd9e19ab1
+- 88ea79c14 Add TmpDir, PushPopD context managers.
+  https://github.com/fedora-infra/pdc-updater/commit/88ea79c14
+- f5ea16de9 Store module dependencies in PDC.
+  https://github.com/fedora-infra/pdc-updater/commit/f5ea16de9
+- 83888b093 Filter out stdout of git commands.
+  https://github.com/fedora-infra/pdc-updater/commit/83888b093
+- c7ddad44a Enhance unit tests for retrieving module metadata.
+  https://github.com/fedora-infra/pdc-updater/commit/c7ddad44a
+- da336bb08 Add a doc comment to get_or_create_unreleased_variant().
+  https://github.com/fedora-infra/pdc-updater/commit/da336bb08
+- 84380b657 Document when we expect topdir/tree info in msg.
+  https://github.com/fedora-infra/pdc-updater/commit/84380b657
+- f44580f6a Process all non-failed module states.
+  https://github.com/fedora-infra/pdc-updater/commit/f44580f6a
+- fe0cfb41e Use simplified 'name', 'version', 'release' in the message.
+  https://github.com/fedora-infra/pdc-updater/commit/fe0cfb41e
+- 203c32bfb Build variant_uid from name, version, release.
+  https://github.com/fedora-infra/pdc-updater/commit/203c32bfb
+- 77e2f8c87 Create koji_tag ourselves.
+  https://github.com/fedora-infra/pdc-updater/commit/77e2f8c87
+- ac9706e4b Update unit tests for modules for recent changes.
+  https://github.com/fedora-infra/pdc-updater/commit/ac9706e4b
+- f3c91ed44 More fully qualify our relevant topic suffix.
+  https://github.com/fedora-infra/pdc-updater/commit/f3c91ed44
+- b12b58df0 Use state_name instead of state.
+  https://github.com/fedora-infra/pdc-updater/commit/b12b58df0
+- 9182f3d6d Add some debug statements.
+  https://github.com/fedora-infra/pdc-updater/commit/9182f3d6d
+- 00ed2e597 Correctly submit new unreleased-variants to PDC.
+  https://github.com/fedora-infra/pdc-updater/commit/00ed2e597
+- fb8c79253 Re-use topic_suffixes here as suggested in review.
+  https://github.com/fedora-infra/pdc-updater/commit/fb8c79253
+- 4c583061c Rename 'rida' to 'module_build_service'.
+  https://github.com/fedora-infra/pdc-updater/commit/4c583061c
+- 0add17dc0 User stream/version instead of version/release to synchronise with module build service code
+  https://github.com/fedora-infra/pdc-updater/commit/0add17dc0
+- 2bd1bfd2f Some appropriate devel settings.
+  https://github.com/fedora-infra/pdc-updater/commit/2bd1bfd2f
+- dac2e589f PDC expects these to be a dict.
+  https://github.com/fedora-infra/pdc-updater/commit/dac2e589f
+- 7285e5e11 I swear, PDC expects this value, not the other.
+  https://github.com/fedora-infra/pdc-updater/commit/7285e5e11
+- d6ce284b0 Whitespace.
+  https://github.com/fedora-infra/pdc-updater/commit/d6ce284b0
+- dc5560bc0 Convenience for future debugging.
+  https://github.com/fedora-infra/pdc-updater/commit/dc5560bc0
+- 7238fefe3 Pass deps to PDC in the new style.
+  https://github.com/fedora-infra/pdc-updater/commit/7238fefe3
+- 5522b0f46 Include ModuleMD in PDC unreleasedvariant and get it from the module.state.change message.
+  https://github.com/fedora-infra/pdc-updater/commit/5522b0f46
+- c007a7d42 Fix koji_tag - it has to be based on name-stream-version, not just name.
+  https://github.com/fedora-infra/pdc-updater/commit/c007a7d42
+- 3797021ab Do not add entries to PDC according to Module in 'init' state, because there are not all data in the message in that time
+  https://github.com/fedora-infra/pdc-updater/commit/3797021ab
+- 2a43a619d Subscribe to both the old and new MBS topics.
+  https://github.com/fedora-infra/pdc-updater/commit/2a43a619d
+- 7dc6cdbc1 Cleanup unused pieces.
+  https://github.com/fedora-infra/pdc-updater/commit/7dc6cdbc1
+
 0.4.10
 ------
 
