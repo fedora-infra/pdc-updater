@@ -1,4 +1,12 @@
 
+0.5.1
+-----
+
+Commits
+
+- ff39ac395 Include test_modules_data in future release tarballs.
+  https://github.com/fedora-infra/pdc-updater/commit/ff39ac395
+
 0.5.0
 -----
 
