@@ -666,30 +666,3 @@ def retry(timeout=500, interval=20, wait_on=Exception):
                     time.sleep(interval)
         return inner
     return wrapper
-
-
-class TmpDir(object):
-
-      def __init__(self, prefix=None):
-          self.prefix = prefix
-
-      def __enter__(self):
-          self.dir = tempfile.mkdtemp(prefix=self.prefix)
-          return self.dir
-
-      def __exit__(self, type, value, tb):
-          shutil.rmtree(self.dir)
-
-
-class PushPopD(object):
-
-      def __init__(self, pushd):
-          self.pushd = pushd
-
-      def __enter__(self):
-          self.popd = os.getcwd()
-          os.chdir(self.pushd)
-          return self
-
-      def __exit__(self, type, value, tb):
-          os.chdir(self.popd)

@@ -2,12 +2,10 @@ import os
 import logging
 import errno
 import re
-from subprocess import check_call, STDOUT
 
 import beanbag
 import pdcupdater.handlers
 import pdcupdater.services
-from pdcupdater.utils import TmpDir, PushPopD
 
 import modulemd
 
