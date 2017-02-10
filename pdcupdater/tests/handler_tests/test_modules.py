@@ -12,6 +12,9 @@ class TestModuleStateChange(BaseHandlerTest):
     handler_path = 'pdcupdater.handlers.modules:ModuleStateChangeHandler'
 
     test_data_dir = os.path.join(os.path.dirname(__file__), "test_modules_data")
+    modulemd_file = os.path.join(test_data_dir, "modulemd.yaml")
+    with open(modulemd_file) as f:
+        modulemd_example = f.read()
     repo_dir = os.path.join(test_data_dir, "repos")
     foo_repo_tar = os.path.join(repo_dir, "foo.tar")
     foo_repo_dir = os.path.join(repo_dir, "foo")
@@ -19,20 +22,23 @@ class TestModuleStateChange(BaseHandlerTest):
     test_tree_dir = os.path.join(test_data_dir, "trees/Test-0-20160712.0")
 
     state_init_msg = {
-        'topic': 'org.fedoraproject.stg.buildsys.module.state.change',
+        'topic': 'org.fedoraproject.stg.mbs.module.state.change',
         'msg': {
-            'state': 'init',
-            'name': "Core",
-            'version': '24',
-            'release': '0',
+            'state': 0,
+            'state_name': 'init',
+            'name': 'core',
+            'stream': '24',
+            'version': '0',
             'scmurl': foo_repo_url,
+            'modulemd': modulemd_example,
         }
     }
 
     state_done_msg = copy.deepcopy(state_init_msg)
-    state_done_msg['topic'] = 'org.fedoraproject.stg.rida.module.state.change'
+    state_done_msg['topic'] = 'org.fedoraproject.stg.mbs.module.state.change'
     state_done_msg['msg'].update({
-        'state': 'done',
+        'state': 3,
+        'state_name': 'done',
         'topdir': test_tree_dir
     })
 
