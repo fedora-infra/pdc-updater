@@ -1,0 +1,21 @@
+document: modulemd
+version: 1
+data:
+    summary: Example module.
+    description: Yup.
+    license:
+        module: [ MIT ]
+    dependencies:
+        buildrequires:
+            base-runtime: master
+    profiles:
+        default:
+            rpms: []
+    api:
+        rpms:
+            - bash
+    components:
+        rpms:
+            bash:
+                rationale: Part of the first base-runtime prototype.
+                ref: b1104ec130056866f3bdce51a3f77685b702fbde
