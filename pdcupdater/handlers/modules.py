@@ -46,7 +46,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             'module_build_service.module.state.change',
         ]
 
-    def can_handle(self, msg):
+    def can_handle(self, pdc, msg):
         if not any([msg['topic'].endswith(s) for s in self.topic_suffixes]):
             return False
 
