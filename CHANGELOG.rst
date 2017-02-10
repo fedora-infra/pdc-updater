@@ -1,4 +1,16 @@
 
+0.5.2
+-----
+
+Commits
+
+- 8481ab695 Get the test suite working again.
+  https://github.com/fedora-infra/pdc-updater/commit/8481ab695
+- 9200f18be Fix bug in last rebase including modularity stuff.
+  https://github.com/fedora-infra/pdc-updater/commit/9200f18be
+- 228bc6d8b Merge branch 'modularity-rebased' into develop
+  https://github.com/fedora-infra/pdc-updater/commit/228bc6d8b
+
 0.5.1
 -----
 
