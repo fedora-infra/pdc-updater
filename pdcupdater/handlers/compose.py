@@ -84,7 +84,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             try:
                 self._import_compose(pdc, compose_id, url)
             except Exception as e:
-                if hasattr(e, 'response'):
+                if getattr(e, 'response', None):
                     log.exception("Failed to import %r - %r %r" % (
                         url, e.response.url, e.response.text))
                 else:
