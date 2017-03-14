@@ -38,12 +38,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
     @property
     def topic_suffixes(self):
         return [
-            # This is the modern value that will be used.
-            # See https://pagure.io/fm-orchestrator/pull-request/279
             'mbs.module.state.change',
-            # This is an old value for backwards compat during development.
-            # Feel free to remove it in the future.
-            'module_build_service.module.state.change',
         ]
 
     def can_handle(self, pdc, msg):
