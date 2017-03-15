@@ -75,6 +75,12 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
         unreleased_variant = self.get_or_create_unreleased_variant(pdc, body)
 
+        if body['state_name'] == 'ready':
+            uid = unreleased_variant['variant_uid']
+            # This submits an HTTP PATCH.
+            # The '/' is necessary to avoid losing the body in a 301.
+            pdc['unreleasedvariants'][uid + '/'] += {'variant_uid': uid, 'active': True}
+
         # trees are only present when a module is done building, i.e. states
         # 'done' or 'ready'
         if 'topdir' in body:
