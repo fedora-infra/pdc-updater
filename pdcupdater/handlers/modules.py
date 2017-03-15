@@ -75,7 +75,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
         unreleased_variant = self.get_or_create_unreleased_variant(pdc, body)
 
-        if body['state_name'] == 'ready':
+        if body['state'] == 5:
             uid = unreleased_variant['variant_uid']
             # This submits an HTTP PATCH.
             # The '/' is necessary to avoid losing the body in a 301.
