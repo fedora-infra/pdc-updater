@@ -130,12 +130,10 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         # version/release, but for now we just do the right mapping here...
         variant_version =  body['stream'] # This is supposed to be equal to version
         variant_release =  body['version'] # This is supposed to be equal to release
+        variant_uid = "%s-%s-%s" % (variant_id, variant_version, variant_release)
 
         try:
-            unreleased_variant = pdc['unreleasedvariants'][variant_id]._(
-                variant_version=variant_version,
-                variant_release=variant_release,
-            )
+            unreleased_variant = pdc['unreleasedvariants'][variant_uid]._()
         except beanbag.BeanBagException as e:
             if e.response.status_code != 404:
                 raise
