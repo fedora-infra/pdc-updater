@@ -1,4 +1,35 @@
 
+0.5.3
+-----
+
+Pull Requests
+
+- #49, Merge pull request #49 from fedora-infra/feature/fix-fedora-cloud-release
+  https://github.com/fedora-infra/pdc-updater/pull/49
+- #51, Merge pull request #51 from fedora-infra/feature/spelling-fix
+  https://github.com/fedora-infra/pdc-updater/pull/51
+- #50, Merge pull request #50 from fedora-infra/old-cruft
+  https://github.com/fedora-infra/pdc-updater/pull/50
+- #52, Merge pull request #52 from fedora-infra/feature/patch-on-module-done
+  https://github.com/fedora-infra/pdc-updater/pull/52
+
+Commits
+
+- e779eba88 Check for NoneType here.
+  https://github.com/fedora-infra/pdc-updater/commit/e779eba88
+- 93c0deffe Remove new internal field.
+  https://github.com/fedora-infra/pdc-updater/commit/93c0deffe
+- 8e3174ae1 Remove old cruft.
+  https://github.com/fedora-infra/pdc-updater/commit/8e3174ae1
+- 6723021ca Fix a spelling mistake.
+  https://github.com/fedora-infra/pdc-updater/commit/6723021ca
+- 7ffc06a36 Use the variant_uid lookup_field.
+  https://github.com/fedora-infra/pdc-updater/commit/7ffc06a36
+- 09575def2 Toggle modules to active=True when they are done.
+  https://github.com/fedora-infra/pdc-updater/commit/09575def2
+- de3092177 Check state instead of state_name.
+  https://github.com/fedora-infra/pdc-updater/commit/de3092177
+
 0.5.2
 -----
 
