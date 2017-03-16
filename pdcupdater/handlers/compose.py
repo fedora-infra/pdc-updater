@@ -139,7 +139,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
 
         # PDC doesn't know about this field which showed up recently in pungi
         # productmd metadata here.
-        release.pop('internal')
+        release.pop('internal', None)
 
         release_id = "{short}-{version}".format(**release)
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)

@@ -1,4 +1,14 @@
 
+0.5.4
+-----
+
+Commits
+
+- e78b809f8 Provide a default value here.
+  https://github.com/fedora-infra/pdc-updater/commit/e78b809f8
+- 004117077 Fix tests after #52.
+  https://github.com/fedora-infra/pdc-updater/commit/004117077
+
 0.5.3
 -----
 
