@@ -17,10 +17,10 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
     tree_processing_states = set(('done', 'ready'))
     other_states = set(('wait', 'building'))
-    irelevant_states = set(('init',))
+    irrelevant_states = set(('init',))
     relevant_states = tree_processing_states.union(other_states)
     error_states = set(('failed',))
-    valid_states = relevant_states.union(error_states).union(irelevant_states)
+    valid_states = relevant_states.union(error_states).union(irrelevant_states)
 
     tree_id_re = re.compile(
         r"(?P<name>[^-]+)-(?P<version>[^-]+)-"
@@ -38,12 +38,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
     @property
     def topic_suffixes(self):
         return [
-            # This is the modern value that will be used.
-            # See https://pagure.io/fm-orchestrator/pull-request/279
             'mbs.module.state.change',
-            # This is an old value for backwards compat during development.
-            # Feel free to remove it in the future.
-            'module_build_service.module.state.change',
         ]
 
     def can_handle(self, pdc, msg):
@@ -74,6 +69,12 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             return
 
         unreleased_variant = self.get_or_create_unreleased_variant(pdc, body)
+
+        if body['state'] == 5:
+            uid = unreleased_variant['variant_uid']
+            # This submits an HTTP PATCH.
+            # The '/' is necessary to avoid losing the body in a 301.
+            pdc['unreleasedvariants'][uid + '/'] += {'variant_uid': uid, 'active': True}
 
         # trees are only present when a module is done building, i.e. states
         # 'done' or 'ready'
@@ -130,12 +131,10 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         # version/release, but for now we just do the right mapping here...
         variant_version =  body['stream'] # This is supposed to be equal to version
         variant_release =  body['version'] # This is supposed to be equal to release
+        variant_uid = "%s-%s-%s" % (variant_id, variant_version, variant_release)
 
         try:
-            unreleased_variant = pdc['unreleasedvariants'][variant_id]._(
-                variant_version=variant_version,
-                variant_release=variant_release,
-            )
+            unreleased_variant = pdc['unreleasedvariants'][variant_uid]._()
         except beanbag.BeanBagException as e:
             if e.response.status_code != 404:
                 raise

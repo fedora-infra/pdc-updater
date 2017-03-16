@@ -84,7 +84,7 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             try:
                 self._import_compose(pdc, compose_id, url)
             except Exception as e:
-                if hasattr(e, 'response'):
+                if getattr(e, 'response', None):
                     log.exception("Failed to import %r - %r %r" % (
                         url, e.response.url, e.response.text))
                 else:
@@ -136,6 +136,11 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
             composeinfo['payload']['release']['short'].lower()
         release = copy.copy(composeinfo['payload']['release'])
         release['release_type'] = release.pop('type', 'ga')
+
+        # PDC doesn't know about this field which showed up recently in pungi
+        # productmd metadata here.
+        release.pop('internal')
+
         release_id = "{short}-{version}".format(**release)
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
