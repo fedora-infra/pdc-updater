@@ -327,7 +327,7 @@ def mock_pdc(function):
             'build_deps': ['core >= 23', 'c-build >= 6.0'],
         }])
 
-        pdc.add_endpoint('unreleasedvariants/core', 'GET', mock_404)
+        pdc.add_endpoint('unreleasedvariants/core-24-0', 'GET', mock_404)
         pdc.add_endpoint('trees/Test-0-20160712.0', 'GET', mock_404)
 
         return function(self, pdc, *args, **kwargs)
