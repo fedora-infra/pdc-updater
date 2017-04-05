@@ -1,4 +1,17 @@
 
+0.5.5
+-----
+
+Pull Requests
+
+-                   #53, Merge pull request #53 from hanzz/module-hash
+  https://github.com/fedora-infra/pdc-updater/pull/53
+
+Commits
+
+- b0f14d1f8 Use hash instead of variant_uid for koji_tag, otherwise we hit the 50 characters limit for koji_tag used by Koji.
+  https://github.com/fedora-infra/pdc-updater/commit/b0f14d1f8
+
 0.5.4
 -----
 
