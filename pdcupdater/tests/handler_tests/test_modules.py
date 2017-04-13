@@ -2,11 +2,59 @@ import os
 import shutil
 import tarfile
 import copy
+import mock
 
 from pdcupdater.tests.handler_tests import (
     BaseHandlerTest, mock_pdc
 )
 
+def mocked_koji_from_tag(url, tag):
+    if tag != 'epel7':
+        return []
+    return [{
+        'build_id': 698494,
+        'name': 'dvisvgm',
+        'arch': 'src',
+        'buildtime': 1447252790,
+        'id': 6979644,
+        'epoch': None,
+        'version': '1.11',
+        'release': '1.el7',
+        'buildroot_id': 4386200,
+        'payloadhash': '46f384609c0db547753857d5b0476cae',
+        'size': 841828,
+        # Extracted from the associated build
+        'srpm_name': 'dvisvgm',
+    }, {
+        'build_id': 698495,
+        'name': 'dvisvgm2',
+        'arch': 'src',
+        'buildtime': 1447252790,
+        'id': 6979645,
+        'epoch': None,
+        'version': '1.11',
+        'release': '1.el7',
+        'buildroot_id': 4386200,
+        'payloadhash': '46f384609c0db547753857d5b0476cae',
+        'size': 841828,
+        # Extracted from the associated build
+        'srpm_name': 'dvisvgm2',
+    }, {
+        'build_id': 696907,
+        'name': 'rubygem-jmespath-doc',
+        'arch': 'noarch',
+        'buildtime': 1446997456,
+        'id': 6968508,
+        'epoch': None,
+        'version': '1.1.3',
+        'release': '1.el7',
+        'buildroot_id': 4364114,
+        'payloadhash': '6b98468f3efe29367c923c577861dec5',
+        'size': 175000,
+        # Extracted from the associated build
+        'srpm_name': 'rubygem-jmespath',
+        'srpm_nevra': 'rubygem-jmespath-1.1.3-1.el7',
+    }]
 
 class TestModuleStateChange(BaseHandlerTest):
     handler_path = 'pdcupdater.handlers.modules:ModuleStateChangeHandler'
@@ -15,6 +63,9 @@ class TestModuleStateChange(BaseHandlerTest):
     modulemd_file = os.path.join(test_data_dir, "modulemd.yaml")
     with open(modulemd_file) as f:
         modulemd_example = f.read()
+    modulemd_file = os.path.join(test_data_dir, "modulemd-minimal.yaml")
+    with open(modulemd_file) as f:
+        modulemd_minimal_example = f.read()
     repo_dir = os.path.join(test_data_dir, "repos")
     foo_repo_tar = os.path.join(repo_dir, "foo.tar")
     foo_repo_dir = os.path.join(repo_dir, "foo")
@@ -66,3 +117,50 @@ class TestModuleStateChange(BaseHandlerTest):
     @mock_pdc
     def test_handle_created_tree(self, pdc):
         self.handler.handle(pdc, self.state_done_msg)
+
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
+    def test_get_unreleased_variant_rpms(self, pdc, koji):
+        koji.side_effect = mocked_koji_from_tag
+
+        variant = {}
+        variant["koji_tag"] = "epel7"
+        variant["modulemd"] = self.modulemd_example
+
+        expected_rpms = [
+            {'srpm_nevra': None, 'epoch': 0, 'version': '1.11',
+             'name': 'dvisvgm', 'release': '1.el7',
+             'srpm_commit_hash': '76f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb',
+             'srpm_commit_branch': 'f26', 'arch': 'src', 'srpm_name': 'dvisvgm'},
+            {'srpm_nevra': None, 'epoch': 0, 'version': '1.11',
+             'name': 'dvisvgm2', 'release': '1.el7',
+             'srpm_commit_hash': '86f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb',
+             'arch': 'src', 'srpm_name': 'dvisvgm2'},
+            {'srpm_nevra': 'rubygem-jmespath-1.1.3-1.el7', 'epoch': 0,
+             'version': '1.1.3', 'name': 'rubygem-jmespath-doc',
+             'release': '1.el7', 'arch': 'noarch', 'srpm_name': 'rubygem-jmespath'}]
+        rpms = self.handler.get_unreleased_variant_rpms(pdc, variant)
+        self.assertEqual(expected_rpms, rpms)
+
+    @mock_pdc
+    @mock.patch('pdcupdater.services.koji_rpms_in_tag')
+    def test_get_unreleased_variant_rpms_minimal_mmd(self, pdc, koji):
+        koji.side_effect = mocked_koji_from_tag
+
+        variant = {}
+        variant["koji_tag"] = "epel7"
+        variant["modulemd"] = self.modulemd_minimal_example
+
+        expected_rpms = [
+            {'srpm_nevra': None, 'epoch': 0, 'version': '1.11',
+             'name': 'dvisvgm', 'release': '1.el7',
+             'arch': 'src', 'srpm_name': 'dvisvgm'},
+            {'srpm_nevra': None, 'epoch': 0, 'version': '1.11',
+             'name': 'dvisvgm2', 'release': '1.el7',
+             'arch': 'src', 'srpm_name': 'dvisvgm2'},
+            {'srpm_nevra': 'rubygem-jmespath-1.1.3-1.el7', 'epoch': 0,
+             'version': '1.1.3', 'name': 'rubygem-jmespath-doc',
+             'release': '1.el7', 'arch': 'noarch', 'srpm_name': 'rubygem-jmespath'}]
+        rpms = self.handler.get_unreleased_variant_rpms(pdc, variant)
+        self.assertEqual(expected_rpms, rpms)
