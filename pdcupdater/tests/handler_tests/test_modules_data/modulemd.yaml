@@ -16,16 +16,6 @@ data:
             - bash
     components:
         rpms:
-            dvisvgm:
+            bash:
                 rationale: Part of the first base-runtime prototype.
-                ref: f26
-            dvisvgm2:
-                rationale: Part of the first base-runtime prototype.
-                ref: 86f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb
-    xmd:
-        mbs:
-            rpms:
-                dvisvgm:
-                    ref: 76f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb
-                dvisvgm2:
-                    ref: 86f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb
+                ref: b1104ec130056866f3bdce51a3f77685b702fbde

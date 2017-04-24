@@ -36,10 +36,6 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         r"(?P<giturl>(?:(?P<scheme>git)://(?P<host>[^/]+))?"
         r"(?P<repopath>/[^\?]+))\?(?P<modpath>[^#]*)#(?P<revision>.+)")
 
-    def __init__(self, *args, **kwargs):
-        super(ModuleStateChangeHandler, self).__init__(*args, **kwargs)
-        self.koji_url = self.config['pdcupdater.koji_url']
-
     @property
     def topic_suffixes(self):
         return [
@@ -63,45 +59,6 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
         return True
 
-    def get_unreleased_variant_rpms(self, pdc, variant):
-        """
-        Returns the list of rpms as defined "rpms" key in "unreleasedvariants"
-        PDC endpoint. The list is obtained from the Koji tag defined by
-        "koji_tag" value of input variant `variant`.
-        """
-        mmd = modulemd.ModuleMetadata()
-        mmd.loads(variant['modulemd'])
-
-        koji_rpms = pdcupdater.services.koji_rpms_in_tag(
-            self.koji_url, variant["koji_tag"])
-
-        rpms = []
-        # Flatten into a list and augment the koji dict with tag info.
-        for rpm in koji_rpms:
-            data = dict(
-                name=rpm['name'],
-                version=rpm['version'],
-                release=rpm['release'],
-                epoch=rpm['epoch'] or 0,
-                arch=rpm['arch'],
-                srpm_name=rpm['srpm_name'],
-                srpm_nevra=rpm['arch'] != 'src' and rpm.get('srpm_nevra') or None,
-            )
-
-            # For SRPM packages, include the hash and branch from which is
-            # has been built.
-            if (rpm['arch'] == 'src' and rpm['name'] in mmd.components.rpms
-                    and 'rpms' in mmd.xmd['mbs']
-                    and rpm['name'] in mmd.xmd['mbs']['rpms']):
-                mmd_rpm = mmd.components.rpms[rpm['name']]
-                xmd_rpm = mmd.xmd['mbs']['rpms'][rpm['name']]
-                data["srpm_commit_hash"] = xmd_rpm['ref']
-                if xmd_rpm['ref'] != mmd_rpm.ref:
-                    data["srpm_commit_branch"] = mmd_rpm.ref
-            rpms.append(data)
-
-        return rpms
-
     def handle(self, pdc, msg):
         log.debug("handle(pdc, msg=%r)" % msg)
         body = msg['msg']
@@ -116,12 +73,9 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
         if body['state'] == 5:
             uid = unreleased_variant['variant_uid']
-            rpms = self.get_unreleased_variant_rpms(pdc, unreleased_variant)
             # This submits an HTTP PATCH.
             # The '/' is necessary to avoid losing the body in a 301.
-            pdc['unreleasedvariants'][uid + '/'] += {'variant_uid': uid,
-                                                     'active': True,
-                                                     'rpms': rpms}
+            pdc['unreleasedvariants'][uid + '/'] += {'variant_uid': uid, 'active': True}
 
         # trees are only present when a module is done building, i.e. states
         # 'done' or 'ready'
