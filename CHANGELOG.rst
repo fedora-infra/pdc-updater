@@ -1,4 +1,19 @@
 
+0.5.6
+-----
+
+Pull Requests
+
+-                   #54, Merge pull request #54 from hanzz/module-hash
+  https://github.com/fedora-infra/pdc-updater/pull/54
+
+Commits
+
+- ed0707849 Add RPMs built in module to PDC when the module state changes to ready.
+  https://github.com/fedora-infra/pdc-updater/commit/ed0707849
+- 35bf475b7 Merge branch 'master' into develop
+  https://github.com/fedora-infra/pdc-updater/commit/35bf475b7
+
 0.5.5
 -----
 
