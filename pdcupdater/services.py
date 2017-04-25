@@ -150,7 +150,11 @@ def koji_builds_in_tag(url, tag, owner=None):
     import koji
     log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
     session = koji.ClientSession(url)
-    return session.listTagged(tag, latest=True, owner=owner)
+    try:
+        return session.listTagged(tag, latest=True, owner=owner)
+    except koji.GenericError as e:
+        log.warn("Failed to get builds in tag %r: %r" % (tag, e))
+        return []
 
 
 @pdcupdater.utils.retry()
