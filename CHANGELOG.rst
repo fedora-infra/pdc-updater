@@ -1,4 +1,14 @@
 
+0.5.7
+-----
+
+Commits
+
+- fb0e68fa0 Do not die if we cannot find a given tag.  Just warn.
+  https://github.com/fedora-infra/pdc-updater/commit/fb0e68fa0
+- 61b11a02c Return to dynamically generating list of container tags.
+  https://github.com/fedora-infra/pdc-updater/commit/61b11a02c
+
 0.5.6
 -----
 
