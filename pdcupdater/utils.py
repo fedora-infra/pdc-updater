@@ -515,10 +515,10 @@ def interesting_container_tags():
     Eventually, we should query PDC itself to figure out what tags we should be
     concerned with.
     """
-    return ['f24-docker']  # This is all we're producing for now...
-    #tags = interesting_tags()
-    #tags = [tag for tag in tags if '-' not in tag]
-    #return ['%s-docker' % tag for tag in tags]
+    tags = interesting_tags()
+    tags = [tag for tag in tags if '-' not in tag]
+    return ['%s-docker' % tag for tag in tags] + \
+        ['%s-container' % tag for tag in tags]
 
 
 @cache.cache_on_arguments()
