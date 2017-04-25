@@ -120,8 +120,13 @@ class TestInclusionDepIngestion(BaseHandlerTest):
                     'from_component_release': 'fedora-24-updates',
                     'type': 'ContainerIncludesRPM',
                 }),
+                ('GET', {
+                    'page': 1,
+                    'from_component_release': 'fedora-24-updates',
+                    'type': 'ContainerIncludesRPM',
+                }),
             ],
-            'releases/fedora-24-updates': [('GET', {})]
+            'releases/fedora-24-updates': [('GET', {}), ('GET', {})]
         })
 
         # Check the results.
@@ -179,8 +184,13 @@ class TestInclusionDepIngestion(BaseHandlerTest):
                     'from_component_release': 'fedora-24-updates',
                     'type': 'ContainerIncludesRPM',
                 }),
+                ('GET', {
+                    'page': 1,
+                    'from_component_release': 'fedora-24-updates',
+                    'type': 'ContainerIncludesRPM',
+                }),
             ],
-            'releases/fedora-24-updates': [('GET', {})]
+            'releases/fedora-24-updates': [('GET', {}), ('GET', {})]
         })
 
         # Check the results.

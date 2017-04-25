@@ -1,4 +1,12 @@
 
+0.5.8
+-----
+
+Commits
+
+- 694ee3b52 Thank goodness for tests.
+  https://github.com/fedora-infra/pdc-updater/commit/694ee3b52
+
 0.5.7
 -----
 
