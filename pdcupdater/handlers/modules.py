@@ -85,8 +85,10 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
                 epoch=rpm['epoch'] or 0,
                 arch=rpm['arch'],
                 srpm_name=rpm['srpm_name'],
-                srpm_nevra=rpm['arch'] != 'src' and rpm.get('srpm_nevra') or None,
             )
+
+            if 'srpm_nevra' in rpm:
+                data['srpm_nevra'] = rpm['srpm_nevra']
 
             # For SRPM packages, include the hash and branch from which is
             # has been built.
