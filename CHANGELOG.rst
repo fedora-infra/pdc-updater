@@ -1,4 +1,17 @@
 
+0.5.9
+-----
+
+Pull Requests
+
+-                   #56, Merge pull request #56 from hanzz/module-hash
+  https://github.com/fedora-infra/pdc-updater/pull/56
+
+Commits
+
+- d6110bd6a Do not set srpm_nevra to None when adding RPM to PDC
+  https://github.com/fedora-infra/pdc-updater/commit/d6110bd6a
+
 0.5.8
 -----
 
