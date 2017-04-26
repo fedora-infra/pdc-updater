@@ -129,11 +129,11 @@ class TestModuleStateChange(BaseHandlerTest):
         variant["modulemd"] = self.modulemd_example
 
         expected_rpms = [
-            {'srpm_nevra': None, 'epoch': 0, 'version': '1.11',
+            {'epoch': 0, 'version': '1.11',
              'name': 'dvisvgm', 'release': '1.el7',
              'srpm_commit_hash': '76f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb',
              'srpm_commit_branch': 'f26', 'arch': 'src', 'srpm_name': 'dvisvgm'},
-            {'srpm_nevra': None, 'epoch': 0, 'version': '1.11',
+            {'epoch': 0, 'version': '1.11',
              'name': 'dvisvgm2', 'release': '1.el7',
              'srpm_commit_hash': '86f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb',
              'arch': 'src', 'srpm_name': 'dvisvgm2'},
@@ -153,10 +153,10 @@ class TestModuleStateChange(BaseHandlerTest):
         variant["modulemd"] = self.modulemd_minimal_example
 
         expected_rpms = [
-            {'srpm_nevra': None, 'epoch': 0, 'version': '1.11',
+            {'epoch': 0, 'version': '1.11',
              'name': 'dvisvgm', 'release': '1.el7',
              'arch': 'src', 'srpm_name': 'dvisvgm'},
-            {'srpm_nevra': None, 'epoch': 0, 'version': '1.11',
+            {'epoch': 0, 'version': '1.11',
              'name': 'dvisvgm2', 'release': '1.el7',
              'arch': 'src', 'srpm_name': 'dvisvgm2'},
             {'srpm_nevra': 'rubygem-jmespath-1.1.3-1.el7', 'epoch': 0,
