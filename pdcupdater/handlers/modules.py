@@ -87,7 +87,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
                 srpm_name=rpm['srpm_name'],
             )
 
-            if 'srpm_nevra' in rpm:
+            if 'srpm_nevra' in rpm and rpm['arch'] != 'src':
                 data['srpm_nevra'] = rpm['srpm_nevra']
 
             # For SRPM packages, include the hash and branch from which is
