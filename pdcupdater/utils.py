@@ -117,6 +117,7 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
             'name': name,
             'global_component': name,
             'release': release_id,
+            'dist_git_branch': releaseid2branch(pdc, release_id),
             'type': type,
         }
         # If this works, then we return the primary key and other data.
@@ -542,6 +543,18 @@ def release2reponame(release):
         return 'f' + release['version']
     if release['name'] == 'EPEL':
         pass
+
+
+@cache.cache_on_arguments()
+def releaseid2branch(pdc, release_id):
+    """ Convert a PDC release_id to a dist-git branch name.
+
+    May return `None` if we don't know.
+    """
+    release = pdc['releases'][release_id]._()
+    # May return `None` if undefined.
+    return release.get('dist_git', {}).get('branch')
+
 
 def subpackage2parent(package, pdc_release):
     """ Use mdapi to return the parent package of a given subpackage """
