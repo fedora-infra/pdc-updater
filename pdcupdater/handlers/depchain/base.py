@@ -231,6 +231,8 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
                 # If switching to a new parent key, then issue bulk create
                 # statements for each parent
                 if parent != old_parent:
+                    pdcupdater.utils.ensure_release_component_exists(
+                        pdc, release_id, parent['name'], type=self.parent_type)
                     pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
                         pdc, parent, children, component_type='rpm')
                     # Reset things...
