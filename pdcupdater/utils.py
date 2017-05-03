@@ -96,6 +96,14 @@ def ensure_release_exists(pdc, release_id, release):
         release_payload.update(dict(
             active=True,
         ))
+
+        # XXX - Both release_type and type should have the same value, but PDC
+        # doesn't expect that the 'type' value should be present.  If it is
+        # present, we fail with a 400 error.  Here, we delete it until the
+        # pungi/PDC authors tell us otherwise.
+        if 'release_type' in release_payload and 'type' in release_payload:
+            del release_payload['type']
+
         log.info("Creating release %r" % release_payload)
         pdc['releases']._(release_payload)
 
