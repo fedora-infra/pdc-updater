@@ -517,7 +517,14 @@ def interesting_container_tags():
     concerned with.
     """
     tags = interesting_tags()
+
+    suffix = '-updates'
+    for i, tag in enumerate(tags):
+        if tag.endswith(suffix):
+            tags[i] = tag[:-len(suffix)]
+
     tags = [tag for tag in tags if '-' not in tag]
+
     return ['%s-docker' % tag for tag in tags] + \
         ['%s-container' % tag for tag in tags]
 
