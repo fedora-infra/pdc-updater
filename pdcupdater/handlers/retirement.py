@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
-
 import requests
+
 import pdcupdater.services
 
 log = logging.getLogger(__name__)
@@ -39,11 +39,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         branch = msg['msg']['commit']['branch']
         repo = msg['msg']['commit']['repo']
         namespace = msg['msg']['commit']['namespace']
-        # The dist-git namespaces are plural but the types are singular in PDC
-        if namespace.endswith('s'):
-            component_type = namespace[:-1]
-        else:
-            component_type = namespace
+        component_type = self._namespace_to_pdc(namespace)
         # This query guarantees a unique component branch, so a count of 1 is
         # expected
         branch_query_rv = pdc['component-branches']._(
@@ -63,7 +59,6 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
     @staticmethod
     def _retire_branch(pdc, branch):
         """ Internal method for retiring a branch in PDC. """
-        log.info("Retiring {type}/{global_component}#{name}".format(**branch))
         today = datetime.utcnow().date()
         for sla in branch['slas']:
             sla_eol = datetime.strptime(sla['eol'], '%Y-%m-%d').date()
@@ -71,14 +66,86 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
                 pdc['component-branch-slas'][sla['id']]._ \
                     += {'eol': str(today)}
 
-    def audit(self, pdc):
-        """ Not Implemented.
+    @staticmethod
+    def _namespace_to_pdc(namespace):
+        namespace_to_pdc = {
+            'rpms': 'rpm',
+            'modules': 'module',
+            'container': 'container',
+        }
+        if namespace not in namespace_to_pdc:
+            raise ValueError('The namespace "{0}" is not supported'
+                             .format(namespace))
+        else:
+            return namespace_to_pdc[namespace]
 
-        This function (if it were implemented) should compare the status in PDC
-        and the status in the "real world" (i.e., in dist-git) and return the
-        difference.
+    @staticmethod
+    def _pdc_to_namespace(pdc_type):
+        pdc_to_namespace = {
+            'rpm': 'rpms',
+            'module': 'modules',
+            'container': 'container',
+        }
+        if pdc_type not in pdc_to_namespace:
+            raise ValueError('The PDC type "{0}" is not supported'
+                             .format(pdc_type))
+        else:
+            return pdc_to_namespace[pdc_type]
+
+    @staticmethod
+    def _is_retired_in_cgit(namespace, repo, branch, requests_session=None):
+        if requests_session is None:
+            requests_session = requests.Session()
+
+        cgit_url = 'https://src.fedoraproject.org/cgit'
+        # Check to see if they have a dead.package file in dist-git
+        url = '{base}/{namespace}/{repo}.git/plain/dead.package?h={branch}'
+        response = requests_session.head(url.format(
+            base=cgit_url,
+            namespace=namespace,
+            repo=repo,
+            branch=branch,
+        ))
+
+        # If there is a dead.package, then the branch is retired in cgit
+        if response.status_code in [200, 404]:
+            return response.status_code == 200
+        else:
+            raise ValueError(
+                'The connection to cgit failed. Retirement status could not '
+                'be determined. The status code was: {0}. The content was: '
+                '{1}'.format(response.status_code, response.content))
+
+    def audit(self, pdc):
+        """ Returns the difference in retirement status in PDC and dist-git.
+
+        This function compares the status in PDC and the status in the
+        "real world" (i.e., in dist-git) and return the difference.
         """
-        pass
+        branches_retired_in_distgit = set()
+        branches_retired_in_pdc = set()
+        session = requests.Session()
+
+        log.info('Looking up all branches from PDC.')
+        for branch in pdc.get_paged(pdc['component-branches']._):
+            branch_str = '{type}/{global_component}#{name}'.format(**branch)
+            log.debug('Considering {0}'.format(branch_str))
+            retired_in_cgit = self._is_retired_in_cgit(
+                namespace=self._pdc_to_namespace(branch['type']),
+                repo=branch['global_component'],
+                branch=branch['name'],
+                requests_session=session
+            )
+
+            if retired_in_cgit:
+                branches_retired_in_distgit.add(branch_str)
+            if not branch['active']:
+                branches_retired_in_pdc.add(branch_str)
+
+        present = branches_retired_in_pdc - branches_retired_in_distgit
+        absent = branches_retired_in_distgit - branches_retired_in_pdc
+
+        return present, absent
 
     def initialize(self, pdc):
         """ Initialize PDC retirement status from analyzing dist-git.
@@ -87,28 +154,19 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         in PDC that have a dead.package file in dist-git.
         """
         session = requests.Session()
-        cgit_url = "https://src.fedoraproject.org/cgit"
-        pdc2namespace = {
-            'rpm': 'rpms',
-            'module': 'modules',
-            'container': 'container',
-        }
 
         # Look up all non-retired branches from PDC
-        log.info("Looking up active branches from PDC.")
-        branches = pdc.get_paged(pdc['component-branches'], active=True)
+        log.info('Looking up active branches from PDC.')
 
-        for branch in branches:
-            log.debug("Considering {type}/{global_component}#{name}".format(**branch))
-            # Check to see if they have a dead.package file in dist-git
-            url = "{base}/{type}/{repo}.git/plain/dead.package?h={branch}"
-            response = session.head(url.format(
-                base=cgit_url,
-                type=pdc2namespace[branch['type']],
+        for branch in pdc.get_paged(pdc['component-branches']._, active=True):
+            log.debug('Considering {type}/{global_component}#{name}'
+                      .format(**branch))
+            retired_in_cgit = self._is_retired_in_cgit(
+                namespace=self._pdc_to_namespace(branch['type']),
                 repo=branch['global_component'],
                 branch=branch['name'],
-            ))
+                requests_session=session
+            )
 
-            # If so, then we need to retire them.
-            if bool(response):
+            if retired_in_cgit:
                 self._retire_branch(pdc, branch)

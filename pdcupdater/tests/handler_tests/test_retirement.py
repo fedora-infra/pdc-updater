@@ -1,5 +1,8 @@
+import mock
+
 from pdcupdater.tests.handler_tests import BaseHandlerTest, mock_pdc
 import pdcupdater.services
+from pdcupdater.handlers.retirement import RetireComponentHandler
 
 
 class TestRetiredComponents(BaseHandlerTest):
@@ -114,3 +117,225 @@ class TestRetiredComponents(BaseHandlerTest):
             'component-branches'
         ]
         self.assertEquals(pdc.calls.keys(), expected_keys)
+
+    @mock_pdc
+    def test_audit(self, pdc):
+        pdc.add_endpoint('component-branches', 'GET', [
+            {
+                "id": 155867,
+                "global_component": "obexftp",
+                "name": "f26",
+                "slas": [
+                    {
+                        "id": 310591,
+                        "sla": "bug_fixes",
+                        "eol": "2017-06-28"
+                    },
+                    {
+                        "id": 310602,
+                        "sla": "security_fixes",
+                        "eol": "2017-06-28"
+                    }
+                ],
+                "type": "rpm",
+                "active": False,
+                "critical_path": False
+            },
+            {
+                "id": 323149,
+                "global_component": "python",
+                "name": "f26",
+                "slas": [
+                    {
+                        "id": 646309,
+                        "sla": "security_fixes",
+                        "eol": "2222-07-01"
+                    },
+                    {
+                        "id": 646303,
+                        "sla": "bug_fixes",
+                        "eol": "2222-07-01"
+                    }
+                ],
+                "type": "module",
+                "active": True,
+                "critical_path": False
+            }
+        ])
+
+        with mock.patch('requests.Session') as mock_requests_session:
+            mock_rv_found = mock.Mock()
+            mock_rv_found.status_code = 200
+            mock_rv_not_found = mock.Mock()
+            mock_rv_not_found.status_code = 404
+            mock_session_rv = mock.Mock()
+            mock_session_rv.head.side_effect = [mock_rv_found, mock_rv_not_found]
+            mock_requests_session.return_value = mock_session_rv
+            present, absent = self.handler.audit(pdc)
+
+        self.assertEquals(present, set())
+        self.assertEquals(absent, set())
+
+
+    @mock_pdc
+    def test_audit_retired_in_pdc_not_cgit(self, pdc):
+        pdc.add_endpoint('component-branches', 'GET', [
+            {
+                "id": 155867,
+                "global_component": "obexftp",
+                "name": "f26",
+                "slas": [
+                    {
+                        "id": 310591,
+                        "sla": "bug_fixes",
+                        "eol": "2017-06-28"
+                    },
+                    {
+                        "id": 310602,
+                        "sla": "security_fixes",
+                        "eol": "2017-06-28"
+                    }
+                ],
+                "type": "rpm",
+                "active": False,
+                "critical_path": False
+            },
+            {
+                "id": 323149,
+                "global_component": "python",
+                "name": "f26",
+                "slas": [
+                    {
+                        "id": 646309,
+                        "sla": "security_fixes",
+                        "eol": "2222-07-01"
+                    },
+                    {
+                        "id": 646303,
+                        "sla": "bug_fixes",
+                        "eol": "2222-07-01"
+                    }
+                ],
+                "type": "module",
+                "active": True,
+                "critical_path": False
+            }
+        ])
+
+        with mock.patch('requests.Session') as mock_requests_session:
+            mock_rv_not_found = mock.Mock()
+            mock_rv_not_found.status_code = 404
+            mock_session_rv = mock.Mock()
+            mock_session_rv.head.return_value = mock_rv_not_found
+            mock_requests_session.return_value = mock_session_rv
+            present, absent = self.handler.audit(pdc)
+
+        self.assertEquals(present, {'rpm/obexftp#f26'})
+        self.assertEquals(absent, set())
+
+    @mock_pdc
+    def test_audit_retired_in_cgit_not_pdc(self, pdc):
+        pdc.add_endpoint('component-branches', 'GET', [
+            {
+                "id": 155867,
+                "global_component": "obexftp",
+                "name": "f26",
+                "slas": [
+                    {
+                        "id": 310591,
+                        "sla": "bug_fixes",
+                        "eol": "2222-06-28"
+                    },
+                    {
+                        "id": 310602,
+                        "sla": "security_fixes",
+                        "eol": "2222-06-28"
+                    }
+                ],
+                "type": "rpm",
+                "active": True,
+                "critical_path": False
+            },
+            {
+                "id": 323149,
+                "global_component": "python",
+                "name": "f26",
+                "slas": [
+                    {
+                        "id": 646309,
+                        "sla": "security_fixes",
+                        "eol": "2222-07-01"
+                    },
+                    {
+                        "id": 646303,
+                        "sla": "bug_fixes",
+                        "eol": "2222-07-01"
+                    }
+                ],
+                "type": "module",
+                "active": True,
+                "critical_path": False
+            }
+        ])
+
+        with mock.patch('requests.Session') as mock_requests_session:
+            mock_rv_not_found = mock.Mock()
+            mock_rv_not_found.status_code = 200
+            mock_session_rv = mock.Mock()
+            mock_session_rv.head.return_value = mock_rv_not_found
+            mock_requests_session.return_value = mock_session_rv
+            present, absent = self.handler.audit(pdc)
+
+        self.assertEquals(present, set())
+        self.assertEquals(absent, {'rpm/obexftp#f26', 'module/python#f26'})
+
+    @mock_pdc
+    def test_initialize(self, pdc):
+        pdc.add_endpoint('component-branches', 'GET', [
+            {
+                "id": 155867,
+                "global_component": "obexftp",
+                "name": "f26",
+                "slas": [
+                    {
+                        "id": 310591,
+                        "sla": "bug_fixes",
+                        "eol": "2017-06-28"
+                    },
+                    {
+                        "id": 310602,
+                        "sla": "security_fixes",
+                        "eol": "2017-06-28"
+                    }
+                ],
+                "type": "rpm",
+                "active": False,
+                "critical_path": False
+            },
+            {
+                "id": 323149,
+                "global_component": "python",
+                "name": "f26",
+                "slas": [
+                    {
+                        "id": 646309,
+                        "sla": "security_fixes",
+                        "eol": "2222-07-01"
+                    },
+                    {
+                        "id": 646303,
+                        "sla": "bug_fixes",
+                        "eol": "2222-07-01"
+                    }
+                ],
+                "type": "module",
+                "active": True,
+                "critical_path": False
+            }
+        ])
+
+        with mock.patch.object(RetireComponentHandler, '_retire_branch') as mock_retire_branch, \
+                mock.patch.object(RetireComponentHandler, '_is_retired_in_cgit') as mock_is_retired_in_cgit:
+            mock_is_retired_in_cgit.side_effect = [True, False]
+            self.handler.initialize(pdc)
+        self.assertEqual(mock_retire_branch.call_count, 1)
