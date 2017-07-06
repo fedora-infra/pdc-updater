@@ -68,6 +68,8 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
 
     @staticmethod
     def _namespace_to_pdc(namespace):
+        """ Internal method to translate a dist-git namespace to a PDC
+        component type. """
         namespace_to_pdc = {
             'rpms': 'rpm',
             'modules': 'module',
@@ -81,6 +83,8 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
 
     @staticmethod
     def _pdc_to_namespace(pdc_type):
+        """ Internal method to translate a PDC component type to a dist-git
+        namespace. """
         pdc_to_namespace = {
             'rpm': 'rpms',
             'module': 'modules',
@@ -94,6 +98,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
 
     @staticmethod
     def _is_retired_in_cgit(namespace, repo, branch, requests_session=None):
+        """ Internal method to determine if a branch is retired in cgit. """
         if requests_session is None:
             requests_session = requests.Session()
 
