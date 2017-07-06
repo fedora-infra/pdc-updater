@@ -50,6 +50,11 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         if branch['active'] is False:
             return
 
+        self._retire_branch(pdc, branch)
+
+    @staticmethod
+    def _retire_branch(pdc, branch):
+        log.info("Retiring {type}/{global_component}#{name}".format(**branch))
         today = datetime.utcnow().date()
         for sla in branch['slas']:
             sla_eol = datetime.strptime(sla['eol'], '%Y-%m-%d').date()
