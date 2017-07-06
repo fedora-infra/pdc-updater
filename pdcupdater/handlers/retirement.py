@@ -8,13 +8,14 @@ log = logging.getLogger(__name__)
 
 
 class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
-    """ When a component's branch is retired, EOL all it's branches """
+    """ When a component's branch is retired, EOL all SLAs on that branch.  """
 
     @property
     def topic_suffixes(self):
         return ['git.receive']
 
     def can_handle(self, pdc, msg):
+        """ Return true if this handler can/should handle a message. """
         if not msg['topic'].endswith('git.receive'):
             return False
 
@@ -29,6 +30,12 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
             and dead_package_commit['deletions'] == 0
 
     def handle(self, pdc, msg):
+        """ Handle an incoming bus message.
+
+        The message should be a dist-git retirement message (where someone adds
+        a dead.package file to the repo).  In response, this method will retire
+        the package in PDC.
+        """
         branch = msg['msg']['commit']['branch']
         repo = msg['msg']['commit']['repo']
         namespace = msg['msg']['commit']['namespace']
@@ -55,6 +62,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
 
     @staticmethod
     def _retire_branch(pdc, branch):
+        """ Internal method for retiring a branch in PDC. """
         log.info("Retiring {type}/{global_component}#{name}".format(**branch))
         today = datetime.utcnow().date()
         for sla in branch['slas']:
@@ -64,9 +72,20 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
                     += {'eol': str(today)}
 
     def audit(self, pdc):
+        """ Not Implemented.
+
+        This function (if it were implemented) should compare the status in PDC
+        and the status in the "real world" (i.e., in dist-git) and return the
+        difference.
+        """
         pass
 
     def initialize(self, pdc):
+        """ Initialize PDC retirement status from analyzing dist-git.
+
+        This steps over all the branches in dist-git and retires any branches
+        in PDC that have a dead.package file in dist-git.
+        """
         session = requests.Session()
         cgit_url = "https://src.fedoraproject.org/cgit"
         pdc2namespace = {
