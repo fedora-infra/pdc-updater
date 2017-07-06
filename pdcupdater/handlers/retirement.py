@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+import requests
 import pdcupdater.services
 
 log = logging.getLogger(__name__)
@@ -66,4 +67,29 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         pass
 
     def initialize(self, pdc):
-        pass
+        session = requests.Session()
+        cgit_url = "https://src.fedoraproject.org/cgit"
+        pdc2namespace = {
+            'rpm': 'rpms',
+            'module': 'modules',
+            'container': 'container',
+        }
+
+        # Look up all non-retired branches from PDC
+        log.info("Looking up active branches from PDC.")
+        branches = pdc.get_paged(pdc['component-branches'], active=True)
+
+        for branch in branches:
+            log.debug("Considering {type}/{global_component}#{name}".format(**branch))
+            # Check to see if they have a dead.package file in dist-git
+            url = "{base}/{type}/{repo}.git/plain/dead.package?h={branch}"
+            response = session.head(url.format(
+                base=cgit_url,
+                type=pdc2namespace[branch['type']],
+                repo=branch['global_component'],
+                branch=branch['name'],
+            ))
+
+            # If so, then we need to retire them.
+            if bool(response):
+                self._retire_branch(pdc, branch)
