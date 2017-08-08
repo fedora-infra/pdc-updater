@@ -3,6 +3,7 @@ from datetime import datetime
 import requests
 
 import pdcupdater.services
+import pdcupdater.utils
 
 log = logging.getLogger(__name__)
 
@@ -54,17 +55,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         if branch['active'] is False:
             return
 
-        self._retire_branch(pdc, branch)
-
-    @staticmethod
-    def _retire_branch(pdc, branch):
-        """ Internal method for retiring a branch in PDC. """
-        today = datetime.utcnow().date()
-        for sla in branch['slas']:
-            sla_eol = datetime.strptime(sla['eol'], '%Y-%m-%d').date()
-            if sla_eol > today:
-                pdc['component-branch-slas'][sla['id']]._ \
-                    += {'eol': str(today)}
+        _retire_branch(pdc, branch)
 
     @staticmethod
     def _namespace_to_pdc(namespace):
@@ -96,31 +87,6 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         else:
             return pdc_to_namespace[pdc_type]
 
-    @staticmethod
-    def _is_retired_in_cgit(namespace, repo, branch, requests_session=None):
-        """ Internal method to determine if a branch is retired in cgit. """
-        if requests_session is None:
-            requests_session = requests.Session()
-
-        cgit_url = 'https://src.fedoraproject.org/cgit'
-        # Check to see if they have a dead.package file in dist-git
-        url = '{base}/{namespace}/{repo}.git/plain/dead.package?h={branch}'
-        response = requests_session.head(url.format(
-            base=cgit_url,
-            namespace=namespace,
-            repo=repo,
-            branch=branch,
-        ))
-
-        # If there is a dead.package, then the branch is retired in cgit
-        if response.status_code in [200, 404]:
-            return response.status_code == 200
-        else:
-            raise ValueError(
-                'The connection to cgit failed. Retirement status could not '
-                'be determined. The status code was: {0}. The content was: '
-                '{1}'.format(response.status_code, response.content))
-
     def audit(self, pdc):
         """ Returns the difference in retirement status in PDC and dist-git.
 
@@ -135,14 +101,14 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         for branch in pdc.get_paged(pdc['component-branches']._):
             branch_str = '{type}/{global_component}#{name}'.format(**branch)
             log.debug('Considering {0}'.format(branch_str))
-            retired_in_cgit = self._is_retired_in_cgit(
+            retired_in_dist_git = _is_retired_in_dist_git(
                 namespace=self._pdc_to_namespace(branch['type']),
                 repo=branch['global_component'],
                 branch=branch['name'],
                 requests_session=session
             )
 
-            if retired_in_cgit:
+            if retired_in_dist_git:
                 branches_retired_in_distgit.add(branch_str)
             if not branch['active']:
                 branches_retired_in_pdc.add(branch_str)
@@ -166,12 +132,47 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         for branch in pdc.get_paged(pdc['component-branches']._, active=True):
             log.debug('Considering {type}/{global_component}#{name}'
                       .format(**branch))
-            retired_in_cgit = self._is_retired_in_cgit(
+            retired_in_dist_git = _is_retired_in_dist_git(
                 namespace=self._pdc_to_namespace(branch['type']),
                 repo=branch['global_component'],
                 branch=branch['name'],
                 requests_session=session
             )
 
-            if retired_in_cgit:
-                self._retire_branch(pdc, branch)
+            if retired_in_dist_git:
+                _retire_branch(pdc, branch)
+
+@pdcupdater.utils.retry(wait_on=requests.exceptions.ConnectionError)
+def _is_retired_in_dist_git(namespace, repo, branch, requests_session=None):
+    if requests_session is None:
+        requests_session = requests.Session()
+
+    base = 'https://src.fedoraproject.org/'
+    # Check to see if they have a dead.package file in dist-git
+    url = '{base}/{namespace}/{repo}/raw/{branch}/f/dead.package'
+    response = requests_session.head(url.format(
+        base=base,
+        namespace=namespace,
+        repo=repo,
+        branch=branch,
+    ))
+
+    # If there is a dead.package, then the branch is retired in dist_git
+    if response.status_code in [200, 404]:
+        return response.status_code == 200
+    else:
+        raise ValueError(
+            'The connection to dist_git failed. Retirement status could not '
+            'be determined. The status code was: {0}. The content was: '
+            '{1}'.format(response.status_code, response.content))
+
+
+@pdcupdater.utils.retry(wait_on=requests.exceptions.ConnectionError)
+def _retire_branch(pdc, branch):
+    """ Internal method for retiring a branch in PDC. """
+    today = datetime.utcnow().date()
+    for sla in branch['slas']:
+        sla_eol = datetime.strptime(sla['eol'], '%Y-%m-%d').date()
+        if sla_eol > today:
+            pdc['component-branch-slas'][sla['id']]._ \
+                += {'eol': str(today)}
