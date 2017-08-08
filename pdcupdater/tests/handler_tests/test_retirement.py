@@ -2,6 +2,7 @@ import mock
 
 from pdcupdater.tests.handler_tests import BaseHandlerTest, mock_pdc
 import pdcupdater.services
+import pdcupdater.handlers.retirement
 from pdcupdater.handlers.retirement import RetireComponentHandler
 
 
@@ -178,7 +179,7 @@ class TestRetiredComponents(BaseHandlerTest):
 
 
     @mock_pdc
-    def test_audit_retired_in_pdc_not_cgit(self, pdc):
+    def test_audit_retired_in_pdc_not_git(self, pdc):
         pdc.add_endpoint('component-branches', 'GET', [
             {
                 "id": 155867,
@@ -234,7 +235,7 @@ class TestRetiredComponents(BaseHandlerTest):
         self.assertEquals(absent, set())
 
     @mock_pdc
-    def test_audit_retired_in_cgit_not_pdc(self, pdc):
+    def test_audit_retired_in_git_not_pdc(self, pdc):
         pdc.add_endpoint('component-branches', 'GET', [
             {
                 "id": 155867,
@@ -334,8 +335,8 @@ class TestRetiredComponents(BaseHandlerTest):
             }
         ])
 
-        with mock.patch.object(RetireComponentHandler, '_retire_branch') as mock_retire_branch, \
-                mock.patch.object(RetireComponentHandler, '_is_retired_in_cgit') as mock_is_retired_in_cgit:
-            mock_is_retired_in_cgit.side_effect = [True, False]
+        with mock.patch.object(pdcupdater.handlers.retirement, '_retire_branch') as mock_retire_branch, \
+                mock.patch.object(pdcupdater.handlers.retirement, '_is_retired_in_dist_git') as mock_is_retired_in_dist_git:
+            mock_is_retired_in_dist_git.side_effect = [True, False]
             self.handler.initialize(pdc)
         self.assertEqual(mock_retire_branch.call_count, 1)
