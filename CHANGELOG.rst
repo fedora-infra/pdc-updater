@@ -1,4 +1,53 @@
 
+0.6.0
+-----
+
+Pull Requests
+
+- (@ralphbean)      #57, srpm_nevra must not be set when arch is src.
+  https://github.com/fedora-infra/pdc-updater/pull/57
+- (@ralphbean)      #62, Force creation of parent with type during initialization.
+  https://github.com/fedora-infra/pdc-updater/pull/62
+- (@ralphbean)      #60, Populate the dist_git_branch value...
+  https://github.com/fedora-infra/pdc-updater/pull/60
+- (@ralphbean)      #61, Also construct container tags from stable updates tags.
+  https://github.com/fedora-infra/pdc-updater/pull/61
+- (@mprahl)         #63, Add a handler so that PDC branches are EOL'd when the branch is retired
+  https://github.com/fedora-infra/pdc-updater/pull/63
+- (@mprahl)         #64, Add some missing doc strings to RetireComponentHandler
+  https://github.com/fedora-infra/pdc-updater/pull/64
+- (@ralphbean)      #66, Some changes to the retirement handler...
+  https://github.com/fedora-infra/pdc-updater/pull/66
+
+Commits
+
+- 6118478b5 srpm_nevra must not be set when arch is src.
+  https://github.com/fedora-infra/pdc-updater/commit/6118478b5
+- 600b6175e Populate the dist_git_branch value...
+  https://github.com/fedora-infra/pdc-updater/commit/600b6175e
+- 17edf56ad Also construct container tags from stable updates tags.
+  https://github.com/fedora-infra/pdc-updater/commit/17edf56ad
+- 7a022d494 Force creation of parent with type during initialization.
+  https://github.com/fedora-infra/pdc-updater/commit/7a022d494
+- b7341977a Add a handler so that PDC branches are EOL'd when the branch is retired
+  https://github.com/fedora-infra/pdc-updater/commit/b7341977a
+- 31f7caf33 Break retirement out into its own staticmethod.
+  https://github.com/fedora-infra/pdc-updater/commit/31f7caf33
+- e2eeec935 Write an init method.
+  https://github.com/fedora-infra/pdc-updater/commit/e2eeec935
+- e132ab502 Add Docstrings to RetireComponentHandler
+  https://github.com/fedora-infra/pdc-updater/commit/e132ab502
+- e2d52896c Add the audit function to the RetireComponentHandler handler
+  https://github.com/fedora-infra/pdc-updater/commit/e2d52896c
+- bcb112faa Add some missing doc strings to RetireComponentHandler
+  https://github.com/fedora-infra/pdc-updater/commit/bcb112faa
+- 3a2cef32e Make these two work functions re-try-able.
+  https://github.com/fedora-infra/pdc-updater/commit/3a2cef32e
+- fe8af401d Check pagure instead of cgit.
+  https://github.com/fedora-infra/pdc-updater/commit/fe8af401d
+- e1b0542b4 Fix those mocks.
+  https://github.com/fedora-infra/pdc-updater/commit/e1b0542b4
+
 0.5.9
 -----
 
