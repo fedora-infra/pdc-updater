@@ -7,7 +7,8 @@ config = {
     'pdcupdater.pdc': {
         'server': 'https://pdc.fedoraproject.org/rest_api/v1/',
         'insecure': False,  # Enable if using a self-signed cert
-        'token': 'AWESOME_SECRET_STRING_GOES_HERE',
+        #'token' : 'UNCOMMENT_THIS_AND_PUT_THE_TOKEN_HERE_IF_OBTAINED_MANUALLY'
+
         # XXX - getting the token is a bit of a pain, but here's a walk through
         # 1) go to https://pdc.fedoraproject.org/ in your browser and login.
         # 2) go to https://pdc.fedoraproject.org/rest_api/v1/auth/token/obtain/
@@ -33,6 +34,10 @@ config = {
     'pdcupdater.koji_url': 'https://koji.fedoraproject.org/kojihub',
     # Use 8 threads to talk to koji in parallel.
     'pdcupdater.koji_io_threads': 8,
+
+    # Optional path to Kerberos keytab used to get PDC token (If token is not manually obtained).
+    # This only works on PDC instances that use Kerberos, not pdc.fedoraproject.org.
+    # 'pdcupdater.keytab': '/path/to/keytab',
 
     # Where to find composes
     'pdcupdater.old_composes_url': 'https://kojipkgs.fedoraproject.org/compose/',
