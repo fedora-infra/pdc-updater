@@ -9,6 +9,7 @@ import shutil
 import tempfile
 
 import requests
+import requests_kerberos
 import six
 import beanbag.bbexcept
 
@@ -16,6 +17,7 @@ import logging
 log = logging.getLogger(__name__)
 
 import dogpile.cache
+
 cache = dogpile.cache.make_region()
 cache.configure('dogpile.cache.memory', expiration_time=300)
 
@@ -694,3 +696,23 @@ def retry(timeout=500, interval=20, wait_on=Exception):
                     time.sleep(interval)
         return inner
     return wrapper
+
+
+def get_token(pdc_api_url, keytab):
+    """
+    Uses kerberos keytab for automatic authentication 
+    and retrieves the token from pdc-updater
+    """
+    if not os.path.exists(keytab):
+        raise IOError("Keytab file not found")
+
+    os.environ['KRB5_CLIENT_KTNAME'] = 'FILE:{0}'.format(keytab)
+    headers = {'Accept':'application/json'}
+    
+    try:
+        auth = requests_kerberos.HTTPKerberosAuth(force_preemptive=True)
+        url = '{0}/auth/token/obtain/'.format(pdc_api_url.rstrip('/'))
+        r = requests.get(url, headers=headers, auth=auth)
+    except requests.exceptions.RequestException:
+        log.exception("<<URL Request Error>>")
+    return r.json()['token']
