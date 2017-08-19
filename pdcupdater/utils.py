@@ -562,7 +562,7 @@ def releaseid2branch(pdc, release_id):
     """
     release = pdc['releases'][release_id]._()
     # May return `None` if undefined.
-    return release.get('dist_git', {}).get('branch')
+    return (release.get('dist_git') or {}).get('branch')
 
 
 def subpackage2parent(package, pdc_release):
