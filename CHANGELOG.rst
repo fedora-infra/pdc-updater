@@ -1,4 +1,25 @@
 
+0.6.1
+-----
+
+Pull Requests
+
+- (@yashvardhannanavati) #69, Automatic token generation from keytab
+  https://github.com/fedora-infra/pdc-updater/pull/69
+- (@ralphbean)      #70, Handle case where release[dist_git] contains an explicit None.
+  https://github.com/fedora-infra/pdc-updater/pull/70
+
+Commits
+
+- ee572cf30 Handle case where release[dist_git] contains an explicit None.
+  https://github.com/fedora-infra/pdc-updater/commit/ee572cf30
+- 8a98a3fc4 Automatic token generation from keytab
+  https://github.com/fedora-infra/pdc-updater/commit/8a98a3fc4
+- 5effdf2be Unit test for auto kerb authentication added
+  https://github.com/fedora-infra/pdc-updater/commit/5effdf2be
+- aa1d0b313 Add pytest.
+  https://github.com/fedora-infra/pdc-updater/commit/aa1d0b313
+
 0.6.0
 -----
 
