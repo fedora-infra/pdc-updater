@@ -700,19 +700,20 @@ def retry(timeout=500, interval=20, wait_on=Exception):
 
 def get_token(pdc_api_url, keytab):
     """
-    Uses kerberos keytab for automatic authentication 
+    Uses kerberos keytab for automatic authentication
     and retrieves the token from pdc-updater
     """
     if not os.path.exists(keytab):
         raise IOError("Keytab file not found")
 
     os.environ['KRB5_CLIENT_KTNAME'] = 'FILE:{0}'.format(keytab)
-    headers = {'Accept':'application/json'}
-    
+    headers = {'Accept': 'application/json'}
+
     try:
-        auth = requests_kerberos.HTTPKerberosAuth(force_preemptive=True)
+        auth = requests_kerberos.HTTPKerberosAuth()
         url = '{0}/auth/token/obtain/'.format(pdc_api_url.rstrip('/'))
         r = requests.get(url, headers=headers, auth=auth)
-    except requests.exceptions.RequestException:
-        log.exception("<<URL Request Error>>")
+    except requests.exceptions.RequestException as error:
+        log.exception('The following error occurred when trying to get a '
+                      'token from PDC: {0}'.format(str(error)))
     return r.json()['token']
