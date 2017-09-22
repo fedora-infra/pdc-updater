@@ -18,7 +18,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
     tree_processing_states = set(('done', 'ready'))
     other_states = set(('wait', 'building'))
-    irrelevant_states = set(('init',))
+    irrelevant_states = set(('init', 'build',))
     relevant_states = tree_processing_states.union(other_states)
     error_states = set(('failed',))
     valid_states = relevant_states.union(error_states).union(irrelevant_states)
