@@ -19,10 +19,18 @@ class BaseHandler(object):
         self.config = config
 
     def construct_topics(self, config):
-        return [
-            '.'.join([config['topic_prefix'], config['environment'], topic])
-            for topic in self.topic_suffixes
-        ]
+        # Don't use the environment when using STOMP
+        if config.get('stomp_uri'):
+            return [
+                '.'.join([config['topic_prefix'], topic])
+                for topic in self.topic_suffixes
+            ]
+        else:
+            return [
+                '.'.join([config['topic_prefix'], config['environment'],
+                          topic])
+                for topic in self.topic_suffixes
+            ]
 
     @abc.abstractproperty
     def topic_suffixes(self):
