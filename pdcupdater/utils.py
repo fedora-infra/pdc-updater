@@ -710,7 +710,7 @@ def get_token(pdc_api_url, keytab):
     headers = {'Accept':'application/json'}
     
     try:
-        auth = requests_kerberos.HTTPKerberosAuth(force_preemptive=True)
+        auth = requests_kerberos.HTTPKerberosAuth()
         url = '{0}/auth/token/obtain/'.format(pdc_api_url.rstrip('/'))
         r = requests.get(url, headers=headers, auth=auth)
     except requests.exceptions.RequestException:
