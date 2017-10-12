@@ -1,4 +1,21 @@
 
+0.6.3
+-----
+
+Pull Requests
+
+- (@ralphbean)      #73, Ignore modules in the build state.
+  https://github.com/fedora-infra/pdc-updater/pull/73
+- (@hanzz)          #74, Use different way to call PDC API to workaround 404 bug for valid modules in PDC.
+  https://github.com/fedora-infra/pdc-updater/pull/74
+
+Commits
+
+- 9604e3009 Ignore modules in the build state.
+  https://github.com/fedora-infra/pdc-updater/commit/9604e3009
+- 66a15a516 Use different way to call PDC API to workaround 404 bug for valid modules in PDC.
+  https://github.com/fedora-infra/pdc-updater/commit/66a15a516
+
 0.6.2
 -----
 
