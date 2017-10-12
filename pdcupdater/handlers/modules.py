@@ -185,13 +185,13 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         variant_release =  body['version'] # This is supposed to be equal to release
         variant_uid = "%s-%s-%s" % (variant_id, variant_version, variant_release)
 
-        try:
-            unreleased_variant = pdc['unreleasedvariants'][variant_uid]._()
-        except beanbag.BeanBagException as e:
-            if e.response.status_code != 404:
-                raise
+        unreleased_variants = pdc['unreleasedvariants']._(
+            page_size=-1, variant_uid=variant_uid)
+        if not unreleased_variants:
             # a new module!
             unreleased_variant = self.create_unreleased_variant(pdc, body)
+        else:
+            unreleased_variant = unreleased_variants[0]
         return unreleased_variant
 
     def handle_new_tree(self, pdc, body, unreleased_variant):
