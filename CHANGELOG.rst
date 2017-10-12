@@ -1,4 +1,25 @@
 
+0.6.2
+-----
+
+Pull Requests
+
+- (@mprahl)         #71, Don't use the environment when constructing a topic for STOMP
+  https://github.com/fedora-infra/pdc-updater/pull/71
+- (@mprahl)         #72, Support old python-requests-kerberos
+  https://github.com/fedora-infra/pdc-updater/pull/72
+
+Commits
+
+- 70193ba8e Don't use the environment when constructing a topic for STOMP
+  https://github.com/fedora-infra/pdc-updater/commit/70193ba8e
+- ab45b1f2a Remove unneeded force_preemptive flag with Kerberos auth
+  https://github.com/fedora-infra/pdc-updater/commit/ab45b1f2a
+- 4b1d83166 PEP8 fix
+  https://github.com/fedora-infra/pdc-updater/commit/4b1d83166
+- 0b2e163ae Add logging when getting a PDC token fails
+  https://github.com/fedora-infra/pdc-updater/commit/0b2e163ae
+
 0.6.1
 -----
 
