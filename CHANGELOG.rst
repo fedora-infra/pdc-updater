@@ -1,4 +1,23 @@
 
+0.6.5
+-----
+
+Pull Requests
+
+- (@ralphbean)      #75, Add some more logging, to help debug in the future.
+  https://github.com/fedora-infra/pdc-updater/pull/75
+
+Commits
+
+- b1ca22f7c Add some more logging, to help debug in the future.
+  https://github.com/fedora-infra/pdc-updater/commit/b1ca22f7c
+- 634232f82 Change the way we PATCH pdc for modules.
+  https://github.com/fedora-infra/pdc-updater/commit/634232f82
+- 8b8b001be 0.6.4
+  https://github.com/fedora-infra/pdc-updater/commit/8b8b001be
+- 3103c3794 Merge branch 'master' into develop
+  https://github.com/fedora-infra/pdc-updater/commit/3103c3794
+
 0.6.4
 -----
 
