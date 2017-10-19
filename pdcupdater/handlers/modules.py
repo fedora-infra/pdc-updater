@@ -118,12 +118,21 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
         if body['state'] == 5:
             uid = unreleased_variant['variant_uid']
+            log.info("%r ready.  Patching with rpms and active=True." % uid)
             rpms = self.get_unreleased_variant_rpms(pdc, unreleased_variant)
-            # This submits an HTTP PATCH.
+            # This submits an HTTP PATCH - a *bulk update* to a single item.
             # The '/' is necessary to avoid losing the body in a 301.
-            pdc['unreleasedvariants'][uid + '/'] += {'variant_uid': uid,
-                                                     'active': True,
-                                                     'rpms': rpms}
+            try:
+                pdc['unreleasedvariants/'] += {
+                    uid: {
+                        'active': True,
+                        'rpms': rpms,
+                    }
+                }
+            except TypeError:
+                # beanbag is weird.  The above patch is accepted, but it
+                # *always* throws a typeerror afterwards, which can be ignored.
+                pass
 
         # trees are only present when a module is done building, i.e. states
         # 'done' or 'ready'
