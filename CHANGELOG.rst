@@ -1,4 +1,17 @@
 
+0.6.4
+-----
+
+Pull Requests
+
+- (@ralphbean)      #76, Change the way we PATCH pdc for modules.
+  https://github.com/fedora-infra/pdc-updater/pull/76
+
+Commits
+
+- a64aaf7ca Change the way we PATCH pdc for modules.
+  https://github.com/fedora-infra/pdc-updater/commit/a64aaf7ca
+
 0.6.3
 -----
 
