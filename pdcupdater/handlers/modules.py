@@ -194,10 +194,12 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         variant_release =  body['version'] # This is supposed to be equal to release
         variant_uid = "%s-%s-%s" % (variant_id, variant_version, variant_release)
 
+        log.info("Looking up module %r" % variant_uid)
         unreleased_variants = pdc['unreleasedvariants']._(
             page_size=-1, variant_uid=variant_uid)
+
         if not unreleased_variants:
-            # a new module!
+            log.info("%r not found.  Creating." % variant_uid)  # a new module!
             unreleased_variant = self.create_unreleased_variant(pdc, body)
         else:
             unreleased_variant = unreleased_variants[0]
