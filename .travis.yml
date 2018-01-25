@@ -1,0 +1,7 @@
+language: generic
+sudo: required
+services: docker
+install:
+  - docker build -t pdc-updater-tests -f .travis-Dockerfile .
+script:
+  - docker run pdc-updater-tests
