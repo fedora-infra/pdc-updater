@@ -53,6 +53,7 @@ def mock_pdc(function):
         pdc.add_endpoint('persons', 'POST', 'wat')
         pdc.add_endpoint('rpms', 'POST', 'wat')
         pdc.add_endpoint('unreleasedvariants', 'POST', 'wat')
+        pdc.add_endpoint('modules', 'POST', 'wat')
 
         # One delete endpoint for single deletes
         pdc.add_endpoint('release-component-relationships/1', 'DELETE', 'ok')
@@ -320,18 +321,59 @@ def mock_pdc(function):
             {'name': 'i386'},
         ])
 
-        pdc.add_endpoint('unreleasedvariants', 'GET', [
-        {
-            'variant_id': 'core-24-0',
-            'variant_uid': 'core-24-0',
-            'variant_name': 'Core version 24',
+        pdc.add_endpoint('unreleasedvariants', 'GET', [{
+            'variant_id': 'testmodule',
+            # No context yet
+            'variant_uid': 'testmodule:master:20180123171544',
+            'variant_name': 'testmodule',
             'variant_type': 'module',
-            'koji_tag': 'module-core-24',
-            'runtime_deps': ['core >= 23'],
-            'build_deps': ['core >= 23', 'c-build >= 6.0'],
+            'variant_version': 'master',
+            'variant_release': '20180123171544',
+            'koji_tag': 'module-ce2adf69caf0e1b5',
+            'runtime_deps': [
+                {
+                    'dependency': 'platform',
+                    'stream': 'f28'
+                }
+            ],
+            'build_deps': [
+                {
+                    'dependency': 'platform',
+                    'stream': 'f28'
+                }
+            ],
+            'rpms': [],
+            'active': False,
         }])
+        pdc.add_endpoint(
+            'unreleasedvariants/testmodule:master:20180123171544',
+            'PATCH', pdc.endpoints['unreleasedvariants']['GET'][0])
 
-        pdc.add_endpoint('unreleasedvariants/core-24-0', 'GET', mock_404)
+        pdc.add_endpoint('modules', 'GET', [{
+            'uid': 'testmodule:master:20180123171544:c2c572ec',
+            'name': 'testmodule',
+            'stream': 'master',
+            'version': '20180123171544',
+            'context': 'c2c572ec',
+            'koji_tag': 'module-ce2adf69caf0e1b5',
+            'runtime_deps': [
+                {
+                    'dependency': 'platform',
+                    'stream': 'f28'
+                }
+            ],
+            'build_deps': [
+                {
+                    'dependency': 'platform',
+                    'stream': 'f28'
+                }
+            ],
+            'rpms': [],
+            'active': False,
+        }])
+        pdc.add_endpoint(
+            'modules/testmodule:master:20180123171544:c2c572ec',
+            'PATCH', pdc.endpoints['modules']['GET'][0])
 
         return function(self, pdc, *args, **kwargs)
     pdc_patcher.stop()

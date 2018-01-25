@@ -4,6 +4,7 @@ import errno
 import re
 
 import beanbag
+import pdc_client
 import pdcupdater.handlers
 import pdcupdater.services
 
@@ -50,17 +51,44 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
         return True
 
-    def get_unreleased_variant_rpms(self, pdc, variant):
+    @staticmethod
+    def get_pdc_api(pdc):
+        """Determine if the new "modules" API is available for use. This API
+        supersedes "unreleasedvariants" but provides backwards-compatible
+        data for it."""
+        try:
+            pdc['modules']._(page_size=1)
+            return 'modules'
+        except beanbag.BeanBagException as error:
+            if error.response.status_code == 404:
+                return 'unreleasedvariants'
+            else:
+                raise
+
+    def get_uid(self, body):
+        """Returns the proper UID based on the message body and PDC API."""
+        name = body['name']
+        stream = body['stream']
+        version = body['version']
+        uid = '{n}:{s}:{v}'.format(n=name, s=stream, v=version)
+        if self.pdc_api == 'modules':
+            # Check to see if the context was provided. Only MBS v1.6+ will
+            # provide this value.
+            context = body.get('context', '00000000')
+            uid = ':'.join([uid, context])
+        return uid
+
+    def get_module_rpms(self, pdc, module):
         """
-        Returns the list of rpms as defined "rpms" key in "unreleasedvariants"
-        PDC endpoint. The list is obtained from the Koji tag defined by
-        "koji_tag" value of input variant `variant`.
+        Returns the list of rpms in the format of the "rpms" key for the
+        "modules" PDC endpoint. The list is obtained from the Koji tag defined
+        by the "koji_tag" propery of the input module.
         """
         mmd = modulemd.ModuleMetadata()
-        mmd.loads(variant['modulemd'])
+        mmd.loads(module['modulemd'])
 
         koji_rpms = pdcupdater.services.koji_rpms_in_tag(
-            self.koji_url, variant["koji_tag"])
+            self.koji_url, module["koji_tag"])
 
         rpms = []
         # Flatten into a list and augment the koji dict with tag info.
@@ -101,19 +129,24 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
                 state))
             return
 
-        unreleased_variant = self.get_or_create_unreleased_variant(pdc, body)
+        log.debug('Determining which PDC API to use.')
+        self.pdc_api = self.get_pdc_api(pdc)
+        log.debug('Using the "{0}" PDC API.'.format(self.pdc_api))
+
+        module = self.get_or_create_module(pdc, body)
 
         if body['state'] == 5:
-            uid = unreleased_variant['variant_uid']
+            if self.pdc_api == 'modules':
+                uid = module['uid']
+            else:
+                uid = module['variant_uid']
             log.info("%r ready.  Patching with rpms and active=True." % uid)
-            rpms = self.get_unreleased_variant_rpms(pdc, unreleased_variant)
-            pdc['unreleasedvariants'][uid]._ += {'active': True, 'rpms': rpms}
+            rpms = self.get_module_rpms(pdc, module)
+            pdc[self.pdc_api][uid]._ += {'active': True, 'rpms': rpms}
 
-    def create_unreleased_variant(self, pdc, body):
-        """Creates an UnreleasedVariant for a module in PDC. Checks out the
-        module metadata from the supplied SCM repository (currently only
-        anonymous GIT is supported)."""
-        log.debug("create_unreleased_variant(pdc, body=%r)" % body)
+    def create_module(self, pdc, body):
+        """Creates a module in PDC."""
+        log.debug("create_module(pdc, body=%r)" % body)
 
         mmd = modulemd.ModuleMetadata()
         mmd.loads(body['modulemd'])
@@ -124,56 +157,56 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
                       for dependency, stream in mmd.buildrequires.items()]
 
         name = body['name']
-        # TODO: PDC has to be patched to support stream/version instead of
-        # version/release, but for now we just do the right mapping here...
-        version = body['stream']
-        release = body['version']
-        variant_uid = "{n}-{v}-{r}".format(n=name, v=version, r=release)
-        variant_id = name
-
-        tag_str = '.'.join([name, version, str(release)])
+        stream = body['stream']
+        version = body['version']
+        tag_str = '.'.join(self.get_uid(body).split(':'))
         tag_hash = hashlib.sha1(tag_str).hexdigest()[:16]
-        koji_tag = "module-" + tag_hash
+        koji_tag = 'module-' + tag_hash
 
-        data = {
-            'variant_id': variant_id,
-            'variant_uid': variant_uid,
-            'variant_name': name,
-            'variant_version': version,
-            'variant_release': release,
-            'variant_type': 'module',
-            'koji_tag': koji_tag,
-            'runtime_deps': runtime_deps,
-            'build_deps': build_deps,
-            'modulemd': body["modulemd"],
-        }
-        unreleased_variant = pdc['unreleasedvariants']._(data)
-
-        return unreleased_variant
-
-    def get_or_create_unreleased_variant(self, pdc, body):
-        """We get multiple messages for each module n-v-r. Attempts to retrieve
-        the corresponding UnreleasedVariant from PDC, or if it's missing,
-        creates it."""
-        log.debug("get_or_create_unreleased_variant(pdc, body=%r)" % body)
-
-        variant_id =  body['name'] # This is supposed to be equal to name
-        # TODO: PDC has to be patched to support stream/version instead of
-        # version/release, but for now we just do the right mapping here...
-        variant_version =  body['stream'] # This is supposed to be equal to version
-        variant_release =  body['version'] # This is supposed to be equal to release
-        variant_uid = "%s-%s-%s" % (variant_id, variant_version, variant_release)
-
-        log.info("Looking up module %r" % variant_uid)
-        unreleased_variants = pdc['unreleasedvariants']._(
-            page_size=-1, variant_uid=variant_uid)
-
-        if not unreleased_variants:
-            log.info("%r not found.  Creating." % variant_uid)  # a new module!
-            unreleased_variant = self.create_unreleased_variant(pdc, body)
+        if self.pdc_api == 'modules':
+            data = {
+                'name': name,
+                'stream': stream,
+                'version': version,
+                # Check if this was provided by MBS
+                'context': body.get('context', '00000000')
+            }
         else:
-            unreleased_variant = unreleased_variants[0]
-        return unreleased_variant
+            data = {
+                'variant_id': name,
+                'variant_uid': self.get_uid(body),
+                'variant_name': name,
+                'variant_version': stream,
+                'variant_release': version,
+                'variant_type': 'module',
+            }
+
+        data['koji_tag'] = koji_tag
+        data['runtime_deps'] = runtime_deps
+        data['build_deps'] = build_deps
+        data['modulemd'] = body['modulemd']
+        module = pdc[self.pdc_api]._(data)
+
+        return module
+
+    def get_or_create_module(self, pdc, body):
+        """Attempts to retrieve the corresponding module from PDC, or if it's
+        missing, creates it."""
+        log.debug("get_or_create_module(pdc, body=%r)" % body)
+
+        uid = self.get_uid(body)
+        log.info("Looking up module %r" % uid)
+        if self.pdc_api == 'modules':
+            query = {'uid': uid}
+        else:
+            query = {'variant_uid': uid}
+        modules = pdc[self.pdc_api]._(page_size=-1, **query)
+
+        if not modules:
+            log.info("%r not found.  Creating." % uid)  # a new module!
+            return self.create_module(pdc, body)
+        else:
+            return modules[0]
 
     def audit(self, pdc):
         pass
