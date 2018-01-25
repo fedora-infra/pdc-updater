@@ -70,7 +70,6 @@ class TestModuleStateChange(BaseHandlerTest):
     foo_repo_tar = os.path.join(repo_dir, "foo.tar")
     foo_repo_dir = os.path.join(repo_dir, "foo")
     foo_repo_url = foo_repo_dir + '?#286f3a32f3e034508012fcbba63ed40092e4129b'
-    test_tree_dir = os.path.join(test_data_dir, "trees/Test-0-20160712.0")
 
     state_init_msg = {
         'topic': 'org.fedoraproject.stg.mbs.module.state.change',
@@ -89,8 +88,7 @@ class TestModuleStateChange(BaseHandlerTest):
     state_done_msg['topic'] = 'org.fedoraproject.stg.mbs.module.state.change'
     state_done_msg['msg'].update({
         'state': 3,
-        'state_name': 'done',
-        'topdir': test_tree_dir
+        'state_name': 'done'
     })
 
     def setUp(self):
@@ -115,7 +113,7 @@ class TestModuleStateChange(BaseHandlerTest):
         self.handler.handle(pdc, self.state_init_msg)
 
     @mock_pdc
-    def test_handle_created_tree(self, pdc):
+    def test_update_unreleased_variant(self, pdc):
         self.handler.handle(pdc, self.state_done_msg)
 
 
