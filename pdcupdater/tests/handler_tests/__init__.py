@@ -4,6 +4,7 @@ import tarfile
 import unittest
 import logging
 
+import mock
 import vcr
 
 import fedmsg.utils
@@ -28,9 +29,13 @@ def mock_404():
     raise beanbag.bbexcept.BeanBagException(response, "404, nope.")
 
 def mock_pdc(function):
+    # Mock the PDC client
+    pdc = pdc_client.test_helpers.MockAPI()
+    pdc_patcher = mock.patch('pdc_client.PDCClient', return_value=pdc)
+    pdc_patcher.start()
+
     @functools.wraps(function)
-    @pdc_client.test_helpers.mock_api
-    def wrapper(self, pdc, *args, **kwargs):
+    def wrapper(self, *args, **kwargs):
         # Mock out POST endpoints
         pdc.add_endpoint('component-group-types', 'POST', 'wat')
         pdc.add_endpoint('component-groups', 'POST', 'wat')
@@ -331,6 +336,7 @@ def mock_pdc(function):
         pdc.add_endpoint('trees/Test-0-20160712.0', 'GET', mock_404)
 
         return function(self, pdc, *args, **kwargs)
+    pdc_patcher.stop()
     return wrapper
 
 
