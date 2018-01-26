@@ -116,19 +116,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             uid = unreleased_variant['variant_uid']
             log.info("%r ready.  Patching with rpms and active=True." % uid)
             rpms = self.get_unreleased_variant_rpms(pdc, unreleased_variant)
-            # This submits an HTTP PATCH - a *bulk update* to a single item.
-            # The '/' is necessary to avoid losing the body in a 301.
-            try:
-                pdc['unreleasedvariants/'] += {
-                    uid: {
-                        'active': True,
-                        'rpms': rpms,
-                    }
-                }
-            except TypeError:
-                # beanbag is weird.  The above patch is accepted, but it
-                # *always* throws a typeerror afterwards, which can be ignored.
-                pass
+            pdc['unreleasedvariants'][uid]._ += {'active': True, 'rpms': rpms}
 
     def create_unreleased_variant(self, pdc, body):
         """Creates an UnreleasedVariant for a module in PDC. Checks out the
