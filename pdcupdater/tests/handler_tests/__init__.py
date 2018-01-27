@@ -52,7 +52,6 @@ def mock_pdc(function):
         pdc.add_endpoint('compose-rpms', 'POST', 'wat')
         pdc.add_endpoint('persons', 'POST', 'wat')
         pdc.add_endpoint('rpms', 'POST', 'wat')
-        pdc.add_endpoint('trees', 'POST', 'wat')
         pdc.add_endpoint('unreleasedvariants', 'POST', 'wat')
 
         # One delete endpoint for single deletes
@@ -333,7 +332,6 @@ def mock_pdc(function):
         }])
 
         pdc.add_endpoint('unreleasedvariants/core-24-0', 'GET', mock_404)
-        pdc.add_endpoint('trees/Test-0-20160712.0', 'GET', mock_404)
 
         return function(self, pdc, *args, **kwargs)
     pdc_patcher.stop()
