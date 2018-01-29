@@ -23,15 +23,6 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
     error_states = set(('failed',))
     valid_states = relevant_states.union(error_states).union(irrelevant_states)
 
-    rpm_fname_re = re.compile(
-        r"(?P<name>.+)-"
-        r"(?:(?P<epoch>[^:]+):)?(?P<version>[^-:]+)-(?P<release>[^-]+)."
-        r"(?P<arch>[^\.]+).rpm")
-
-    scmurl_re = re.compile(
-        r"(?P<giturl>(?:(?P<scheme>git)://(?P<host>[^/]+))?"
-        r"(?P<repopath>/[^\?]+))\?(?P<modpath>[^#]*)#(?P<revision>.+)")
-
     def __init__(self, *args, **kwargs):
         super(ModuleStateChangeHandler, self).__init__(*args, **kwargs)
         self.koji_url = self.config['pdcupdater.koji_url']
