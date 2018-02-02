@@ -1,4 +1,33 @@
 
+0.7.0
+-----
+
+Pull Requests
+
+-                   #78, Merge pull request #78 from fedora-infra/fix-tests
+  https://github.com/fedora-infra/pdc-updater/pull/78
+-                   #79, Merge pull request #79 from fedora-infra/remove-trees
+  https://github.com/fedora-infra/pdc-updater/pull/79
+-                   #80, Merge pull request #80 from fedora-infra/new-module-api
+  https://github.com/fedora-infra/pdc-updater/pull/80
+
+Commits
+
+- 1d6837744 Fix PDC mocks on the latest pdc_client version
+  https://github.com/fedora-infra/pdc-updater/commit/1d6837744
+- 86678fce3 Remove invalid imports for TestKerberosAuthentication and fix its styling
+  https://github.com/fedora-infra/pdc-updater/commit/86678fce3
+- 2580832b7 Add Travis CI configuration
+  https://github.com/fedora-infra/pdc-updater/commit/2580832b7
+- dec9094b2 Remove code for the non-existent "trees" PDC API
+  https://github.com/fedora-infra/pdc-updater/commit/dec9094b2
+- 1e4c59cb8 Change bulk patch to single patch in unreleasedvariants
+  https://github.com/fedora-infra/pdc-updater/commit/1e4c59cb8
+- e6ffff4a5 Remove some unused class variables on "ModuleStateChangeHandler"
+  https://github.com/fedora-infra/pdc-updater/commit/e6ffff4a5
+- 6a848b0c8 Support the new "modules" PDC API
+  https://github.com/fedora-infra/pdc-updater/commit/6a848b0c8
+
 0.6.5
 -----
 
