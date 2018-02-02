@@ -1,31 +1,47 @@
 document: modulemd
 version: 1
 data:
-    summary: Example module.
-    description: Yup.
-    license:
-        module: [ MIT ]
-    dependencies:
-        buildrequires:
-            base-runtime: master
-    profiles:
-        default:
-            rpms: []
-    api:
-        rpms:
-            - bash
-    components:
-        rpms:
-            dvisvgm:
-                rationale: Part of the first base-runtime prototype.
-                ref: f26
-            dvisvgm2:
-                rationale: Part of the first base-runtime prototype.
-                ref: 86f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb
-    xmd:
-        mbs:
-            rpms:
-                dvisvgm:
-                    ref: 76f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb
-                dvisvgm2:
-                    ref: 86f9d8c8e87eed0aab91034b01d3d5ff6bd5b4cb
+  name: testmodule
+  stream: master
+  version: 20180123171544
+  context: c2c572ec
+  summary: A test module in all its beautiful beauty
+  description: This module demonstrates how to write simple modulemd files And can
+    be used for testing the build and release pipeline.
+  license:
+    module:
+    - MIT
+  dependencies:
+    buildrequires:
+      platform: f28
+    requires:
+      platform: f28
+  references:
+    community: https://docs.pagure.org/modularity/
+    documentation: https://fedoraproject.org/wiki/Fedora_Packaging_Guidelines_for_Modules
+  xmd:
+    mbs:
+      buildrequires:
+        platform:
+          filtered_rpms: []
+          ref: virtual
+          stream: f28
+          version: '3'
+      commit: 1d28a6e2e4fd604d98be0322ef0c0c4a931f091d
+      requires:
+        platform:
+          filtered_rpms: []
+          ref: virtual
+          stream: f28
+          version: '3'
+      rpms:
+        ed:
+          ref: 51f529a5cde2b843ed9c7870689d707eaab3a9d1
+      scmurl: https://src.fedoraproject.org/modules/testmodule.git?#1d28a6e2e4fd604d98be0322ef0c0c4a931f091d
+  components:
+    rpms:
+      ed:
+        rationale: A build dependency of mksh, to test buildorder.
+        repository: git://pkgs.fedoraproject.org/rpms/ed
+        ref: master
+        cache: http://pkgs.fedoraproject.org/repo/pkgs/ed

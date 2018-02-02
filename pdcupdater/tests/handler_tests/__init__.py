@@ -4,6 +4,7 @@ import tarfile
 import unittest
 import logging
 
+import mock
 import vcr
 
 import fedmsg.utils
@@ -28,9 +29,13 @@ def mock_404():
     raise beanbag.bbexcept.BeanBagException(response, "404, nope.")
 
 def mock_pdc(function):
+    # Mock the PDC client
+    pdc = pdc_client.test_helpers.MockAPI()
+    pdc_patcher = mock.patch('pdc_client.PDCClient', return_value=pdc)
+    pdc_patcher.start()
+
     @functools.wraps(function)
-    @pdc_client.test_helpers.mock_api
-    def wrapper(self, pdc, *args, **kwargs):
+    def wrapper(self, *args, **kwargs):
         # Mock out POST endpoints
         pdc.add_endpoint('component-group-types', 'POST', 'wat')
         pdc.add_endpoint('component-groups', 'POST', 'wat')
@@ -47,8 +52,8 @@ def mock_pdc(function):
         pdc.add_endpoint('compose-rpms', 'POST', 'wat')
         pdc.add_endpoint('persons', 'POST', 'wat')
         pdc.add_endpoint('rpms', 'POST', 'wat')
-        pdc.add_endpoint('trees', 'POST', 'wat')
         pdc.add_endpoint('unreleasedvariants', 'POST', 'wat')
+        pdc.add_endpoint('modules', 'POST', 'wat')
 
         # One delete endpoint for single deletes
         pdc.add_endpoint('release-component-relationships/1', 'DELETE', 'ok')
@@ -316,21 +321,62 @@ def mock_pdc(function):
             {'name': 'i386'},
         ])
 
-        pdc.add_endpoint('unreleasedvariants', 'GET', [
-        {
-            'variant_id': 'core-24-0',
-            'variant_uid': 'core-24-0',
-            'variant_name': 'Core version 24',
+        pdc.add_endpoint('unreleasedvariants', 'GET', [{
+            'variant_id': 'testmodule',
+            # No context yet
+            'variant_uid': 'testmodule:master:20180123171544',
+            'variant_name': 'testmodule',
             'variant_type': 'module',
-            'koji_tag': 'module-core-24',
-            'runtime_deps': ['core >= 23'],
-            'build_deps': ['core >= 23', 'c-build >= 6.0'],
+            'variant_version': 'master',
+            'variant_release': '20180123171544',
+            'koji_tag': 'module-ce2adf69caf0e1b5',
+            'runtime_deps': [
+                {
+                    'dependency': 'platform',
+                    'stream': 'f28'
+                }
+            ],
+            'build_deps': [
+                {
+                    'dependency': 'platform',
+                    'stream': 'f28'
+                }
+            ],
+            'rpms': [],
+            'active': False,
         }])
+        pdc.add_endpoint(
+            'unreleasedvariants/testmodule:master:20180123171544',
+            'PATCH', pdc.endpoints['unreleasedvariants']['GET'][0])
 
-        pdc.add_endpoint('unreleasedvariants/core-24-0', 'GET', mock_404)
-        pdc.add_endpoint('trees/Test-0-20160712.0', 'GET', mock_404)
+        pdc.add_endpoint('modules', 'GET', [{
+            'uid': 'testmodule:master:20180123171544:c2c572ec',
+            'name': 'testmodule',
+            'stream': 'master',
+            'version': '20180123171544',
+            'context': 'c2c572ec',
+            'koji_tag': 'module-ce2adf69caf0e1b5',
+            'runtime_deps': [
+                {
+                    'dependency': 'platform',
+                    'stream': 'f28'
+                }
+            ],
+            'build_deps': [
+                {
+                    'dependency': 'platform',
+                    'stream': 'f28'
+                }
+            ],
+            'rpms': [],
+            'active': False,
+        }])
+        pdc.add_endpoint(
+            'modules/testmodule:master:20180123171544:c2c572ec',
+            'PATCH', pdc.endpoints['modules']['GET'][0])
 
         return function(self, pdc, *args, **kwargs)
+    pdc_patcher.stop()
     return wrapper
 
 
