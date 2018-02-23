@@ -8,8 +8,11 @@ import pdc_client
 import pdcupdater.handlers
 import pdcupdater.services
 
-import modulemd
 import hashlib
+
+import gi
+gi.require_version('Modulemd', '1.0') # noqa
+from gi.repository import Modulemd
 
 log = logging.getLogger(__name__)
 
@@ -84,8 +87,8 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         "modules" PDC endpoint. The list is obtained from the Koji tag defined
         by the "koji_tag" propery of the input module.
         """
-        mmd = modulemd.ModuleMetadata()
-        mmd.loads(module['modulemd'])
+        mmd = Modulemd.Module.new_from_string(module['modulemd'])
+        mmd.upgrade()
 
         koji_rpms = pdcupdater.services.koji_rpms_in_tag(
             self.koji_url, module["koji_tag"])
@@ -107,14 +110,15 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
             # For SRPM packages, include the hash and branch from which is
             # has been built.
-            if (rpm['arch'] == 'src' and rpm['name'] in mmd.components.rpms
-                    and 'rpms' in mmd.xmd['mbs']
-                    and rpm['name'] in mmd.xmd['mbs']['rpms']):
-                mmd_rpm = mmd.components.rpms[rpm['name']]
-                xmd_rpm = mmd.xmd['mbs']['rpms'][rpm['name']]
+            if (rpm['arch'] == 'src'
+                    and rpm['name'] in mmd.get_rpm_components().keys()
+                    and 'rpms' in mmd.get_xmd()['mbs'].keys()
+                    and rpm['name'] in mmd.get_xmd()['mbs']['rpms']):
+                mmd_rpm = mmd.get_rpm_components()[rpm['name']]
+                xmd_rpm = mmd.get_xmd()['mbs']['rpms'][rpm['name']]
                 data["srpm_commit_hash"] = xmd_rpm['ref']
-                if xmd_rpm['ref'] != mmd_rpm.ref:
-                    data["srpm_commit_branch"] = mmd_rpm.ref
+                if xmd_rpm['ref'] != mmd_rpm.get_ref():
+                    data["srpm_commit_branch"] = mmd_rpm.get_ref()
             rpms.append(data)
 
         return rpms
@@ -148,13 +152,20 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         """Creates a module in PDC."""
         log.debug("create_module(pdc, body=%r)" % body)
 
-        mmd = modulemd.ModuleMetadata()
-        mmd.loads(body['modulemd'])
+        mmd = Modulemd.Module.new_from_string(body['modulemd'])
+        mmd.upgrade()
 
-        runtime_deps = [{'dependency': dependency, 'stream': stream}
-                        for dependency, stream in mmd.requires.items()]
-        build_deps = [{'dependency': dependency, 'stream': stream}
-                      for dependency, stream in mmd.buildrequires.items()]
+        runtime_deps = []
+        build_deps = []
+        for deps in mmd.get_dependencies():
+            for dependency, streams in deps.get_requires().items():
+                for stream in streams.get():
+                    runtime_deps.append(
+                        {'dependency': dependency, 'stream': stream})
+            for dependency, streams in deps.get_buildrequires().items():
+                for stream in streams.get():
+                    build_deps.append(
+                        {'dependency': dependency, 'stream': stream})
 
         name = body['name']
         stream = body['stream']
