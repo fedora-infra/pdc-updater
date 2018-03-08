@@ -1,4 +1,21 @@
 
+0.8.1
+-----
+
+Pull Requests
+
+-                   #81, Merge pull request #81 from hanzz/modulemdv2
+  https://github.com/fedora-infra/pdc-updater/pull/81
+
+Commits
+
+- 44e0a36dc Use libmodulemd library instead of old deprecated modulemd module.
+  https://github.com/fedora-infra/pdc-updater/commit/44e0a36dc
+- c5c72bb46 Merge branch 'master' into develop
+  https://github.com/fedora-infra/pdc-updater/commit/c5c72bb46
+- a19c8c624 0.8.0
+  https://github.com/fedora-infra/pdc-updater/commit/a19c8c624
+
 0.8.0
 -----
 
