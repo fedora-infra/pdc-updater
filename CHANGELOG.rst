@@ -1,4 +1,9 @@
 
+0.7.1
+-----
+
+Include missing vcr-request-data for tests.
+
 0.7.0
 -----
 
