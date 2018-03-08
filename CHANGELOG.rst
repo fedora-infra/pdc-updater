@@ -1,4 +1,21 @@
 
+0.8.0
+-----
+
+Pull Requests
+
+- Support for libmodulemd, v2.
+  https://github.com/fedora-infra/pdc-updater/pull/81
+
+Commits
+
+- d173e6477 0.7.1
+  https://github.com/fedora-infra/pdc-updater/commit/d173e6477
+- 44e0a36dc Use libmodulemd library instead of old deprecated modulemd module.
+  https://github.com/fedora-infra/pdc-updater/commit/44e0a36dc
+- c5c72bb46 Merge branch 'master' into develop
+  https://github.com/fedora-infra/pdc-updater/commit/c5c72bb46
+
 0.7.1
 -----
 
