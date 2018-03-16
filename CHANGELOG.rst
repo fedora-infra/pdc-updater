@@ -1,4 +1,16 @@
 
+0.8.4
+-----
+
+Commits
+
+- 3569ba5f8 Add a timeout, and use HTTP HEAD.
+  https://github.com/fedora-infra/pdc-updater/commit/3569ba5f8
+- 5ce792d7a Fix tests: specify file_check_url for the test suite.
+  https://github.com/fedora-infra/pdc-updater/commit/5ce792d7a
+- 24aa3fb8f Merge branch 'fix-tests' into develop
+  https://github.com/fedora-infra/pdc-updater/commit/24aa3fb8f
+
 0.8.3
 -----
 
