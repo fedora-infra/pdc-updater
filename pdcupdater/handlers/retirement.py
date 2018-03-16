@@ -68,7 +68,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
                               'branch': branch,
                               'file': 'dead.package'}
         log.info('Checking for file: %s' % fileurl)
-        resp = requests.get(fileurl)
+        resp = requests.head(fileurl, timeout=15)
         if resp.status_code != 200:
             log.info('Seems not to actually be retired, possibly merge')
             return
@@ -159,6 +159,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
 
             if retired_in_dist_git:
                 _retire_branch(pdc, branch)
+
 
 @pdcupdater.utils.retry(wait_on=requests.exceptions.ConnectionError)
 def _is_retired_in_dist_git(namespace, repo, branch, requests_session=None):
