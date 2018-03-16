@@ -41,6 +41,11 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         repo = msg['msg']['commit']['repo']
         namespace = msg['msg']['commit']['namespace']
         component_type = self._namespace_to_pdc(namespace)
+        checkurl = self.config.get('pdcupdater.file_check_url')
+        if not checkurl:
+            log.error('No check URL configured, ignoring')
+            return
+
         # This query guarantees a unique component branch, so a count of 1 is
         # expected
         branch_query_rv = pdc['component-branches']._(
@@ -53,6 +58,19 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         branch = branch_query_rv['results'][0]
         # If the branch is already EOL in PDC, don't do anything
         if branch['active'] is False:
+            return
+
+        # Make sure that the file is still retired right this moment.
+        # This fixes cases where people merge from master to an older branch, and one of the
+        # intermediate commits contained a dead.package.
+        fileurl = checkurl % {'namespace': namespace,
+                              'repo': repo,
+                              'branch': branch,
+                              'file': 'dead.package'}
+        log.info('Checking for file: %s' % fileurl)
+        resp = requests.get(fileurl)
+        if resp.status_code != 200:
+            log.info('Seems not to actually be retired, possibly merge')
             return
 
         _retire_branch(pdc, branch)

@@ -1,4 +1,12 @@
 
+0.8.2
+-----
+
+Commits
+
+- 13edc90be Only retire a package if the dead.package still exists on retiring
+  https://github.com/fedora-infra/pdc-updater/commit/13edc90be
+
 0.8.1
 -----
 
