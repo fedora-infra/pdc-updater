@@ -30,6 +30,9 @@ config = {
     # PkgDB details
     'pdcupdater.pkgdb_url': 'https://admin.fedoraproject.org/pkgdb',
 
+    # File check URL
+    'pdcupdater.file_check_url': 'https://src.fedoraproject.org/%(namespace)s/%(repo)s/blob/%(branch)s/f/%(file)s',
+
     # Koji details
     'pdcupdater.koji_url': 'https://koji.fedoraproject.org/kojihub',
     # Use 8 threads to talk to koji in parallel.
