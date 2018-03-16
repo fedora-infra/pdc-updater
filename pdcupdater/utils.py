@@ -1,7 +1,6 @@
 import copy
 import contextlib
 import functools
-import itertools
 import socket
 import time
 import os
@@ -212,14 +211,7 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
             from_component_release=release,
             type=relationship_type,
         )
-        response = _chunked_query(
-            pdc, endpoint, query_kwargs,
-            key='to_component_name',
-            iterable=children,
-        )
-
-        # Flatten the generator so we can check length.
-        response = list(response)
+        response = _get_existing_items(endpoint, children, query_kwargs, 'to_component', 'name')
 
         # Nobody can ask us to delete things that aren't there.
         # That's unreasonable.  Sanity check.
@@ -235,41 +227,14 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
         endpoint("DELETE", identifiers)
 
 
-def _chunked_iter(iterable, N):
-    """ Yield successive N-sized chunks from an iterable. """
-    iterable = list(iterable)  # Just to make slicing simpler.
-    for i in xrange(0, len(iterable), N):
-        yield iterable[i: i + N]
+def _get_absent_items(endpoint, items, query_kwargs, field_name, sub_field_name=None):
+    present = _get_existing_items(endpoint, items, query_kwargs, field_name, sub_field_name)
+    return set(items) - present
 
 
-def _chunked_query(pdc, endpoint, kwargs, key, iterable, count=False, N=100):
-    """ Break up a large PDC query and return consolidated results.
-
-    Given a query to PDC with a large iterable key, break that query into
-    chunks of size N each.  The results are recombined and returned.  If
-    `count` is `True`, then just the count is returned, otherwise, all the
-    paged results are returned.
-
-    See https://github.com/product-definition-center/product-definition-center/issues/421
-    """
-
-    # Set up our initial value as one of two different kinds of results
-    result = []
-    if count:
-        result = 0
-
-    # Copy our given kwargs so we don't modify them for our caller.
-    kwargs = copy.copy(kwargs)
-
-    # Step through our given iterable in chunks and make successive queries.
-    for chunk in _chunked_iter(iterable, N):
-        kwargs[key] = chunk
-        if count:
-            result = result + endpoint(**kwargs)['count']
-        else:
-            result = itertools.chain(result, pdc.get_paged(endpoint, **kwargs))
-
-    return result
+def _get_existing_items(endpoint, items, query_kwargs, field_name, sub_field_name=None):
+    query = endpoint.results(fields=field_name, page_size=-1, **query_kwargs)
+    return {item[field_name][sub_field_name] if sub_field_name else item[field_name] for item in query}
 
 
 def ensure_bulk_release_component_relationships_exists(pdc, parent,
@@ -295,10 +260,8 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
             from_component_release=release,
             type=relationship_type,
         )
-        count = _chunked_query(
-            pdc, endpoint, query_kwargs,
-            key='to_component_name', iterable=children,
-            count=True)
+        absent_names = _get_absent_items(endpoint, children, query_kwargs, 'to_component', 'name')
+        count = len(absent_names)
 
         log.info("Of %i needed %s relationships for %s in koji, found %i in PDC."
                  "  (%i are missing)" % (
@@ -306,19 +269,12 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
                      parent['name'], count,
                      len(children) - count))
 
-        if count != len(children):
-            # If they weren't all there already, figure out which ones are missing.
-            query = _chunked_query(
-                pdc, endpoint, query_kwargs,
-                key='to_component_name', iterable=children)
-            present = [relation['to_component']['name'] for relation in query]
-            absent_names = [name for name in children if name not in present]
-
+        if absent_names:
             # This creates the components themselves if they are missing, but
             # importantly it also retrieves the primary key ids which we need
             # in the next step.
-            absent = list(ensure_bulk_release_components_exist(
-                pdc, release, absent_names, component_type=component_type))
+            absent = ensure_bulk_release_components_exist(
+                pdc, release, absent_names, component_type=component_type)
 
             #if len(absent) != len(absent_names):
             #    raise ValueError("Error1 creating components: %i != %i" % (
@@ -334,7 +290,7 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
                     pdc, release, parent['name'], component_type)
 
             # Now issue a bulk create the missing ones.
-            pdc['release-component-relationships']._([dict(
+            endpoint([dict(
                 from_component=dict(id=parent['id']),
                 to_component=dict(id=child['id']),
                 type=relationship_type,
@@ -346,21 +302,11 @@ def ensure_bulk_release_components_exist(pdc, release, components,
 
     ensure_bulk_global_components_exist(pdc, components)
 
-    query_kwargs = dict(release=release, type=component_type)
     endpoint = pdc['release-components']._
-    count = _chunked_query(
-        pdc, endpoint, query_kwargs,
-        key='name', iterable=components,
-        count=True)
+    query_kwargs = dict(release=release, type=component_type)
+    absent = _get_absent_items(endpoint, components, query_kwargs, 'name')
 
-    if count != len(components):
-        # If they weren't all there already, figure out which ones are missing.
-        query = _chunked_query(
-            pdc, endpoint, query_kwargs,
-            key='name', iterable=components)
-        present = [component['name'] for component in query]
-        absent = [name for name in components if name not in present]
-
+    if absent:
         ## Validate that.
         #if len(absent) != len(components) - count:
         #    raise ValueError("Error creating components: %i != (%i - %i)" % (
@@ -369,7 +315,7 @@ def ensure_bulk_release_components_exist(pdc, release, components,
         # Now issue a bulk create the missing ones.
         log.info("Of %i needed, %i release-components missing." % (
             len(components), len(absent)))
-        pdc['release-components']._([dict(
+        endpoint([dict(
             name=name,
             global_component=name,
             release=release,
@@ -383,9 +329,7 @@ def ensure_bulk_release_components_exist(pdc, release, components,
     # database
     @retry(timeout=300, interval=10, wait_on=AssertionError)
     def get_present_components():
-        results = list(_chunked_query(
-            pdc, endpoint, query_kwargs,
-            key='name', iterable=components))
+        results = _get_existing_items(endpoint, components, query_kwargs, 'name')
         assert len(results) == len(components)
         return results
 
@@ -394,20 +338,13 @@ def ensure_bulk_release_components_exist(pdc, release, components,
 
 def ensure_bulk_global_components_exist(pdc, components):
     endpoint = pdc['global-components']._
-    count = _chunked_query(
-        pdc, endpoint, {}, key='name', iterable=components, count=True)
+    absent = _get_absent_items(endpoint, components, {}, 'name')
 
-    if count != len(components):
-        # If they weren't all there already, figure out which ones are missing.
-        query = _chunked_query(
-            pdc, endpoint, {}, key='name', iterable=components)
-        present = [component['name'] for component in query]
-        absent = [name for name in components if name not in present]
-
+    if absent:
         # Now issue a bulk create the missing ones.
         log.info("Of %i needed, %i global-components missing." % (
             len(components), len(absent)))
-        pdc['global-components']._([dict(name=name) for name in absent])
+        endpoint([dict(name=name) for name in absent])
 
 
 def delete_release_component_relationship(pdc, parent, child, type):
