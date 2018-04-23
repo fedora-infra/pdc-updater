@@ -3,8 +3,7 @@ FROM centos
 WORKDIR /build
 
 RUN yum -y update && \
-    yum -y install epel-release yum-config-manager centos-release-scl && \
-    yum-config-manager --enable rhel-server-rhscl-7-rpms && \
+    yum -y install epel-release && \
     yum -y install \
         --setopt=deltarpm=0 \
         --setopt=install_weak_deps=false \
@@ -20,12 +19,15 @@ RUN yum -y update && \
         python-pip \
         redhat-rpm-config \
         swig \
-        zeromq-devel &&\
+        zeromq-devel \
+        rpm-devel \
+        python2-koji \
+        libmodulemd && \
     yum clean all
 
 COPY . .
 
-RUN scl enable python27 'pip install --upgrade pip setuptools koji' && \
-    scl enable python27 'python setup.py develop && pip install -r test-requirements.txt'
+RUN pip install --upgrade pip setuptools && \
+    python setup.py develop && pip install -r test-requirements.txt
 
-CMD ["scl", "enable", "python27", "pytest -v pdcupdater/tests/"]
+CMD ["pytest", "-v", "pdcupdater/tests/"]
