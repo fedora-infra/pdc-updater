@@ -8,8 +8,6 @@ import pdc_client
 import pdcupdater.handlers
 import pdcupdater.services
 
-import hashlib
-
 import gi
 gi.require_version('Modulemd', '1.0') # noqa
 from gi.repository import Modulemd
@@ -170,9 +168,11 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         name = body['name']
         stream = body['stream']
         version = body['version']
-        tag_str = '.'.join(self.get_uid(body).split(':'))
-        tag_hash = hashlib.sha1(tag_str).hexdigest()[:16]
-        koji_tag = 'module-' + tag_hash
+        tag_str = '-'.join(self.get_uid(body).split(':'))
+        if self.pdc_api == 'unreleasedvariants':
+            # context is not available under unreleasedvariants endpoint
+            tag_str += '-00000000'
+        koji_tag = 'module-' + tag_str
 
         if self.pdc_api == 'modules':
             data = {

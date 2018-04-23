@@ -183,7 +183,7 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertEqual(pdc.calls['unreleasedvariants'][1][0], 'POST')
         expected_post = {
             'build_deps': [{'dependency': 'platform', 'stream': 'f28'}],
-            'koji_tag': 'module-ce2adf69caf0e1b5',
+            'koji_tag': 'module-testmodule-master-20180123171544-00000000',
             'modulemd': self.modulemd_example,
             'runtime_deps': [{'dependency': 'platform', 'stream': 'f28'}],
             'variant_id': 'testmodule',
@@ -246,7 +246,7 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertEqual(pdc.calls['modules'][2][0], 'POST')
         expected_post = {
             'build_deps': [{'dependency': 'platform', 'stream': 'f28'}],
-            'koji_tag': 'module-67eff7c74088acdf',
+            'koji_tag': 'module-testmodule-master-20180123171544-c2c572ec',
             'modulemd': self.modulemd_example,
             'runtime_deps': [{'dependency': 'platform', 'stream': 'f28'}],
             'name': 'testmodule',

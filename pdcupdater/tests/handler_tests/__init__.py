@@ -329,7 +329,7 @@ def mock_pdc(function):
             'variant_type': 'module',
             'variant_version': 'master',
             'variant_release': '20180123171544',
-            'koji_tag': 'module-ce2adf69caf0e1b5',
+            'koji_tag': 'module-testmodule-master-20180123171544-00000000',
             'runtime_deps': [
                 {
                     'dependency': 'platform',
