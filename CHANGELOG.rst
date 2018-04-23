@@ -1,4 +1,19 @@
 
+0.9.0
+-----
+
+Pull Requests
+
+-                   #84, Merge pull request #84 from qixiang/informative-koji-tag
+  https://github.com/fedora-infra/pdc-updater/pull/84
+
+Commits
+
+- bee78eb72 Use more informative koji tag name for module builds
+  https://github.com/fedora-infra/pdc-updater/commit/bee78eb72
+- 7b431fb78 run with default python to workaround test failure
+  https://github.com/fedora-infra/pdc-updater/commit/7b431fb78
+
 0.8.4
 -----
 
