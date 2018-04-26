@@ -1,4 +1,17 @@
 
+0.9.1
+-----
+
+Pull Requests
+
+-                   #85, Merge pull request #85 from qixiang/fallback-to-old-koji-tag
+  https://github.com/fedora-infra/pdc-updater/pull/85
+
+Commits
+
+- 16796285e Fallback to old way of koji_tag name if tag is too long
+  https://github.com/fedora-infra/pdc-updater/commit/16796285e
+
 0.9.0
 -----
 
