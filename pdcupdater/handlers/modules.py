@@ -7,6 +7,7 @@ import beanbag
 import pdc_client
 import pdcupdater.handlers
 import pdcupdater.services
+import pdcupdater.utils
 
 import gi
 gi.require_version('Modulemd', '1.0') # noqa
@@ -168,11 +169,10 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         name = body['name']
         stream = body['stream']
         version = body['version']
-        tag_str = '-'.join(self.get_uid(body).split(':'))
-        if self.pdc_api == 'unreleasedvariants':
-            # context is not available under unreleasedvariants endpoint
-            tag_str += '-00000000'
-        koji_tag = 'module-' + tag_str
+        nsvc = self.get_uid(body).split(':')
+        # koji tag in pdc is required, but not available in init
+        # message, we mimicks what MBS does
+        koji_tag = pdcupdater.utils.generate_koji_tag(*nsvc)
 
         if self.pdc_api == 'modules':
             data = {
