@@ -267,44 +267,6 @@ class TestModuleStateChange(BaseHandlerTest):
 
     @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_module_with_too_long_nsvc(self, pdc, mbs):
-        mbs.return_value = self.modulemd_example
-        # Remove the data returned from the API since the test PDC client
-        # doesn't seem to understand filtering and pdc-updater will think it
-        # doesn't need to create the entry
-        pdc.endpoints['modules']['GET'] = []
-        state_wait_msg = copy.deepcopy(self.state_wait_msg)
-        long_stream = 'stream-with-very-looooong-name' + '-blah' * 50
-        state_wait_msg['msg']['stream'] = long_stream
-        self.handler.handle(pdc, state_wait_msg)
-        self.assertEqual(len(pdc.calls['modules']), 3)
-        # The API version check here
-        self.assertEqual(pdc.calls['modules'][0][0], 'GET')
-        self.assertDictEqual(pdc.calls['modules'][0][1], {'page_size': 1})
-        # The GET check using the context
-        self.assertEqual(pdc.calls['modules'][1][0], 'GET')
-        expect_uid = ':'.join(
-            ['testmodule', long_stream, '20180123171544', 'c2c572ec'])
-        expected_get = {
-            'uid': expect_uid,
-            'page_size': -1
-        }
-        self.assertDictEqual(pdc.calls['modules'][1][1], expected_get)
-        self.assertEqual(pdc.calls['modules'][2][0], 'POST')
-        expected_post = {
-            'build_deps': [{'dependency': 'platform', 'stream': 'f28'}],
-            'koji_tag': 'NA',
-            'modulemd': self.modulemd_example,
-            'runtime_deps': [{'dependency': 'platform', 'stream': 'f28'}],
-            'name': 'testmodule',
-            'version': '20180123171544',
-            'stream': long_stream,
-            'context': 'c2c572ec',
-        }
-        self.assertDictEqual(pdc.calls['modules'][2][1], expected_post)
-
-    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
-    @mock_pdc
     def test_create_module_exists(self, pdc, mbs):
         mbs.return_value = self.modulemd_example
         self.handler.handle(pdc, self.state_wait_msg)
