@@ -1,4 +1,20 @@
 
+0.9.2
+-----
+
+This fixes a bug in the retirement handler.
+https://pagure.io/fedora-infrastructure/issue/6928
+
+Pull Requests
+
+- #86, Merge pull request #86 from fedora-infra/dont-overwrite
+  https://github.com/fedora-infra/pdc-updater/pull/86
+
+Commits
+
+- 65ebd4ad9 Don't overwrite `branch`.
+  https://github.com/fedora-infra/pdc-updater/commit/65ebd4ad9
+
 0.9.1
 -----
 
