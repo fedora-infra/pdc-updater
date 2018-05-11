@@ -13,3 +13,4 @@ pdcupdater/tests/vcr-request-data
 .idea
 .vagrant
 
+.pytest_cache/
