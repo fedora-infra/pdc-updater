@@ -108,7 +108,6 @@ class TestModuleStateChange(BaseHandlerTest):
             'name': 'testmodule',
             'time_submitted': '2018-01-23T17:15:57Z',
             'time_modified': '2018-01-23T17:16:02Z',
-            'modulemd': modulemd_example,
             'context': 'c2c572ec'
         }
     }
@@ -148,8 +147,10 @@ class TestModuleStateChange(BaseHandlerTest):
     state_ready_new_api_msg['msg'].update({'koji_tag': '67eff7c74088acdf'})
 
     @mock.patch(HANDLER_PATH + '.get_pdc_api')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_unreleased_variant_exists(self, pdc, get_api):
+    def test_create_unreleased_variant_exists(self, pdc, mbs, get_api):
+        mbs.return_value = self.modulemd_example
         # Test the old API
         get_api.return_value = 'unreleasedvariants'
         self.handler.handle(pdc, self.state_wait_msg)
@@ -163,8 +164,10 @@ class TestModuleStateChange(BaseHandlerTest):
             pdc.calls['unreleasedvariants'][0][1], expected_get)
 
     @mock.patch(HANDLER_PATH + '.get_pdc_api')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_unreleased_variant(self, pdc, get_api):
+    def test_create_unreleased_variant(self, pdc, mbs, get_api):
+        mbs.return_value = self.modulemd_example
         # Test the old API
         get_api.return_value = 'unreleasedvariants'
         # Remove the data returned from the API since the test PDC client
@@ -198,8 +201,10 @@ class TestModuleStateChange(BaseHandlerTest):
 
     @mock.patch(HANDLER_PATH + '.get_pdc_api')
     @mock.patch(HANDLER_PATH + '.get_module_rpms')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_update_unreleased_variant(self, pdc, get_rpms, get_api):
+    def test_update_unreleased_variant(self, pdc, mbs, get_rpms, get_api):
+        mbs.return_value = self.modulemd_example
         # Test the old API
         get_api.return_value = 'unreleasedvariants'
         get_rpms.return_value = get_expected_rpms()
@@ -212,9 +217,11 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertEqual(
             set(pdc.calls[endpoint][0][1].keys()), set(['active', 'rpms']))
 
-    @mock_pdc
     @mock.patch('pdcupdater.services.koji_rpms_in_tag')
-    def test_get_module_rpms(self, pdc, koji):
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
+    @mock_pdc
+    def test_get_module_rpms(self, pdc, mbs, koji):
+        mbs.return_value = self.modulemd_example
         koji.side_effect = mocked_koji_from_tag
 
         variant = {}
@@ -225,8 +232,10 @@ class TestModuleStateChange(BaseHandlerTest):
         rpms = self.handler.get_module_rpms(pdc, variant)
         self.assertEqual(expected_rpms, rpms)
 
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_module(self, pdc):
+    def test_create_module(self, pdc, mbs):
+        mbs.return_value = self.modulemd_example
         # Remove the data returned from the API since the test PDC client
         # doesn't seem to understand filtering and pdc-updater will think it
         # doesn't need to create the entry
@@ -256,8 +265,10 @@ class TestModuleStateChange(BaseHandlerTest):
         }
         self.assertDictEqual(pdc.calls['modules'][2][1], expected_post)
 
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_module_with_too_long_nsvc(self, pdc):
+    def test_create_module_with_too_long_nsvc(self, pdc, mbs):
+        mbs.return_value = self.modulemd_example
         # Remove the data returned from the API since the test PDC client
         # doesn't seem to understand filtering and pdc-updater will think it
         # doesn't need to create the entry
@@ -292,8 +303,10 @@ class TestModuleStateChange(BaseHandlerTest):
         }
         self.assertDictEqual(pdc.calls['modules'][2][1], expected_post)
 
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_module_exists(self, pdc):
+    def test_create_module_exists(self, pdc, mbs):
+        mbs.return_value = self.modulemd_example
         self.handler.handle(pdc, self.state_wait_msg)
         # The API version check here
         self.assertEqual(pdc.calls['modules'][0][0], 'GET')
@@ -308,8 +321,10 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertDictEqual(pdc.calls['modules'][1][1], expected_get)
 
     @mock.patch(HANDLER_PATH + '.get_module_rpms')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_update_module(self, pdc, get_rpms):
+    def test_update_module(self, pdc, mbs, get_rpms):
+        mbs.return_value = self.modulemd_example
         get_rpms.return_value = get_expected_rpms()
         self.handler.handle(pdc, self.state_ready_new_api_msg)
         # The API version check here

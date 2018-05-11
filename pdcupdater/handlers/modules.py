@@ -153,15 +153,20 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             rpms = self.get_module_rpms(pdc, module)
             pdc[self.pdc_api][uid]._ += {'active': True, 'rpms': rpms}
 
+    def _get_modulemd_by_mbs_id(self, idx):
+        # Query MBS to get the modulemd
+        mbs_url = self.config['pdcupdater.mbs_url']
+        module_url = '{0}/{1}?verbose=True'.format(mbs_url, idx)
+        response = requests.get(module_url, timeout=30)
+        response.raise_for_status()
+        return response.json()['modulemd']
+
     def create_module(self, pdc, body):
         """Creates a module in PDC."""
         log.debug("create_module(pdc, body=%r)" % body)
 
-        # Query MBS to get the modulemd
-        mbs_url = self.config['pdcupdater.mbs_url']
-        module_url = '{0}/{1}?verbose=True'.format(mbs_url, body['id'])
-        module_json = requests.get(module_url, timeout=30).json()
-        mmd = Modulemd.Module.new_from_string(module_json['modulemd'])
+        modulemd = self._get_modulemd_by_mbs_id(body['id'])
+        mmd = Modulemd.Module.new_from_string(modulemd)
         mmd.upgrade()
 
         runtime_deps = []
@@ -204,7 +209,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         data['koji_tag'] = koji_tag
         data['runtime_deps'] = runtime_deps
         data['build_deps'] = build_deps
-        data['modulemd'] = body['modulemd']
+        data['modulemd'] = modulemd
         module = pdc[self.pdc_api]._(data)
 
         return module
