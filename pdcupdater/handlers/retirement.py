@@ -37,7 +37,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         a dead.package file to the repo).  In response, this method will retire
         the package in PDC.
         """
-        branch = msg['msg']['commit']['branch']
+        branchname = msg['msg']['commit']['branch']
         repo = msg['msg']['commit']['repo']
         namespace = msg['msg']['commit']['namespace']
         component_type = self._namespace_to_pdc(namespace)
@@ -49,7 +49,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         # This query guarantees a unique component branch, so a count of 1 is
         # expected
         branch_query_rv = pdc['component-branches']._(
-            name=branch, type=component_type, global_component=repo)
+            name=branchname, type=component_type, global_component=repo)
 
         if branch_query_rv['count'] != 1:
             log.error('"{0}/{1}" was not found in PDC'.format(namespace, repo))
@@ -65,7 +65,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         # intermediate commits contained a dead.package.
         fileurl = checkurl % {'namespace': namespace,
                               'repo': repo,
-                              'branch': branch,
+                              'branch': branchname,
                               'file': 'dead.package'}
         log.info('Checking for file: %s' % fileurl)
         resp = requests.head(fileurl, timeout=15)
