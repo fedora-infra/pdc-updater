@@ -85,7 +85,6 @@ class TestModuleStateChange(BaseHandlerTest):
     state_wait_msg = {
         'topic': 'org.fedoraproject.prod.mbs.module.state.change',
         'msg': {
-            'tasks': {},
             'state_name': 'wait',
             'stream': 'master',
             'owner': 'mprahl',
@@ -98,7 +97,6 @@ class TestModuleStateChange(BaseHandlerTest):
             'koji_tag': None,
             'scmurl': ('https://src.fedoraproject.org/modules/testmodule.git'
                        '?#1d28a6e2e4fd604d98be0322ef0c0c4a931f091d'),
-            'state_trace': [],
             'rebuild_strategy': 'all',
             'runtime_context': '3044bea5ac56e79502c45b08536a51d5a9e0a88e',
             'state_url': None,
@@ -108,48 +106,34 @@ class TestModuleStateChange(BaseHandlerTest):
             'name': 'testmodule',
             'time_submitted': '2018-01-23T17:15:57Z',
             'time_modified': '2018-01-23T17:16:02Z',
-            'modulemd': modulemd_example,
             'context': 'c2c572ec'
         }
     }
-    state_ready_msg = copy.deepcopy(state_wait_msg)
-    state_ready_msg['msg'].update({
-        'tasks': {
-            'rpms': {
-                'ed': {
-                    'state': 1,
-                    'nvr': 'ed-1.14.2-1.module_1503+67eff7c7',
-                    'task_id': 24401846,
-                    'state_reason': ''
-                },
-                'module-build-macros': {
-                    'state': 1,
-                    'nvr': ('module-build-macros-0.1-1.module_1503'
-                            '+67eff7c7'),
-                    'task_id': 24401602,
-                    'state_reason': ''
-                }
-            }
-        },
-        'state_name': 'ready',
-        'id': 1503,
-        'time_completed': '2018-01-23T17:34:06Z',
-        'state': 5,
-        'koji_tag': 'module-ce2adf69caf0e1b5',
+    state_build_msg = copy.deepcopy(state_wait_msg)
+    state_build_msg['msg'].update({
         'component_builds': [
             91387,
             91388
         ],
+        'koji_tag': 'module-ce2adf69caf0e1b5',
+        'state': 2,
+        'state_name': 'build',
+        'time_modified': '2018-01-23T17:31:11Z'
+    })
+    state_ready_msg = copy.deepcopy(state_wait_msg)
+    state_ready_msg['msg'].update({
+        'state_name': 'ready',
+        'id': 1503,
+        'time_completed': '2018-01-23T17:34:06Z',
+        'state': 5,
         'time_modified': '2018-01-23T17:34:11Z'
     })
-    # On the new "modules" PDC API, the context is used to generate the Koji
-    # tag
-    state_ready_new_api_msg = copy.deepcopy(state_ready_msg)
-    state_ready_new_api_msg['msg'].update({'koji_tag': '67eff7c74088acdf'})
 
     @mock.patch(HANDLER_PATH + '.get_pdc_api')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_unreleased_variant_exists(self, pdc, get_api):
+    def test_create_unreleased_variant_exists(self, pdc, mbs, get_api):
+        mbs.return_value = self.modulemd_example
         # Test the old API
         get_api.return_value = 'unreleasedvariants'
         self.handler.handle(pdc, self.state_wait_msg)
@@ -163,8 +147,10 @@ class TestModuleStateChange(BaseHandlerTest):
             pdc.calls['unreleasedvariants'][0][1], expected_get)
 
     @mock.patch(HANDLER_PATH + '.get_pdc_api')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_unreleased_variant(self, pdc, get_api):
+    def test_create_unreleased_variant(self, pdc, mbs, get_api):
+        mbs.return_value = self.modulemd_example
         # Test the old API
         get_api.return_value = 'unreleasedvariants'
         # Remove the data returned from the API since the test PDC client
@@ -183,7 +169,7 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertEqual(pdc.calls['unreleasedvariants'][1][0], 'POST')
         expected_post = {
             'build_deps': [{'dependency': 'platform', 'stream': 'f28'}],
-            'koji_tag': 'module-ce2adf69caf0e1b5',
+            'koji_tag': 'NA',
             'modulemd': self.modulemd_example,
             'runtime_deps': [{'dependency': 'platform', 'stream': 'f28'}],
             'variant_id': 'testmodule',
@@ -198,8 +184,11 @@ class TestModuleStateChange(BaseHandlerTest):
 
     @mock.patch(HANDLER_PATH + '.get_pdc_api')
     @mock.patch(HANDLER_PATH + '.get_module_rpms')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_update_unreleased_variant(self, pdc, get_rpms, get_api):
+    def test_update_unreleased_variant_ready(
+            self, pdc, mbs, get_rpms, get_api):
+        mbs.return_value = self.modulemd_example
         # Test the old API
         get_api.return_value = 'unreleasedvariants'
         get_rpms.return_value = get_expected_rpms()
@@ -212,9 +201,29 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertEqual(
             set(pdc.calls[endpoint][0][1].keys()), set(['active', 'rpms']))
 
+    @mock.patch(HANDLER_PATH + '.get_pdc_api')
+    @mock.patch(HANDLER_PATH + '.get_module_rpms')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
+    def test_update_unreleased_variant_build(
+            self, pdc, mbs, get_rpms, get_api):
+        mbs.return_value = self.modulemd_example
+        # Test the old API
+        get_api.return_value = 'unreleasedvariants'
+        get_rpms.return_value = get_expected_rpms()
+        self.handler.handle(pdc, self.state_build_msg)
+        # Make sure a GET request was made to get the module
+        self.assertEqual(pdc.calls['unreleasedvariants'][0][0], 'GET')
+        # Make sure the PATCH was sent on the module
+        endpoint = 'unreleasedvariants/testmodule:master:20180123171544'
+        self.assertEqual(pdc.calls[endpoint][0][0], 'PATCH')
+        self.assertEqual(pdc.calls[endpoint][0][1].keys(), ['koji_tag'])
+
     @mock.patch('pdcupdater.services.koji_rpms_in_tag')
-    def test_get_module_rpms(self, pdc, koji):
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
+    @mock_pdc
+    def test_get_module_rpms(self, pdc, mbs, koji):
+        mbs.return_value = self.modulemd_example
         koji.side_effect = mocked_koji_from_tag
 
         variant = {}
@@ -225,8 +234,10 @@ class TestModuleStateChange(BaseHandlerTest):
         rpms = self.handler.get_module_rpms(pdc, variant)
         self.assertEqual(expected_rpms, rpms)
 
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_module(self, pdc):
+    def test_create_module(self, pdc, mbs):
+        mbs.return_value = self.modulemd_example
         # Remove the data returned from the API since the test PDC client
         # doesn't seem to understand filtering and pdc-updater will think it
         # doesn't need to create the entry
@@ -246,7 +257,7 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertEqual(pdc.calls['modules'][2][0], 'POST')
         expected_post = {
             'build_deps': [{'dependency': 'platform', 'stream': 'f28'}],
-            'koji_tag': 'module-testmodule-master-20180123171544-c2c572ec',
+            'koji_tag': 'NA',
             'modulemd': self.modulemd_example,
             'runtime_deps': [{'dependency': 'platform', 'stream': 'f28'}],
             'name': 'testmodule',
@@ -256,44 +267,10 @@ class TestModuleStateChange(BaseHandlerTest):
         }
         self.assertDictEqual(pdc.calls['modules'][2][1], expected_post)
 
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_create_module_with_too_long_nsvc(self, pdc):
-        # Remove the data returned from the API since the test PDC client
-        # doesn't seem to understand filtering and pdc-updater will think it
-        # doesn't need to create the entry
-        pdc.endpoints['modules']['GET'] = []
-        state_wait_msg = copy.deepcopy(self.state_wait_msg)
-        long_stream = 'stream-with-very-looooong-name' + '-blah' * 50
-        state_wait_msg['msg']['stream'] = long_stream
-        self.handler.handle(pdc, state_wait_msg)
-        self.assertEqual(len(pdc.calls['modules']), 3)
-        # The API version check here
-        self.assertEqual(pdc.calls['modules'][0][0], 'GET')
-        self.assertDictEqual(pdc.calls['modules'][0][1], {'page_size': 1})
-        # The GET check using the context
-        self.assertEqual(pdc.calls['modules'][1][0], 'GET')
-        expect_uid = ':'.join(
-            ['testmodule', long_stream, '20180123171544', 'c2c572ec'])
-        expected_get = {
-            'uid': expect_uid,
-            'page_size': -1
-        }
-        self.assertDictEqual(pdc.calls['modules'][1][1], expected_get)
-        self.assertEqual(pdc.calls['modules'][2][0], 'POST')
-        expected_post = {
-            'build_deps': [{'dependency': 'platform', 'stream': 'f28'}],
-            'koji_tag': 'module-d9bf2388b10ea27c',
-            'modulemd': self.modulemd_example,
-            'runtime_deps': [{'dependency': 'platform', 'stream': 'f28'}],
-            'name': 'testmodule',
-            'version': '20180123171544',
-            'stream': long_stream,
-            'context': 'c2c572ec',
-        }
-        self.assertDictEqual(pdc.calls['modules'][2][1], expected_post)
-
-    @mock_pdc
-    def test_create_module_exists(self, pdc):
+    def test_create_module_exists(self, pdc, mbs):
+        mbs.return_value = self.modulemd_example
         self.handler.handle(pdc, self.state_wait_msg)
         # The API version check here
         self.assertEqual(pdc.calls['modules'][0][0], 'GET')
@@ -308,10 +285,12 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertDictEqual(pdc.calls['modules'][1][1], expected_get)
 
     @mock.patch(HANDLER_PATH + '.get_module_rpms')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_update_module(self, pdc, get_rpms):
+    def test_update_module_ready(self, pdc, mbs, get_rpms):
+        mbs.return_value = self.modulemd_example
         get_rpms.return_value = get_expected_rpms()
-        self.handler.handle(pdc, self.state_ready_new_api_msg)
+        self.handler.handle(pdc, self.state_ready_msg)
         # The API version check here
         self.assertEqual(pdc.calls['modules'][0][0], 'GET')
         self.assertDictEqual(pdc.calls['modules'][0][1], {'page_size': 1})
@@ -322,3 +301,20 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertEqual(pdc.calls[endpoint][0][0], 'PATCH')
         self.assertEqual(
             set(pdc.calls[endpoint][0][1].keys()), set(['active', 'rpms']))
+
+    @mock.patch(HANDLER_PATH + '.get_module_rpms')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
+    @mock_pdc
+    def test_update_module_build(self, pdc, mbs, get_rpms):
+        mbs.return_value = self.modulemd_example
+        get_rpms.return_value = get_expected_rpms()
+        self.handler.handle(pdc, self.state_build_msg)
+        # The API version check here
+        self.assertEqual(pdc.calls['modules'][0][0], 'GET')
+        self.assertDictEqual(pdc.calls['modules'][0][1], {'page_size': 1})
+        # Make sure a GET request was made to get the module
+        self.assertEqual(pdc.calls['modules'][1][0], 'GET')
+        # Make sure the PATCH was sent on the module
+        endpoint = 'modules/testmodule:master:20180123171544:c2c572ec'
+        self.assertEqual(pdc.calls[endpoint][0][0], 'PATCH')
+        self.assertEqual(pdc.calls[endpoint][0][1].keys(), ['koji_tag'])

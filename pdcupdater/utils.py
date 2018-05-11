@@ -718,27 +718,3 @@ def get_token(pdc_api_url, keytab):
         log.exception('The following error occurred when trying to get a '
                       'token from PDC: {0}'.format(str(error)))
     return r.json()['token']
-
-
-def generate_koji_tag(name, stream, version, context=None):
-    """
-    Generate a koji tag from name, stream, version and context.
-
-    :param name: a module's name
-    :param stream: a module's stream
-    :param version: a module's version
-    :param context: a module's context
-    """
-    if context is None:
-        # MBS < 1.6, use old style of module-<hash> tag
-        tag_str = '.'.join([name, stream, version])
-        tag_hash = hashlib.sha1(tag_str).hexdigest()[:16]
-        return 'module-' + tag_hash
-
-    nsvc_list = [name, stream, str(version), context]
-    nsvc_tag = 'module-' + '-'.join(nsvc_list)
-    if len(nsvc_tag) + len('-build') > 256:
-        nsvc_hash = hashlib.sha1('.'.join(nsvc_list)).hexdigest()[:16]
-        return 'module-' + nsvc_hash
-    else:
-        return nsvc_tag
