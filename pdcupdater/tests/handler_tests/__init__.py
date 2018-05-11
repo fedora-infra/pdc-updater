@@ -390,6 +390,9 @@ class BaseHandlerTest(unittest.TestCase):
             'password': 'whatever',
         },
         'pdcupdater.pkgdb_url': 'blihblihblih',
+
+        'pdcupdater.mbs_url': 'https://mbs.fedoraproject.org/module-build-service/2/module-builds/',
+
         'pdcupdater.file_check_url': (
             'https://src.fedoraproject.org/%(namespace)s/'
             '%(repo)s/blob/%(branch)s/f/%(file)s'),

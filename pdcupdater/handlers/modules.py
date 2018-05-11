@@ -139,10 +139,11 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
         module = self.get_or_create_module(pdc, body)
 
-        if self.pdc_api == 'modules':
-            uid = module['uid']
-        else:
-            uid = module['variant_uid']
+        if body['state_name'] in ('build', 'ready'):
+            if self.pdc_api == 'modules':
+                uid = module['uid']
+            else:
+                uid = module['variant_uid']
 
         if body['state_name'] == 'build':
             # At this point we can update the Koji tag from MBS
