@@ -30,6 +30,9 @@ config = {
     # PkgDB details
     'pdcupdater.pkgdb_url': 'https://admin.fedoraproject.org/pkgdb',
 
+    # MBS details
+    'pdcupdater.mbs_url': 'https://mbs.fedoraproject.org/module-build-service/2/module-builds/',
+
     # File check URL
     'pdcupdater.file_check_url': 'https://src.fedoraproject.org/%(namespace)s/%(repo)s/blob/%(branch)s/f/%(file)s',
 
