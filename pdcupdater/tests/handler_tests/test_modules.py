@@ -85,7 +85,6 @@ class TestModuleStateChange(BaseHandlerTest):
     state_wait_msg = {
         'topic': 'org.fedoraproject.prod.mbs.module.state.change',
         'msg': {
-            'tasks': {},
             'state_name': 'wait',
             'stream': 'master',
             'owner': 'mprahl',
@@ -98,7 +97,6 @@ class TestModuleStateChange(BaseHandlerTest):
             'koji_tag': None,
             'scmurl': ('https://src.fedoraproject.org/modules/testmodule.git'
                        '?#1d28a6e2e4fd604d98be0322ef0c0c4a931f091d'),
-            'state_trace': [],
             'rebuild_strategy': 'all',
             'runtime_context': '3044bea5ac56e79502c45b08536a51d5a9e0a88e',
             'state_url': None,
@@ -113,38 +111,12 @@ class TestModuleStateChange(BaseHandlerTest):
     }
     state_ready_msg = copy.deepcopy(state_wait_msg)
     state_ready_msg['msg'].update({
-        'tasks': {
-            'rpms': {
-                'ed': {
-                    'state': 1,
-                    'nvr': 'ed-1.14.2-1.module_1503+67eff7c7',
-                    'task_id': 24401846,
-                    'state_reason': ''
-                },
-                'module-build-macros': {
-                    'state': 1,
-                    'nvr': ('module-build-macros-0.1-1.module_1503'
-                            '+67eff7c7'),
-                    'task_id': 24401602,
-                    'state_reason': ''
-                }
-            }
-        },
         'state_name': 'ready',
         'id': 1503,
         'time_completed': '2018-01-23T17:34:06Z',
         'state': 5,
-        'koji_tag': 'module-ce2adf69caf0e1b5',
-        'component_builds': [
-            91387,
-            91388
-        ],
         'time_modified': '2018-01-23T17:34:11Z'
     })
-    # On the new "modules" PDC API, the context is used to generate the Koji
-    # tag
-    state_ready_new_api_msg = copy.deepcopy(state_ready_msg)
-    state_ready_new_api_msg['msg'].update({'koji_tag': '67eff7c74088acdf'})
 
     @mock.patch(HANDLER_PATH + '.get_pdc_api')
     @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
@@ -288,7 +260,7 @@ class TestModuleStateChange(BaseHandlerTest):
     def test_update_module(self, pdc, mbs, get_rpms):
         mbs.return_value = self.modulemd_example
         get_rpms.return_value = get_expected_rpms()
-        self.handler.handle(pdc, self.state_ready_new_api_msg)
+        self.handler.handle(pdc, self.state_ready_msg)
         # The API version check here
         self.assertEqual(pdc.calls['modules'][0][0], 'GET')
         self.assertDictEqual(pdc.calls['modules'][0][1], {'page_size': 1})
