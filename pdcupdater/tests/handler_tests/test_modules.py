@@ -109,6 +109,17 @@ class TestModuleStateChange(BaseHandlerTest):
             'context': 'c2c572ec'
         }
     }
+    state_build_msg = copy.deepcopy(state_wait_msg)
+    state_build_msg['msg'].update({
+        'component_builds': [
+            91387,
+            91388
+        ],
+        'koji_tag': 'module-ce2adf69caf0e1b5',
+        'state': 2,
+        'state_name': 'build',
+        'time_modified': '2018-01-23T17:31:11Z'
+    })
     state_ready_msg = copy.deepcopy(state_wait_msg)
     state_ready_msg['msg'].update({
         'state_name': 'ready',
@@ -175,7 +186,8 @@ class TestModuleStateChange(BaseHandlerTest):
     @mock.patch(HANDLER_PATH + '.get_module_rpms')
     @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_update_unreleased_variant(self, pdc, mbs, get_rpms, get_api):
+    def test_update_unreleased_variant_ready(
+            self, pdc, mbs, get_rpms, get_api):
         mbs.return_value = self.modulemd_example
         # Test the old API
         get_api.return_value = 'unreleasedvariants'
@@ -188,6 +200,24 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertEqual(pdc.calls[endpoint][0][0], 'PATCH')
         self.assertEqual(
             set(pdc.calls[endpoint][0][1].keys()), set(['active', 'rpms']))
+
+    @mock.patch(HANDLER_PATH + '.get_pdc_api')
+    @mock.patch(HANDLER_PATH + '.get_module_rpms')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
+    @mock_pdc
+    def test_update_unreleased_variant_build(
+            self, pdc, mbs, get_rpms, get_api):
+        mbs.return_value = self.modulemd_example
+        # Test the old API
+        get_api.return_value = 'unreleasedvariants'
+        get_rpms.return_value = get_expected_rpms()
+        self.handler.handle(pdc, self.state_build_msg)
+        # Make sure a GET request was made to get the module
+        self.assertEqual(pdc.calls['unreleasedvariants'][0][0], 'GET')
+        # Make sure the PATCH was sent on the module
+        endpoint = 'unreleasedvariants/testmodule:master:20180123171544'
+        self.assertEqual(pdc.calls[endpoint][0][0], 'PATCH')
+        self.assertEqual(pdc.calls[endpoint][0][1].keys(), ['koji_tag'])
 
     @mock.patch('pdcupdater.services.koji_rpms_in_tag')
     @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
@@ -257,7 +287,7 @@ class TestModuleStateChange(BaseHandlerTest):
     @mock.patch(HANDLER_PATH + '.get_module_rpms')
     @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
     @mock_pdc
-    def test_update_module(self, pdc, mbs, get_rpms):
+    def test_update_module_ready(self, pdc, mbs, get_rpms):
         mbs.return_value = self.modulemd_example
         get_rpms.return_value = get_expected_rpms()
         self.handler.handle(pdc, self.state_ready_msg)
@@ -271,3 +301,20 @@ class TestModuleStateChange(BaseHandlerTest):
         self.assertEqual(pdc.calls[endpoint][0][0], 'PATCH')
         self.assertEqual(
             set(pdc.calls[endpoint][0][1].keys()), set(['active', 'rpms']))
+
+    @mock.patch(HANDLER_PATH + '.get_module_rpms')
+    @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
+    @mock_pdc
+    def test_update_module_build(self, pdc, mbs, get_rpms):
+        mbs.return_value = self.modulemd_example
+        get_rpms.return_value = get_expected_rpms()
+        self.handler.handle(pdc, self.state_build_msg)
+        # The API version check here
+        self.assertEqual(pdc.calls['modules'][0][0], 'GET')
+        self.assertDictEqual(pdc.calls['modules'][0][1], {'page_size': 1})
+        # Make sure a GET request was made to get the module
+        self.assertEqual(pdc.calls['modules'][1][0], 'GET')
+        # Make sure the PATCH was sent on the module
+        endpoint = 'modules/testmodule:master:20180123171544:c2c572ec'
+        self.assertEqual(pdc.calls[endpoint][0][0], 'PATCH')
+        self.assertEqual(pdc.calls[endpoint][0][1].keys(), ['koji_tag'])
