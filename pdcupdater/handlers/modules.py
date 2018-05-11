@@ -4,6 +4,7 @@ import errno
 import re
 
 import beanbag
+import requests
 import pdc_client
 import pdcupdater.handlers
 import pdcupdater.services
@@ -20,8 +21,8 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
     """ When the state of a module changes. """
 
     processing_states = set(('done', 'ready'))
-    other_states = set(('wait', 'building'))
-    irrelevant_states = set(('init', 'build',))
+    other_states = set(('wait', 'build'))
+    irrelevant_states = set(('init',))
     relevant_states = processing_states.union(other_states)
     error_states = set(('failed',))
     valid_states = relevant_states.union(error_states).union(irrelevant_states)
@@ -138,20 +139,34 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
         module = self.get_or_create_module(pdc, body)
 
-        if body['state'] == 5:
+        if body['state_name'] in ('build', 'ready'):
             if self.pdc_api == 'modules':
                 uid = module['uid']
             else:
                 uid = module['variant_uid']
+
+        if body['state_name'] == 'build':
+            # At this point we can update the Koji tag from MBS
+            pdc[self.pdc_api][uid]._ += {'koji_tag': body['koji_tag']}
+        elif body['state_name'] == 'ready':
             log.info("%r ready.  Patching with rpms and active=True." % uid)
             rpms = self.get_module_rpms(pdc, module)
             pdc[self.pdc_api][uid]._ += {'active': True, 'rpms': rpms}
+
+    def _get_modulemd_by_mbs_id(self, idx):
+        # Query MBS to get the modulemd
+        mbs_url = self.config['pdcupdater.mbs_url']
+        module_url = '{0}/{1}?verbose=True'.format(mbs_url, idx)
+        response = requests.get(module_url, timeout=30)
+        response.raise_for_status()
+        return response.json()['modulemd']
 
     def create_module(self, pdc, body):
         """Creates a module in PDC."""
         log.debug("create_module(pdc, body=%r)" % body)
 
-        mmd = Modulemd.Module.new_from_string(body['modulemd'])
+        modulemd = self._get_modulemd_by_mbs_id(body['id'])
+        mmd = Modulemd.Module.new_from_string(modulemd)
         mmd.upgrade()
 
         runtime_deps = []
@@ -169,10 +184,9 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         name = body['name']
         stream = body['stream']
         version = body['version']
-        nsvc = self.get_uid(body).split(':')
         # koji tag in pdc is required, but not available in init
-        # message, we mimicks what MBS does
-        koji_tag = pdcupdater.utils.generate_koji_tag(*nsvc)
+        # message, so let's put a placeholder value for now and updater later
+        koji_tag = 'NA'
 
         if self.pdc_api == 'modules':
             data = {
@@ -195,7 +209,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         data['koji_tag'] = koji_tag
         data['runtime_deps'] = runtime_deps
         data['build_deps'] = build_deps
-        data['modulemd'] = body['modulemd']
+        data['modulemd'] = modulemd
         module = pdc[self.pdc_api]._(data)
 
         return module

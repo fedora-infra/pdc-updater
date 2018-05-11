@@ -1,4 +1,29 @@
 
+0.9.3
+-----
+
+Pull Requests
+
+- #87, Merge pull request #87 from fedora-infra/mbs-2.2
+  https://github.com/fedora-infra/pdc-updater/pull/87
+
+Commits
+
+- 9adf79f18 WIP: Support MBS v2.2.0
+  https://github.com/fedora-infra/pdc-updater/commit/9adf79f18
+- 0e225a942 Get the tests passing, but with no mocks yet.
+  https://github.com/fedora-infra/pdc-updater/commit/0e225a942
+- badae4701 Introduce mocks and ensure modulemd is really gone from test message payloads.
+  https://github.com/fedora-infra/pdc-updater/commit/badae4701
+- ede9d7004 Remove unapplicable test
+  https://github.com/fedora-infra/pdc-updater/commit/ede9d7004
+- d68894c42 Update the test module messages to reflect the new schema
+  https://github.com/fedora-infra/pdc-updater/commit/d68894c42
+- d057b892f Add some tests for the module handler when the module is in the build state
+  https://github.com/fedora-infra/pdc-updater/commit/d057b892f
+- e591c82de Ignore .pytest_cache.
+  https://github.com/fedora-infra/pdc-updater/commit/e591c82de
+
 0.9.2
 -----
 
