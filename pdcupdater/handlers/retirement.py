@@ -65,7 +65,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
         # intermediate commits contained a dead.package.
         fileurl = checkurl % {'namespace': namespace,
                               'repo': repo,
-                              'branch': branchname,
+                              'branch': branchname['name'],
                               'file': 'dead.package'}
         log.info('Checking for file: %s' % fileurl)
         resp = requests.head(fileurl, timeout=15)
