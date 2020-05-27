@@ -1,8 +1,11 @@
 import logging
 import operator
+import os
 
 import bs4
 import requests
+
+from fasjson_client import Client
 
 import pdcupdater.handlers.compose
 import pdcupdater.utils
@@ -72,13 +75,18 @@ def old_composes(base_url):
 
 
 @pdcupdater.utils.with_ridiculous_timeout
-def fas_persons(base_url, username, password):
+def fas_persons(base_url, username, password, fasjson):
     """ Return the list of users in the Fedora Account System. """
+
+    log.info("Connecting to Account System at %r" % base_url)
+    if fasjson:
+        client = Client(url=base_url)
+        people = client.list_users().result
+        return people
 
     import fedora.client
     import fedora.client.fas2
 
-    log.info("Connecting to FAS at %r" % base_url)
     fasclient = fedora.client.fas2.AccountSystem(
         base_url=base_url, username=username, password=password)
 

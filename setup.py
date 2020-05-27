@@ -12,6 +12,7 @@ requirements = [
     'pdc-client',
     'six',
     'modulemd',
+    'fasjson-client',
 ]
 
 

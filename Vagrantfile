@@ -13,15 +13,14 @@ $script = <<SCRIPT
         zeromq-devel \
         koji \
         swig \
-        fedmsg \
-        libyaml-devel
+        fedmsg
     cd /opt/pdc-updater/src
     python setup.py develop
     pip install -r test-requirements.txt
 SCRIPT
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "fedora/24-cloud-base"
+  config.vm.box = "fedora/31-cloud-base"
   config.vm.provider :virtualbox do |v|
     v.customize ["modifyvm", :id, "--memory", 2048]
   end
