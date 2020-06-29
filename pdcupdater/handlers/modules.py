@@ -111,8 +111,8 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             # For SRPM packages, include the hash and branch from which is
             # has been built.
             if (rpm['arch'] == 'src'
-                    and rpm['name'] in mmd.get_rpm_components().keys()
-                    and 'rpms' in mmd.get_xmd()['mbs'].keys()
+                    and rpm['name'] in list(mmd.get_rpm_components().keys())
+                    and 'rpms' in list(mmd.get_xmd()['mbs'].keys())
                     and rpm['name'] in mmd.get_xmd()['mbs']['rpms']):
                 mmd_rpm = mmd.get_rpm_components()[rpm['name']]
                 xmd_rpm = mmd.get_xmd()['mbs']['rpms'][rpm['name']]
@@ -172,11 +172,11 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         runtime_deps = []
         build_deps = []
         for deps in mmd.get_dependencies():
-            for dependency, streams in deps.get_requires().items():
+            for dependency, streams in list(deps.get_requires().items()):
                 for stream in streams.get():
                     runtime_deps.append(
                         {'dependency': dependency, 'stream': stream})
-            for dependency, streams in deps.get_buildrequires().items():
+            for dependency, streams in list(deps.get_buildrequires().items()):
                 for stream in streams.get():
                     build_deps.append(
                         {'dependency': dependency, 'stream': stream})

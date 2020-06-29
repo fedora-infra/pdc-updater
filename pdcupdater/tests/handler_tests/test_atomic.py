@@ -16,7 +16,7 @@ class TestAtomicUpdate(BaseHandlerTest):
         idx = '2016-ab90226c-5fc3-48f8-83de-821e4fe0ade4'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, False)
+        self.assertEqual(result, False)
 
     def test_can_handle_atomic_update_push(self):
         msg = {
@@ -29,7 +29,7 @@ class TestAtomicUpdate(BaseHandlerTest):
             },
         }
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     @mock_pdc
     def test_handle_a_push(self, pdc):
@@ -45,5 +45,5 @@ class TestAtomicUpdate(BaseHandlerTest):
         self.handler.handle(pdc, msg)
 
         # Check number of groups
-        self.assertEquals(len(pdc.calls['component-group-types']), 4)
-        self.assertEquals(len(pdc.calls['component-groups']), 8)
+        self.assertEqual(len(pdc.calls['component-group-types']), 4)
+        self.assertEqual(len(pdc.calls['component-groups']), 8)

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import logging
 import logging.config
 import sys
@@ -77,80 +79,77 @@ def audit():
 
 def _print_audit_report(results, verbose):
     fail = False
-    for key, values in results.items():
+    for key, values in list(results.items()):
         present, absent = values
         fail = fail or present or absent
 
     if not fail:
-        print "Everything seems to be OK."
+        print("Everything seems to be OK.")
     else:
-        print "WARNING - audit script detected something is wrong."
+        print("WARNING - audit script detected something is wrong.")
 
-    print
-    print "Summary"
-    print "======="
-    print
+    print("\nSummary")
+    print("=======\n")
 
-    for key, values in results.items():
+    for key, values in list(results.items()):
         present, absent = values
         if not present and not absent:
-            print "- [x]", key
+            print(( "- [x]", key))
         else:
-            print "- [!]", key
-            print "     ", len(present), "extra entries in PDC unaccounted for"
-            print "     ", len(absent), "entries absent from PDC"
+            print(("- [!]", key))
+            print(("     ", len(present), "extra entries in PDC unaccounted for"))
+            print(("     ", len(absent), "entries absent from PDC"))
 
-    print
-    print "Details"
-    print "======="
+    print("\nDetails")
+    print("=======")
 
     limit = 100
-    for key, values in results.items():
+    for key, values in list(results.items()):
         present, absent = values
         if not present and not absent:
             continue
 
-        print
-        print key
-        print "-" * len(key)
-        print
+        print()
+        print(key)
+        print(("-" * len(key)))
+        print()
 
         if not present:
-            print "No extra entries in PDC that do not appear in the source."
+            print("No extra entries in PDC that do not appear in the source.")
         else:
-            print "Values present in PDC but missing from the source:"
-            print
+            print("Values present in PDC but missing from the source:")
+            print()
             if verbose or len(present) < limit:
                 for value in present:
-                    print "-", value
+                    print(("-", value))
                     if isinstance(present, dict):
-                        print " ", present[value]
+                        print((" ", present[value]))
             else:
                 present = list(present)
                 for value in present[:limit]:
-                    print "-", value
+                    print(("-", value))
                     if isinstance(present, dict):
-                        print " ", present[value]
-                print "- (plus %i more... truncated.)" % (len(present) - limit)
-        print
+                        print((" ", present[value]))
+                print(("- (plus %i more... truncated.)" % (len(present) - limit)))
+        print()
 
         if not absent:
-            print "No entries found in the source to be absent from from PDC."
+            print("No entries found in the source to be absent from from PDC.")
         else:
-            print "Values absent from PDC but present in the source:"
-            print
+            print("Values absent from PDC but present in the source:")
+            print()
             if verbose or len(absent) < limit:
                 for value in absent:
-                    print "-", value
+                    print("-", value)
                     if isinstance(absent, dict):
-                        print " ", absent[value]
+                        print(" ", absent[value])
             else:
                 absent = list(absent)
                 for value in absent[:limit]:
-                    print "-", value
+                    print("-", value)
                     if isinstance(absent, dict):
-                        print " ", absent[value]
-                print "- (plus %i more... truncated.)" % (len(absent) - limit)
+                        print(" ", absent[value])
+                print("- (plus %i more... truncated.)" % (len(absent) - limit))
 
     if not fail:
         return 0

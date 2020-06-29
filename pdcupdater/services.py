@@ -6,6 +6,7 @@ import requests
 
 import pdcupdater.handlers.compose
 import pdcupdater.utils
+from functools import reduce
 
 log = logging.getLogger(__name__)
 
@@ -120,7 +121,7 @@ def koji_yield_rpm_requires(url, nvra):
         rpm.RPMSENSE_GREATER: '>',
         rpm.RPMSENSE_EQUAL: '=',
     }
-    relevant_flags = reduce(operator.ior, header_lookup.keys())
+    relevant_flags = reduce(operator.ior, list(header_lookup.keys()))
 
     # Query koji and step over all the deps listed in the raw rpm headers.
     deps = session.getRPMDeps(nvra, koji.DEP_REQUIRE)
@@ -248,4 +249,4 @@ if __name__ == '__main__':
     composes = old_composes('https://kojipkgs.fedoraproject.org/compose/')
     composes = list(composes)
     for compose in composes:
-        print compose
+        print(compose)

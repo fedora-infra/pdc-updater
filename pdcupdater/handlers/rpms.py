@@ -107,7 +107,7 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         }
 
         # Flatten into a list and augment the koji dict with tag info.
-        for tag, rpms in koji_rpms.items():
+        for tag, rpms in list(koji_rpms.items()):
             yield [
                 dict(
                     name=rpm['name'],

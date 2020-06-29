@@ -114,8 +114,8 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
                 # Construct and yield a three-tuple result.
                 keys = ('name', 'release')
-                parent = dict(zip(keys, [entry['from_component'][key] for key in keys]))
-                child = dict(zip(keys, [entry['to_component'][key] for key in keys]))
+                parent = dict(list(zip(keys, [entry['from_component'][key] for key in keys])))
+                child = dict(list(zip(keys, [entry['to_component'][key] for key in keys])))
                 yield parent, relationship_type, child
 
     def handle(self, pdc, msg):
@@ -154,7 +154,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
             by_parent[parent_name].add((relationship, child_name,))
 
         # Finally, iterate over all those, now grouped by parent_name
-        for parent_name, koji_relationships in by_parent.items():
+        for parent_name, koji_relationships in list(by_parent.items()):
             # TODO -- pass in global_component_name to this function?
             parent = pdcupdater.utils.ensure_release_component_exists(
                 pdc, release_id, parent_name, type=self.parent_type)

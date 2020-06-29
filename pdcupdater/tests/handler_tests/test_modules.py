@@ -217,7 +217,7 @@ class TestModuleStateChange(BaseHandlerTest):
         # Make sure the PATCH was sent on the module
         endpoint = 'unreleasedvariants/testmodule:master:20180123171544'
         self.assertEqual(pdc.calls[endpoint][0][0], 'PATCH')
-        self.assertEqual(pdc.calls[endpoint][0][1].keys(), ['koji_tag'])
+        self.assertEqual(list(pdc.calls[endpoint][0][1].keys()), ['koji_tag'])
 
     @mock.patch('pdcupdater.services.koji_rpms_in_tag')
     @mock.patch(HANDLER_PATH + '._get_modulemd_by_mbs_id')
@@ -317,4 +317,4 @@ class TestModuleStateChange(BaseHandlerTest):
         # Make sure the PATCH was sent on the module
         endpoint = 'modules/testmodule:master:20180123171544:c2c572ec'
         self.assertEqual(pdc.calls[endpoint][0][0], 'PATCH')
-        self.assertEqual(pdc.calls[endpoint][0][1].keys(), ['koji_tag'])
+        self.assertEqual(list(pdc.calls[endpoint][0][1].keys()), ['koji_tag'])

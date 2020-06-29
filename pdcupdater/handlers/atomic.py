@@ -110,7 +110,7 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
 
         # Associate the two by release and normalize
         present, absent = {}, {}
-        for release in set(git_groups.keys() + pdc_groups.keys()):
+        for release in set(list(git_groups.keys()) + list(pdc_groups.keys())):
             # Convert each group to a set
             left = set(git_groups.get(release, []))
             right = set(pdc_groups.get(release, []))

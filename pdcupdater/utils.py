@@ -65,7 +65,7 @@ def ensure_component_group_exists(pdc, component_group):
         body = e.response.json()
         if 'non_field_errors' not in body and 'detail' not in body:
             raise
-        message = u'The fields group_type, release, description must make a unique set.'
+        message = 'The fields group_type, release, description must make a unique set.'
         if body.get('non_field_errors') != [message] \
                 and body.get('detail') != [message]:
             raise
@@ -82,7 +82,7 @@ def ensure_component_group_type_exists(pdc, component_group_type):
         body = e.response.json()
         if not 'name' in body:
             raise
-        if body['name'] != [u"This field must be unique."]:
+        if body['name'] != ["This field must be unique."]:
             raise
 
 
@@ -134,10 +134,10 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
             raise
         allowable = [
             # This is the old error string
-            u'The fields release, name must make a unique set.',
+            'The fields release, name must make a unique set.',
             # This is the new error string, after
             # https://github.com/product-definition-center/product-definition-center/pull/422
-            u'The fields release, name, type must make a unique set.',
+            'The fields release, name, type must make a unique set.',
         ]
         # The old error message location
         if 'non_field_errors' in body and not any(
@@ -184,7 +184,7 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
         if 'non_field_errors' not in body and 'detail' not in body:
             raise
 
-        message = u'The fields relation_type, from_component, to_component must make a unique set.'
+        message = 'The fields relation_type, from_component, to_component must make a unique set.'
         if body.get('non_field_errors') != [message] \
                 and body.get('detail') != [message]:
             raise
@@ -206,7 +206,7 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
 
     endpoint = pdc['release-component-relationships']._
 
-    for relationship_type, children in relationship_lookup.items():
+    for relationship_type, children in list(relationship_lookup.items()):
         # Check to see if all the relations are all already there, first.
         query_kwargs = dict(
             from_component_name=parent['name'],
@@ -239,7 +239,7 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
 def _chunked_iter(iterable, N):
     """ Yield successive N-sized chunks from an iterable. """
     iterable = list(iterable)  # Just to make slicing simpler.
-    for i in xrange(0, len(iterable), N):
+    for i in range(0, len(iterable), N):
         yield iterable[i: i + N]
 
 
@@ -288,7 +288,7 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
         for key in relationship_types
     ])
 
-    for relationship_type, children in relationship_lookup.items():
+    for relationship_type, children in list(relationship_lookup.items()):
         # Check to see if all the relations are all already there, first.
         endpoint = pdc['release-component-relationships']._
         query_kwargs = dict(
