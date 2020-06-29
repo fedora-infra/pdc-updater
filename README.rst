@@ -22,18 +22,18 @@ Try running the test suite::
 
     $ dnf install libyaml-devel
     $ pip install -r test-requirements.txt
-    $ nosetests
+    $ pytest
 
 Check test suite coverage::
 
     $ pip install coverage
-    $ nosetests --with-coverage --cover-package=pdcupdater
+    $ pytest --with-coverage --cov=pdcupdater
 
 If the test suite is failing, one thing to try is to remove the VCR cassette
 data before re-running the tests::
 
     $ rm -rf pdcupdater/tests/vcr-request-data/
-    $ nosetests
+    $ pytest
 
 Getting an authentication token
 -------------------------------
