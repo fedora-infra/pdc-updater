@@ -20,11 +20,11 @@ log = logging.getLogger(__name__)
 class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
     """ When the state of a module changes. """
 
-    processing_states = set(('done', 'ready'))
-    other_states = set(('wait', 'build'))
-    irrelevant_states = set(('init',))
+    processing_states = {'done', 'ready'}
+    other_states = {'wait', 'build'}
+    irrelevant_states = {'init'}
     relevant_states = processing_states.union(other_states)
-    error_states = set(('failed',))
+    error_states = {'failed'}
     valid_states = relevant_states.union(error_states).union(irrelevant_states)
 
     def __init__(self, *args, **kwargs):
@@ -96,14 +96,14 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         rpms = []
         # Flatten into a list and augment the koji dict with tag info.
         for rpm in koji_rpms:
-            data = dict(
-                name=rpm['name'],
-                version=rpm['version'],
-                release=rpm['release'],
-                epoch=rpm['epoch'] or 0,
-                arch=rpm['arch'],
-                srpm_name=rpm['srpm_name'],
-            )
+            data = {
+                'name': rpm['name'],
+                'version': rpm['version'],
+                'release': rpm['release'],
+                'epoch': rpm['epoch'] or 0,
+                'arch': rpm['arch'],
+                'srpm_name': rpm['srpm_name'],
+            }
 
             if 'srpm_nevra' in rpm and rpm['arch'] != 'src':
                 data['srpm_nevra'] = rpm['srpm_nevra']
@@ -111,8 +111,8 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             # For SRPM packages, include the hash and branch from which is
             # has been built.
             if (rpm['arch'] == 'src'
-                    and rpm['name'] in list(mmd.get_rpm_components().keys())
-                    and 'rpms' in list(mmd.get_xmd()['mbs'].keys())
+                    and rpm['name'] in mmd.get_rpm_components()
+                    and 'rpms' in mmd.get_xmd()['mbs']
                     and rpm['name'] in mmd.get_xmd()['mbs']['rpms']):
                 mmd_rpm = mmd.get_rpm_components()[rpm['name']]
                 xmd_rpm = mmd.get_xmd()['mbs']['rpms'][rpm['name']]
@@ -124,7 +124,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         return rpms
 
     def handle(self, pdc, msg):
-        log.debug("handle(pdc, msg=%r)" % msg)
+        log.debug("handle(pdc, msg=%r)", msg)
         body = msg['msg']
         state = body['state_name']
 
@@ -149,7 +149,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
             # At this point we can update the Koji tag from MBS
             pdc[self.pdc_api][uid]._ += {'koji_tag': body['koji_tag']}
         elif body['state_name'] == 'ready':
-            log.info("%r ready.  Patching with rpms and active=True." % uid)
+            log.info("%r ready.  Patching with rpms and active=True.", uid)
             rpms = self.get_module_rpms(pdc, module)
             pdc[self.pdc_api][uid]._ += {'active': True, 'rpms': rpms}
 
@@ -163,7 +163,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
 
     def create_module(self, pdc, body):
         """Creates a module in PDC."""
-        log.debug("create_module(pdc, body=%r)" % body)
+        log.debug("create_module(pdc, body=%r)", body)
 
         modulemd = self._get_modulemd_by_mbs_id(body['id'])
         mmd = Modulemd.Module.new_from_string(modulemd)
@@ -172,11 +172,11 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         runtime_deps = []
         build_deps = []
         for deps in mmd.get_dependencies():
-            for dependency, streams in list(deps.get_requires().items()):
+            for dependency, streams in deps.get_requires().items():
                 for stream in streams.get():
                     runtime_deps.append(
                         {'dependency': dependency, 'stream': stream})
-            for dependency, streams in list(deps.get_buildrequires().items()):
+            for dependency, streams in deps.get_buildrequires().items():
                 for stream in streams.get():
                     build_deps.append(
                         {'dependency': dependency, 'stream': stream})
@@ -217,10 +217,10 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
     def get_or_create_module(self, pdc, body):
         """Attempts to retrieve the corresponding module from PDC, or if it's
         missing, creates it."""
-        log.debug("get_or_create_module(pdc, body=%r)" % body)
+        log.debug("get_or_create_module(pdc, body=%r)", body)
 
         uid = self.get_uid(body)
-        log.info("Looking up module %r" % uid)
+        log.info("Looking up module %r", uid)
         if self.pdc_api == 'modules':
             query = {'uid': uid}
         else:
@@ -228,7 +228,7 @@ class ModuleStateChangeHandler(pdcupdater.handlers.BaseHandler):
         modules = pdc[self.pdc_api]._(page_size=-1, **query)
 
         if not modules:
-            log.info("%r not found.  Creating." % uid)  # a new module!
+            log.info("%r not found.  Creating.", uid)  # a new module!
             return self.create_module(pdc, body)
         else:
             return modules[0]

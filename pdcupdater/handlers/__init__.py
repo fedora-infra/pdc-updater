@@ -31,7 +31,8 @@ class BaseHandler(object, metaclass=abc.ABCMeta):
                 for topic in self.topic_suffixes
             ]
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def topic_suffixes(self):
         pass
 

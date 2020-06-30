@@ -30,14 +30,14 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
 
         # Ignore secondary arches for now
         if msg['msg']['instance'] != 'primary':
-            log.debug("From %r.  Skipping." % (msg['msg']['instance']))
+            log.debug("From %r.  Skipping.", msg['msg']['instance'])
             return False
 
         interesting = interesting_tags()
         tag = msg['msg']['tag']
 
         if tag not in interesting:
-            log.debug("%r not in %r.  Skipping."  % (tag, interesting))
+            log.debug("%r not in %r.  Skipping.", tag, interesting)
             return False
 
         return True
@@ -61,21 +61,21 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
             # Start with podofo-0.9.1-17.el7.ppc64.rpm
             name, version, release = rpm.rsplit('-', 2)
             release, arch, _ = release.rsplit('.', 2)
-            data = dict(
-                name=name,
-                version=version,
-                release=release,
-                arch=arch,
-                epoch=build['epoch'] or 0,
-                srpm_name=build['name'],
-                srpm_nevra=None,  # This gets overwritten below
-                linked_releases=[
+            data = {
+                'name': name,
+                'version': version,
+                'release': release,
+                'arch': arch,
+                'epoch': build['epoch'] or 0,
+                'srpm_name': build['name'],
+                'srpm_nevra': None,  # This gets overwritten below
+                'linked_releases': [
                     release_id,
                 ],
-            )
+            }
             if arch != 'src':
                 data['srpm_nevra'] = build['nvr']
-            log.info("Adding rpm %s to PDC release %s" % (rpm, release_id))
+            log.info("Adding rpm %s to PDC release %s", rpm, release_id)
             pdc['rpms']._(data)
 
     def audit(self, pdc):
@@ -84,8 +84,8 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         pdc_rpms = pdc.get_paged(pdc['rpms']._)
 
         # Normalize the lists before comparing them.
-        koji_rpms = set([json.dumps(r, sort_keys=True) for r in koji_rpms])
-        pdc_rpms = set([json.dumps(r, sort_keys=True) for r in pdc_rpms])
+        koji_rpms = {json.dumps(r, sort_keys=True) for r in koji_rpms}
+        pdc_rpms = {json.dumps(r, sort_keys=True) for r in pdc_rpms}
 
         # use set operators to determine the difference
         present = pdc_rpms - koji_rpms
@@ -96,7 +96,7 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
     def initialize(self, pdc):
         # Get a list of all rpms in koji and send it to PDC
         for batch in self._gather_koji_rpms():
-            log.info("Uploading info about %i rpms to PDC." % len(batch))
+            log.info("Uploading info about %i rpms to PDC.", len(batch))
             for entry in batch:
                 pdc['rpms']._(entry)
 
@@ -107,19 +107,19 @@ class NewRPMHandler(pdcupdater.handlers.BaseHandler):
         }
 
         # Flatten into a list and augment the koji dict with tag info.
-        for tag, rpms in list(koji_rpms.items()):
+        for tag, rpms in koji_rpms.items():
             yield [
-                dict(
-                    name=rpm['name'],
-                    version=rpm['version'],
-                    release=rpm['release'],
-                    epoch=rpm['epoch'] or 0,
-                    arch=rpm['arch'],
-                    linked_releases=[
+                {
+                    'name': rpm['name'],
+                    'version': rpm['version'],
+                    'release': rpm['release'],
+                    'epoch': rpm['epoch'] or 0,
+                    'arch': rpm['arch'],
+                    'linked_releases': [
                         tag2release(tag)[0],  # Just the release_id
                     ],
-                    srpm_name=rpm['srpm_name'],
-                    srpm_nevra=rpm['arch'] != 'src' and rpm.get('srpm_nevra') or None,
-                )
+                    'srpm_name': rpm['srpm_name'],
+                    'srpm_nevra': rpm['arch'] != 'src' and rpm.get('srpm_nevra') or None,
+                }
                 for rpm in rpms
             ]

@@ -62,8 +62,8 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         pdc_composes = pdc.get_paged(pdc['composes']._)
 
         # normalize the two lists
-        old_composes = set([idx for branch, idx, url in old_composes])
-        pdc_composes = set([c['compose_id'] for c in pdc_composes])
+        old_composes = {idx for branch, idx, url in old_composes}
+        pdc_composes = {c['compose_id'] for c in pdc_composes}
 
         # use set operators to determine the difference
         present = pdc_composes - old_composes
@@ -85,10 +85,10 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
                 self._import_compose(pdc, compose_id, url)
             except Exception as e:
                 if getattr(e, 'response', None):
-                    log.exception("Failed to import %r - %r %r" % (
-                        url, e.response.url, e.response.text))
+                    log.exception("Failed to import %r - %r %r",
+                                  url, e.response.url, e.response.text)
                 else:
-                    log.exception("Failed to import %r" % url)
+                    log.exception("Failed to import %r", url)
 
 
     @pdcupdater.utils.with_ridiculous_timeout
@@ -98,23 +98,23 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         url = base + '/composeinfo.json'
         response = session.get(url)
         if not bool(response):
-            raise IOError("Failed to get %r: %r" % (url, response))
+            raise IOError(f"Failed to get {url!r}: {response!r}")
         composeinfo = response.json()
 
         # Before we waste any more time pulling down 100MB files from koji and
         # POSTing them back to PDC, let's check to see if we already know about
         # this compose.
         compose_id = composeinfo['payload']['compose']['id']
-        log.info("Importing compose %r" % compose_id)
+        log.info("Importing compose %r", compose_id)
         if pdcupdater.utils.compose_exists(pdc, compose_id):
-            log.warn("%r already exists in PDC." % compose_id)
+            log.warn("%r already exists in PDC.", compose_id)
             return
 
         # OK, go ahead and pull down these gigantic files.
         url = base + '/images.json'
         response = session.get(url)
         if not bool(response):
-            raise IOError("Failed to get %r: %r" % (url, response))
+            raise IOError(f"Failed to get {url!r}: {response!r}")
         images = response.json()
 
         url = base + '/rpms.json'
@@ -123,11 +123,11 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
         if response.status_code == 404:
             # Not all composes have rpms.  In particular, atomic ones.
             # https://github.com/fedora-infra/pdc-updater/issues/11
-            log.warn('Found no rpms.json file at %r' % r)
+            log.warn('Found no rpms.json file at %r', r)
             rpms = None
         elif not bool(response):
             # Something other than a 404 means real failure, so complain.
-            raise IOError("Failed to get %r: %r" % (url, response))
+            raise IOError(f"Failed to get {url!r}: {response!r}")
         else:
             rpms = response.json()
 
@@ -146,16 +146,16 @@ class NewComposeHandler(pdcupdater.handlers.BaseHandler):
 
         # https://github.com/product-definition-center/product-definition-center/issues/228
         # https://pdc.fedoraproject.org/rest_api/v1/compose-images/
-        pdc['compose-images']._(dict(
-            release_id=release_id,
-            composeinfo=composeinfo,
-            image_manifest=images,
-        ))
+        pdc['compose-images']._({
+            'release_id': release_id,
+            'composeinfo': composeinfo,
+            'image_manifest': images,
+        })
 
         # https://pdc.fedoraproject.org/rest_api/v1/compose-rpms/
         if rpms:
-            pdc['compose-rpms']._(dict(
-                release_id=release_id,
-                composeinfo=composeinfo,
-                rpm_manifest=rpms,
-            ))
+            pdc['compose-rpms']._({
+                'release_id': release_id,
+                'composeinfo': composeinfo,
+                'rpm_manifest': rpms,
+            })

@@ -29,10 +29,10 @@ class TestNewPerson(BaseHandlerTest):
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
             'persons': [
-                ('POST', dict(
-                    username='alvicler',
-                    email='alvicler@fedoraproject.org',
-                )),
+                ('POST', {
+                    'username': 'alvicler',
+                    'email': 'alvicler@fedoraproject.org',
+                }),
             ],
         })
 
@@ -51,14 +51,14 @@ class TestNewPerson(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'persons': [
-                ('POST', dict(
-                    username='ralph',
-                    email='ralph@fedoraproject.org',
-                )),
-                ('POST', dict(
-                    username='lmacken',
-                    email='lmacken@fedoraproject.org',
-                )),
+                ('POST', {
+                    'username': 'ralph',
+                    'email': 'ralph@fedoraproject.org',
+                }),
+                ('POST', {
+                    'username': 'lmacken',
+                    'email': 'lmacken@fedoraproject.org',
+                }),
             ],
         })
 
@@ -104,7 +104,7 @@ class TestNewPerson(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['lmacken']))
+        self.assertSetEqual(present, {'lmacken'})
         self.assertSetEqual(absent, set())
 
     @mock_pdc
@@ -129,7 +129,7 @@ class TestNewPerson(BaseHandlerTest):
 
         # Check the results.
         self.assertSetEqual(present, set())
-        self.assertSetEqual(absent, set(['toshio']))
+        self.assertSetEqual(absent, {'toshio'})
 
     @mock_pdc
     @mock.patch('pdcupdater.services.fas_persons')
@@ -150,5 +150,5 @@ class TestNewPerson(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['lmacken', 'ralph']))
-        self.assertSetEqual(absent, set(['toshio']))
+        self.assertSetEqual(present, {'lmacken', 'ralph'})
+        self.assertSetEqual(absent, {'toshio'})

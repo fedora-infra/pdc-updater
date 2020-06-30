@@ -65,7 +65,7 @@ class TestInclusionDepIngestion(BaseHandlerTest):
             'release-components',
             'global-components',
         ])
-        self.assertEqual(sorted(pdc.calls.keys()), expected_keys)
+        self.assertEqual(sorted(pdc.calls), expected_keys)
 
         self.assertEqual(len(pdc.calls['global-components']), 1)
         self.assertEqual(len(pdc.calls['release-components']), 1)
@@ -194,7 +194,7 @@ class TestInclusionDepIngestion(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([]))
-        self.assertSetEqual(absent, set([
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, {
             'cockpit/fedora-24-updates ContainerIncludesRPM guake/fedora-24-updates',
-        ]))
+        })

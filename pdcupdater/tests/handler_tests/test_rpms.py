@@ -342,7 +342,7 @@ class TestNewRPM(BaseHandlerTest):
 
         # Check the results.
         # We removed a build from koji, so it is erroneously "present" in PDC
-        self.assertSetEqual(present, set([json.dumps({
+        self.assertSetEqual(present, {json.dumps({
             "arch": "noarch",
             "epoch": 0,
             "linked_releases": [
@@ -353,7 +353,7 @@ class TestNewRPM(BaseHandlerTest):
             "release": "1.el7",
             "srpm_name": "rubygem-jmespath",
             "srpm_nevra": "rubygem-jmespath-1.1.3-1.el7",
-        }, sort_keys=True)]))
+        }, sort_keys=True)})
         self.assertSetEqual(absent, set())
 
     @mock_pdc
@@ -375,7 +375,7 @@ class TestNewRPM(BaseHandlerTest):
         # Check the results.
         self.assertSetEqual(present, set())
         # We added an extra koji build, so it is "absent" from PDC.
-        self.assertSetEqual(absent, set([json.dumps({
+        self.assertSetEqual(absent, {json.dumps({
             "arch": "noarch",
             "epoch": 0,
             "linked_releases": [
@@ -386,4 +386,4 @@ class TestNewRPM(BaseHandlerTest):
             "release": "1.fc24",
             "srpm_name": "rubygem-jmespath",
             "srpm_nevra": "rubygem-jmespath-1.1.3-1.fc24",
-        }, sort_keys=True)]))
+        }, sort_keys=True)})

@@ -56,12 +56,12 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
                 branch = 'f' + release['version']
 
             # Go, get, and parse the data
-            params = dict(h=branch)
-            filename = 'fedora-%s.json' % self.group_type
+            params = {'h': branch}
+            filename = f'fedora-{self.group_type}.json'
             url = self.git_url + filename
             response = requests.get(url, params=params)
             if not bool(response):
-                log.warn("Failed to get %r: %r" % (response.url, response))
+                log.warn("Failed to get %r: %r", response.url, response)
                 continue
             data = response.json()
 
@@ -77,10 +77,7 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
             yield {
                 'group_type': self.group_type,
                 'release': release_id,
-                'description': 'Deps for %s %s' % (
-                    self.group_type,
-                    self.git_url,
-                ),
+                'description': f'Deps for {self.group_type} {self.git_url}',
                 'components': [{
                     'release': release_id,
                     'name': package,
@@ -101,16 +98,18 @@ class AtomicComponentGroupHandler(pdcupdater.handlers.BaseHandler):
         ]
 
         # Invert the lists of dicts into dicts of lists
-        invert = lambda collection: dict([(
-            group['release'],
-            [component['name'] for component in group['components']]
-        ) for group in collection ])
+        invert = lambda collection: {
+            group['release']: [
+                component['name'] for component in group['components']
+            ]
+            for group in collection
+        }
         git_groups = invert(git_groups)
         pdc_groups = invert(pdc_groups)
 
         # Associate the two by release and normalize
         present, absent = {}, {}
-        for release in set(list(git_groups.keys()) + list(pdc_groups.keys())):
+        for release in set(git_groups) | set(pdc_groups):
             # Convert each group to a set
             left = set(git_groups.get(release, []))
             right = set(pdc_groups.get(release, []))

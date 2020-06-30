@@ -48,7 +48,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         required = ('managed_types', 'parent_type', 'child_type',)
         for attr in required:
             if not getattr(self, attr, None):
-                raise AttributeError("%r is required on %r" % (attr, self))
+                raise AttributeError(f"{attr!r} is required on {self!r}")
 
         super(BaseKojiDepChainHandler, self).__init__(*args, **kwargs)
         self.koji_url = self.config['pdcupdater.koji_url']
@@ -86,14 +86,14 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         # Ignore secondary arches for now
         instance = msg.get('msg', {}).get('instance', 'primary')
         if instance != 'primary':
-            log.debug("From %r.  Skipping." % instance)
+            log.debug("From %r.  Skipping.", instance)
             return False
 
         interesting = self.interesting_tags(pdc)
         tag = self.extract_tag(msg)
 
         if tag not in interesting:
-            log.debug("%r not in %r.  Skipping."  % (tag, interesting))
+            log.debug("%r not in %r.  Skipping.", tag, interesting)
             return False
 
         return True
@@ -114,8 +114,8 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
                 # Construct and yield a three-tuple result.
                 keys = ('name', 'release')
-                parent = dict(list(zip(keys, [entry['from_component'][key] for key in keys])))
-                child = dict(list(zip(keys, [entry['to_component'][key] for key in keys])))
+                parent = {key: entry['from_component'][key] for key in keys}
+                child = {key: entry['to_component'][key] for key in keys}
                 yield parent, relationship_type, child
 
     def handle(self, pdc, msg):
@@ -144,7 +144,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         # all the relationships from koji, then find all the relationships from
         # pdc.  We'll study the intersection between the two sets and act on
         # the discrepancies.
-        log.info("Gathering relationships from koji for %r" % build_id)
+        log.info("Gathering relationships from koji for %r", build_id)
         koji_relationships = set(self._yield_koji_relationships_from_build(
             self.koji_url, build_id))
 
@@ -154,23 +154,23 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
             by_parent[parent_name].add((relationship, child_name,))
 
         # Finally, iterate over all those, now grouped by parent_name
-        for parent_name, koji_relationships in list(by_parent.items()):
+        for parent_name, koji_relationships in by_parent.items():
             # TODO -- pass in global_component_name to this function?
             parent = pdcupdater.utils.ensure_release_component_exists(
                 pdc, release_id, parent_name, type=self.parent_type)
 
-            log.info("Gathering from pdc for %s/%s" % (parent_name, release_id))
+            log.info("Gathering from pdc for %s/%s", parent_name, release_id)
             pdc_relationships = set(self._yield_pdc_relationships_from_build(
                 pdc, parent['name'], release_id))
 
             to_be_created = koji_relationships - pdc_relationships
             to_be_deleted = pdc_relationships - koji_relationships
 
-            log.info("Issuing bulk create for %i entries" % len(to_be_created))
+            log.info("Issuing bulk create for %i entries", len(to_be_created))
             pdcupdater.utils.ensure_bulk_release_component_relationships_exists(
                 pdc, parent, to_be_created, component_type=self.child_type)
 
-            log.info("Issuing bulk delete for %i entries" % len(to_be_deleted))
+            log.info("Issuing bulk delete for %i entries", len(to_be_deleted))
             pdcupdater.utils.delete_bulk_release_component_relationships(
                 pdc, parent, to_be_deleted)
 
@@ -179,7 +179,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         tags = self.interesting_tags(pdc)
 
         for tag in tags:
-            log.info("Starting audit of tag %r of %r." % (tag, tags))
+            log.info("Starting audit of tag %r of %r.", tag, tags)
             if self.pdc_tag_mapping:
                 release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
             else:
@@ -191,13 +191,13 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
 
             # normalize the two lists, and smash items into hashable strings.
             def _format(parent, relationship_type, child):
-                return "%s/%s %s %s/%s" % (
-                    parent['name'], parent['release'],
-                    relationship_type,
-                    child['name'], child['release'],
+                return (
+                    f"{parent['name']}/{parent['release']} "
+                    f"{relationship_type} "
+                    f"{child['name']}/{child['release']}"
                 )
-            koji_relationships = set([_format(*x) for x in koji_relationships])
-            pdc_relationships = set([_format(*x) for x in pdc_relationships])
+            koji_relationships = {_format(*x) for x in koji_relationships}
+            pdc_relationships = {_format(*x) for x in pdc_relationships}
 
             # use set operators to determine the difference
             present = present.union(pdc_relationships - koji_relationships)
@@ -210,7 +210,7 @@ class BaseKojiDepChainHandler(pdcupdater.handlers.BaseHandler):
         tags.reverse()
 
         for tag in tags:
-            log.info("Starting initialize of tag %r of %r." % (tag, tags))
+            log.info("Starting initialize of tag %r of %r.", tag, tags)
             if self.pdc_tag_mapping:
                 release_id, release = pdcupdater.utils.tag2release(tag, pdc=pdc)
             else:

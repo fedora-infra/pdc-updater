@@ -147,7 +147,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'guake',
-        #'bugzilla_component': u'guake',
+        #'bugzilla_component': 'guake',
         'dist_git_branch': 'master',
         'global_component': 'guake',
         'name': 'guake',
@@ -157,7 +157,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'guake',
-        #'bugzilla_component': u'guake',
+        #'bugzilla_component': 'guake',
         'dist_git_branch': 'el6',
         'global_component': 'guake',
         'name': 'guake',
@@ -167,7 +167,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'guake',
-        #'bugzilla_component': u'guake',
+        #'bugzilla_component': 'guake',
         'dist_git_branch': 'f20',
         'global_component': 'guake',
         'name': 'guake',
@@ -177,7 +177,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'guake',
-        #'bugzilla_component': u'guake',
+        #'bugzilla_component': 'guake',
         'dist_git_branch': 'epel7',
         'global_component': 'guake',
         'name': 'guake',
@@ -187,7 +187,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'guake',
-        #'bugzilla_component': u'guake',
+        #'bugzilla_component': 'guake',
         'dist_git_branch': 'f21',
         'global_component': 'guake',
         'name': 'guake',
@@ -197,7 +197,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'guake',
-        #'bugzilla_component': u'guake',
+        #'bugzilla_component': 'guake',
         'dist_git_branch': 'f22',
         'global_component': 'guake',
         'name': 'guake',
@@ -207,7 +207,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'guake',
-        #'bugzilla_component': u'guake',
+        #'bugzilla_component': 'guake',
         'dist_git_branch': 'f23',
         'global_component': 'guake',
         'name': 'guake',
@@ -217,7 +217,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'geany',
-        #'bugzilla_component': u'geany',
+        #'bugzilla_component': 'geany',
         'dist_git_branch': 'master',
         'global_component': 'geany',
         'name': 'geany',
@@ -227,7 +227,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'geany',
-        #'bugzilla_component': u'geany',
+        #'bugzilla_component': 'geany',
         'dist_git_branch': 'el6',
         'global_component': 'geany',
         'name': 'geany',
@@ -237,7 +237,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'geany',
-        #'bugzilla_component': u'geany',
+        #'bugzilla_component': 'geany',
         'dist_git_branch': 'epel7',
         'global_component': 'geany',
         'name': 'geany',
@@ -247,7 +247,7 @@ PDC_DATA = [
     {
         'active': True,
         'brew_package': 'geany',
-        #'bugzilla_component': u'geany',
+        #'bugzilla_component': 'geany',
         'dist_git_branch': 'f23',
         'global_component': 'geany',
         'name': 'geany',
@@ -293,22 +293,22 @@ class TestNewPackage(BaseHandlerTest):
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
             'releases/fedora-23-updates': [
-                ('GET', dict()),
+                ('GET', {}),
             ],
             'global-components': [
-                ('GET', dict(name='perl-Lingua-Translit')),
+                ('GET', {'name': 'perl-Lingua-Translit'}),
             ],
             'release-components': [
-                ('POST', dict(
-                    name='perl-Lingua-Translit',
-                    global_component='perl-Lingua-Translit',
-                    #bugzilla_component=u'perl-Lingua-Translit',
-                    brew_package='perl-Lingua-Translit',
-                    release='fedora-23-updates',
-                    dist_git_branch='f23',
-                    type='rpm',
-                    active=True,
-                )),
+                ('POST', {
+                    'name': 'perl-Lingua-Translit',
+                    'global_component': 'perl-Lingua-Translit',
+                    # 'bugzilla_component': 'perl-Lingua-Translit',
+                    'brew_package': 'perl-Lingua-Translit',
+                    'release': 'fedora-23-updates',
+                    'dist_git_branch': 'f23',
+                    'type': 'rpm',
+                    'active': True,
+                }),
             ],
         })
 
@@ -350,7 +350,7 @@ class TestNewPackage(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['guake']))
+        self.assertSetEqual(present, {'guake'})
         self.assertSetEqual(absent, set())
 
     @mock_pdc
@@ -379,7 +379,7 @@ class TestNewPackage(BaseHandlerTest):
 
         # Check the results.
         self.assertSetEqual(present, set())
-        self.assertSetEqual(absent, set(['gnome-terminal']))
+        self.assertSetEqual(absent, {'gnome-terminal'})
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')
@@ -407,8 +407,8 @@ class TestNewPackage(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['guake']))
-        self.assertSetEqual(absent, set([('gnome-terminal')]))
+        self.assertSetEqual(present, {'guake'})
+        self.assertSetEqual(absent, {'gnome-terminal'})
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')
@@ -422,12 +422,8 @@ class TestNewPackage(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'global-components': [
-                ('POST', dict(
-                    name='guake',
-                )),
-                ('POST', dict(
-                    name='geany',
-                )),
+                ('POST', {'name': 'guake'}),
+                ('POST', {'name': 'geany'}),
             ],
         })
 
@@ -455,16 +451,16 @@ class TestNewBranch(BaseHandlerTest):
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
             'release-components': [
-                ('POST', dict(
-                    name='perl-Lingua-Translit',
-                    global_component='perl-Lingua-Translit',
-                    #bugzilla_component=u'perl-Lingua-Translit',
-                    brew_package='perl-Lingua-Translit',
-                    release='fedora-24',
-                    dist_git_branch='master',
-                    type='rpm',
-                    active=True,
-                )),
+                ('POST', {
+                    'name': 'perl-Lingua-Translit',
+                    'global_component': 'perl-Lingua-Translit',
+                    # 'bugzilla_component': 'perl-Lingua-Translit',
+                    'brew_package': 'perl-Lingua-Translit',
+                    'release': 'fedora-24',
+                    'dist_git_branch': 'master',
+                    'type': 'rpm',
+                    'active': True,
+                }),
             ],
             'releases/fedora-24': [('GET', {})],
             'global-components': [('GET', {'name': 'perl-Lingua-Translit'}) ],
@@ -508,7 +504,7 @@ class TestNewBranch(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([('guake', 'fedora-24', 'master')]))
+        self.assertSetEqual(present, {('guake', 'fedora-24', 'master')})
         self.assertSetEqual(absent, set())
 
     @mock_pdc
@@ -539,7 +535,7 @@ class TestNewBranch(BaseHandlerTest):
 
         # Check the results.
         self.assertSetEqual(present, set())
-        self.assertSetEqual(absent, set([('guake', 'fedora-18-updates', 'f18')]))
+        self.assertSetEqual(absent, {('guake', 'fedora-18-updates', 'f18')})
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')
@@ -569,8 +565,8 @@ class TestNewBranch(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([('guake', 'fedora-24', 'master')]))
-        self.assertSetEqual(absent, set([('guake', 'fedora-18-updates', 'f18')]))
+        self.assertSetEqual(present, {('guake', 'fedora-24', 'master')})
+        self.assertSetEqual(absent, {('guake', 'fedora-18-updates', 'f18')})
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')

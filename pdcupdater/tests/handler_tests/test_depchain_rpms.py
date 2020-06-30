@@ -76,7 +76,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
             'release-components',
             'global-components',
         ])
-        self.assertEqual(sorted(pdc.calls.keys()), expected_keys)
+        self.assertEqual(sorted(pdc.calls), expected_keys)
 
         self.assertEqual(len(pdc.calls['global-components']), 22)
         self.assertEqual(len(pdc.calls['release-components']), 22)
@@ -173,11 +173,11 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([]))
-        self.assertSetEqual(absent, set([
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, {
             'guake/fedora-24 RPMBuildRequires buildtimelib1/fedora-24',
             'guake/fedora-24 RPMBuildRoot buildtimelib2/fedora-24',
-        ]))
+        })
 
 
 class TestRuntimeDepIngestionFedora(BaseHandlerTest):
@@ -220,8 +220,8 @@ class TestRuntimeDepIngestionFedora(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['guake/fedora-24 RPMRequires nethack/fedora-24']))
-        self.assertSetEqual(absent, set(['guake/fedora-24 RPMRequires runtimelib1/fedora-24']))
+        self.assertSetEqual(present, {'guake/fedora-24 RPMRequires nethack/fedora-24'})
+        self.assertSetEqual(absent, {'guake/fedora-24 RPMRequires runtimelib1/fedora-24'})
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
@@ -366,7 +366,7 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
             'release-components',
             'global-components',
         ])
-        self.assertEqual(sorted(pdc.calls.keys()), expected_keys)
+        self.assertEqual(sorted(pdc.calls), expected_keys)
 
         self.assertEqual(len(pdc.calls['global-components']), 1)
         self.assertEqual(len(pdc.calls['release-components']), 1)

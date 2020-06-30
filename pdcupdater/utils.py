@@ -41,7 +41,7 @@ def get_group_pk(pdc, target_group):
             return group['id']
 
     # If we can't find it, then complain.
-    raise ValueError("Could not find matching group for %r" % target_group)
+    raise ValueError(f"Could not find matching group for {target_group!r}")
 
 
 def ensure_component_group_exists(pdc, component_group):
@@ -75,7 +75,7 @@ def ensure_component_group_type_exists(pdc, component_group_type):
     """ Create a component_group-type in PDC if it doesn't already exist. """
     try:
         # Try to create it
-        pdc['component-group-types']._(dict(name=component_group_type))
+        pdc['component-group-types']._({'name': component_group_type})
     except beanbag.bbexcept.BeanBagException as e:
         if e.response.status_code != 400:
             raise
@@ -93,13 +93,11 @@ def ensure_release_exists(pdc, release_id, release):
     except beanbag.bbexcept.BeanBagException as e:
         if e.response.status_code != 404:
             raise
-        log.warn("No release %r exists.  Creating." % release_id)
+        log.warn("No release %r exists.  Creating.", release_id)
 
         release_payload = copy.copy(release)
-        release_payload.update(dict(
-            active=True,
-        ))
-        log.info("Creating release %r" % release_payload)
+        release_payload.update({'active': True})
+        log.info("Creating release %r", release_payload)
         pdc['releases']._(release_payload)
 
 
@@ -107,8 +105,8 @@ def ensure_release_exists(pdc, release_id, release):
 def ensure_global_component_exists(pdc, name):
     response = pdc['global-components']._(name=name)
     if not response['results']:
-        log.warn("No global-component %r exists.  Creating." % name)
-        pdc['global-components']._(dict(name=name))
+        log.warn("No global-component %r exists.  Creating.", name)
+        pdc['global-components']._({'name': name})
 
 
 def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
@@ -151,14 +149,17 @@ def ensure_release_component_exists(pdc, release_id, name, type='rpm'):
 
     # But if it was just that the component already existed, then go back and
     # query for what we tried to submit (return the primary key)
-    query = dict(name=name, release=release_id, type=type)
+    query = {'name': name, 'release': release_id, 'type': type}
     response = pdc['release-components']._(**query)
     if not response['count']:
-        raise IndexError("No results found for %r after submitting %r" % (
-            query, data))
+        raise IndexError(
+            f"No results found for {query!r} after submitting {data!r}"
+        )
     if response['count'] > 1:
-        raise IndexError("%i results found for %r after submitting %r" % (
-            response['count'], query, data))
+        raise IndexError(
+            f"{response['count']} results found for {query!r} after submitting"
+            f" {data!r}"
+        )
     return response['results'][0]
 
 
@@ -170,8 +171,8 @@ def ensure_release_component_relationship_exists(pdc, parent, child, type):
     try:
         # Try to create it
         data = {
-            'from_component': dict(id=parent['id']),
-            'to_component': dict(id=child['id']),
+            'from_component': {'id': parent['id']},
+            'to_component': {'id': child['id']},
             # This may not exist, and we have no API to create it.  It must be
             # entered by an admin in the admin panel beforehand.
             'type': type,
@@ -198,21 +199,21 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
 
     # Split things up by relationship type into a lookup keyed by type
     relationships = list(relationships)
-    relationship_types = set([relation for relation, child in relationships])
-    relationship_lookup = dict([
-        (key, [child for relation, child in relationships if relation == key])
+    relationship_types = {relation for relation, child in relationships}
+    relationship_lookup = {
+        key: [child for relation, child in relationships if relation == key]
         for key in relationship_types
-    ])
+    }
 
     endpoint = pdc['release-component-relationships']._
 
-    for relationship_type, children in list(relationship_lookup.items()):
+    for relationship_type, children in relationship_lookup.items():
         # Check to see if all the relations are all already there, first.
-        query_kwargs = dict(
-            from_component_name=parent['name'],
-            from_component_release=release,
-            type=relationship_type,
-        )
+        query_kwargs = {
+            'from_component_name': parent['name'],
+            'from_component_release': release,
+            'type': relationship_type,
+        }
         response = _chunked_query(
             pdc, endpoint, query_kwargs,
             key='to_component_name',
@@ -224,15 +225,16 @@ def delete_bulk_release_component_relationships(pdc, parent, relationships):
 
         # Nobody can ask us to delete things that aren't there.
         # That's unreasonable.  Sanity check.
-        message = "%r != %r" % (len(response), len(children))
-        assert len(response) == len(children), message
+        assert len(response) == len(children), (
+            f"{len(response)} != {len(children)}"
+        )
 
         # Find the primary keys for all of these...
         query = pdc.get_paged(endpoint, **query_kwargs)
         identifiers = [relation['id'] for relation in query]
 
         # Issue the DELETE request for those found primary keys.
-        log.info("Pruning %i old relationships." % len(identifiers))
+        log.info("Pruning %i old relationships.", len(identifiers))
         endpoint("DELETE", identifiers)
 
 
@@ -282,30 +284,30 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
 
     # Split things up by relationship type into a lookup keyed by type
     relationships = list(relationships)
-    relationship_types = set([relation for relation, child in relationships])
-    relationship_lookup = dict([
-        (key, set([child for relation, child in relationships if relation == key]))
+    relationship_types = {relation for relation, child in relationships}
+    relationship_lookup = {
+        key: {child for relation, child in relationships if relation == key}
         for key in relationship_types
-    ])
+    }
 
-    for relationship_type, children in list(relationship_lookup.items()):
+    for relationship_type, children in relationship_lookup.items():
         # Check to see if all the relations are all already there, first.
         endpoint = pdc['release-component-relationships']._
-        query_kwargs = dict(
-            from_component_name=parent['name'],
-            from_component_release=release,
-            type=relationship_type,
-        )
+        query_kwargs = {
+            'from_component_name': parent['name'],
+            'from_component_release': release,
+            'type': relationship_type,
+        }
         count = _chunked_query(
             pdc, endpoint, query_kwargs,
             key='to_component_name', iterable=children,
             count=True)
 
         log.info("Of %i needed %s relationships for %s in koji, found %i in PDC."
-                 "  (%i are missing)" % (
-                     len(children), relationship_type,
-                     parent['name'], count,
-                     len(children) - count))
+                 "  (%i are missing)",
+                 len(children), relationship_type,
+                 parent['name'], count,
+                 len(children) - count)
 
         if count != len(children):
             # If they weren't all there already, figure out which ones are missing.
@@ -322,12 +324,16 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
                 pdc, release, absent_names, component_type=component_type))
 
             #if len(absent) != len(absent_names):
-            #    raise ValueError("Error1 creating components: %i != %i" % (
-            #        len(absent), len(absent_names)))
+            #    raise ValueError(
+            #        f"Error1 creating components: {len(absent)} !="
+            #        f" {len(absent_names)}"
+            #    )
 
             #if len(absent) != len(children) - count:
-            #    raise ValueError("Error2 creating components: %i != %i" % (
-            #        len(absent), len(children) - count))
+            #    raise ValueError(
+            #        f"Error2 creating components: {len(absent)} !="
+            #        f" {len(children) - count}"
+            #    )
 
             # Make sure this guy exists and has a primary key id.
             if 'id' not in parent:
@@ -335,11 +341,11 @@ def ensure_bulk_release_component_relationships_exists(pdc, parent,
                     pdc, release, parent['name'], component_type)
 
             # Now issue a bulk create the missing ones.
-            pdc['release-component-relationships']._([dict(
-                from_component=dict(id=parent['id']),
-                to_component=dict(id=child['id']),
-                type=relationship_type,
-            ) for child in absent])
+            pdc['release-component-relationships']._([{
+                'from_component': {'id': parent['id']},
+                'to_component': {'id': child['id']},
+                'type': relationship_type,
+            } for child in absent])
 
 
 def ensure_bulk_release_components_exist(pdc, release, components,
@@ -347,7 +353,7 @@ def ensure_bulk_release_components_exist(pdc, release, components,
 
     ensure_bulk_global_components_exist(pdc, components)
 
-    query_kwargs = dict(release=release, type=component_type)
+    query_kwargs = {'release': release, 'type': component_type}
     endpoint = pdc['release-components']._
     count = _chunked_query(
         pdc, endpoint, query_kwargs,
@@ -364,18 +370,20 @@ def ensure_bulk_release_components_exist(pdc, release, components,
 
         ## Validate that.
         #if len(absent) != len(components) - count:
-        #    raise ValueError("Error creating components: %i != (%i - %i)" % (
-        #        len(absent), len(components), count))
+        #    raise ValueError(
+        #        f"Error creating components: {len(absent)} !="
+        #        f" ({len(components)} - {count})"
+        #    )
 
         # Now issue a bulk create the missing ones.
-        log.info("Of %i needed, %i release-components missing." % (
-            len(components), len(absent)))
-        pdc['release-components']._([dict(
-            name=name,
-            global_component=name,
-            release=release,
-            type=component_type
-        ) for name in absent])
+        log.info("Of %i needed, %i release-components missing.",
+                 len(components), len(absent))
+        pdc['release-components']._([{
+            'name': name,
+            'global_component': name,
+            'release': release,
+            'type': component_type
+        } for name in absent])
 
     # Finally, return all of the present components (with all of their primary
     # key IDs which were assigned server side.  that's why we have to query a
@@ -406,9 +414,9 @@ def ensure_bulk_global_components_exist(pdc, components):
         absent = [name for name in components if name not in present]
 
         # Now issue a bulk create the missing ones.
-        log.info("Of %i needed, %i global-components missing." % (
-            len(components), len(absent)))
-        pdc['global-components']._([dict(name=name) for name in absent])
+        log.info("Of %i needed, %i global-components missing.",
+                 len(components), len(absent))
+        pdc['global-components']._([{'name': name} for name in absent])
 
 
 def delete_release_component_relationship(pdc, parent, child, type):
@@ -424,9 +432,10 @@ def delete_release_component_relationship(pdc, parent, child, type):
         to_component_release=child['release'],
     ))
     if len(entries) != 1:
-        raise ValueError("No unique relationship found for "
-                         "%r -> %r -> %r.  Found %i." % (
-                             parent, type, child, len(entries)))
+        raise ValueError(
+            f"No unique relationship found for {parent!r} -> {type!r} ->"
+            f" {child!r}.  Found {len(entries)}."
+        )
 
     # But also, we needed the primary key in order to delete it.
     primary_key = entries[0]['id']
@@ -448,9 +457,9 @@ def compose_exists(pdc, compose_id):
 
 def get_fedmsg(idx):
     url = 'https://apps.fedoraproject.org/datagrepper/id'
-    response = session.get(url, params=dict(id=idx))
+    response = session.get(url, params={'id': idx})
     if not bool(response):
-        raise IOError("Failed to talk to %r %r" % (response.url, response))
+        raise IOError(f"Failed to talk to {response.url!r} {response!r}")
     return response.json()
 
 
@@ -469,9 +478,9 @@ def handle_message(pdc, handlers, msg, verbose=False):
     for handler in handlers:
         name = type(handler).__name__
         if not handler.can_handle(pdc, msg):
-            debug("%s could not handle %s" % (name, idx))
+            debug("%s could not handle %s", name, idx)
             continue
-        log.info("%s handling %s %s" % (name, idx, topic))
+        log.info("%s handling %s %s", name, idx, topic)
         with annotated(pdc, msg['msg_id']) as client:
             try:
                 handler.handle(client, msg)
@@ -484,9 +493,9 @@ def handle_message(pdc, handlers, msg, verbose=False):
 def bodhi_releases():
     # TODO -- get these releases from PDC, instead of from Bodhi
     url = 'https://bodhi.fedoraproject.org/releases'
-    response = session.get(url, params=dict(rows_per_page=100))
+    response = session.get(url, params={'rows_per_page': 100})
     if not bool(response):
-        raise IOError('Failed to talk to %r: %r' % (url, response))
+        raise IOError(f"'Failed to talk to {url!r} {response!r}")
     return response.json()['releases']
 
 
@@ -494,9 +503,9 @@ def bodhi_releases():
 def rawhide_tag():
     # TODO - get this tag from PDC, instead of guessing from pkgdb
     url = 'https://admin.fedoraproject.org/pkgdb/api/collections/'
-    response = session.get(url, params=dict(clt_status="Under Development"))
+    response = session.get(url, params={'clt_status': "Under Development"})
     if not bool(response):
-        raise IOError('Failed to talk to %r: %r' % (url, response))
+        raise IOError('Failed to talk to %r: %r', url, response)
     collections = response.json()['collections']
     rawhide = [c for c in collections if c['koji_name'] == 'rawhide'][0]
     return 'f' + rawhide['dist_tag'].strip('.fc')
@@ -528,8 +537,8 @@ def interesting_container_tags():
 
     tags = [tag for tag in tags if '-' not in tag]
 
-    return ['%s-docker' % tag for tag in tags] + \
-        ['%s-container' % tag for tag in tags]
+    return ([f'{tag}-docker' for tag in tags]
+            + [f'{tag}-container' for tag in tags])
 
 
 @cache.cache_on_arguments()
@@ -574,7 +583,7 @@ def subpackage2parent(package, pdc_release):
     url = url.format(repo=repo, package=package)
     response = session.get(url)
     if not bool(response):
-        log.debug("Could not talk to mdapi %r %r" % (response.url, response))
+        log.debug("Could not talk to mdapi %r %r", response.url, response)
         return package
     data = response.json()
     return data['basename']
@@ -604,11 +613,11 @@ def _tag2release_with_pdc(pdc, tag):
     ))
 
     if not releases:
-        raise ValueError("Could not find matching release for tag %r" % tag)
+        raise ValueError("Could not find matching release for tag %r", tag)
 
     if len(releases) != 1:
-        log.error("%i different releases match tag %r, %r" % (
-            len(releases), tag, releases))
+        log.error("%i different releases match tag %r, %r", len(releases), tag,
+                  releases)
 
     release = releases[0]
     return release['release_id'], release
@@ -692,8 +701,8 @@ def retry(timeout=500, interval=20, wait_on=Exception):
                 try:
                     return function(*args, **kwargs)
                 except wait_on as e:
-                    log.warn("Exception %r raised from %r.  Retry in %rs" % (
-                        e, function, interval))
+                    log.warn("Exception %r raised from %r.  Retry in %rs", e,
+                             function, interval)
                     time.sleep(interval)
         return inner
     return wrapper

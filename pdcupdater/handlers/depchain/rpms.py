@@ -55,8 +55,8 @@ class BaseRPMDepChainHandler(BaseKojiDepChainHandler):
                 return "{name}-{version}-{release}.{arch}.rpm".format(**rpm)
 
             working_set = [_format_rpm_filename(rpm) for rpm in working_set]
-            log.info("Considering build idx=%r, (%i of %i) with %r" % (
-                working_build_id, i, len(rpms), working_set))
+            log.info("Considering build idx=%r, (%i of %i) with %r",
+                     working_build_id, i, len(rpms), working_set)
 
             relationships = list(self._yield_koji_relationships_from_build(
                 self.koji_url, working_build_id, rpms=working_set))
@@ -87,16 +87,16 @@ class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
     child_type = 'rpm'
 
     def interesting_tags(self, pdc):
-        key = "pdcupdater.%s.interesting_tags" % type(self).__name__
+        key = f"pdcupdater.{type(self).__name__}.interesting_tags"
 
         if not self.config.get(key):
-            log.debug("config key %s has no value.  performing queries." % key)
+            log.debug("config key %s has no value.  performing queries.", key)
             if self.pdc_tag_mapping:
                 return pdcupdater.utils.all_tags_from_pdc(pdc)
             else:
                 return pdcupdater.utils.interesting_tags()
 
-        log.debug("using value from config key %s" % key)
+        log.debug("using value from config key %s", key)
         return self.config[key]
 
     def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
@@ -110,7 +110,7 @@ class NewRPMBuildTimeDepChainHandler(BaseRPMDepChainHandler):
         results = collections.defaultdict(set)
 
         def _get_buildroot(filename):
-            log.debug("Looking up buildtime deps in koji for %r" % filename)
+            log.debug("Looking up buildtime deps in koji for %r", filename)
             return filename, pdcupdater.services.koji_list_buildroot_for(
                 self.koji_url, filename)
 
@@ -147,16 +147,16 @@ class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
     child_type = 'rpm'
 
     def interesting_tags(self, pdc):
-        key = "pdcupdater.%s.interesting_tags" % type(self).__name__
+        key = f"pdcupdater.{type(self).__name__}.interesting_tags"
 
         if not self.config.get(key):
-            log.debug("config key %s has no value.  performing queries." % key)
+            log.debug("config key %s has no value.  performing queries.", key)
             if self.pdc_tag_mapping:
                 return pdcupdater.utils.all_tags_from_pdc(pdc)
             else:
                 return pdcupdater.utils.interesting_tags()
 
-        log.debug("using value from config key %s" % key)
+        log.debug("using value from config key %s", key)
         return self.config[key]
 
     def _yield_koji_relationships_from_build(self, koji_url, build_id, rpms=None):
@@ -169,7 +169,7 @@ class NewRPMRunTimeDepChainHandler(BaseRPMDepChainHandler):
         results = collections.defaultdict(set)
 
         def _get_requirements(filename):
-            log.debug("Looking up installtime deps in koji for %r" % filename)
+            log.debug("Looking up installtime deps in koji for %r", filename)
             return filename, pdcupdater.services.koji_yield_rpm_requires(
                 self.koji_url, filename)
 
