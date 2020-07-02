@@ -79,12 +79,12 @@ class TestRetiredComponents(BaseHandlerTest):
         idx = '2017-b1adac6d-64e9-406f-a1f4-4d3e57105649'
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
-        expected_keys = [
+        expected_keys = {
             'component-branches',
             'component-branch-slas/178020',
             'component-branch-slas/178028'
-        ]
-        self.assertEquals(pdc.calls.keys(), expected_keys)
+        }
+        self.assertEqual(set(pdc.calls), expected_keys)
 
     @mock_pdc
     def test_can_process_retire_msg_already_retired(self, pdc):
@@ -114,10 +114,10 @@ class TestRetiredComponents(BaseHandlerTest):
         idx = '2017-3f490f4d-7612-4881-80cb-e1a941d6d700'
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
-        expected_keys = [
+        expected_keys = {
             'component-branches'
-        ]
-        self.assertEquals(pdc.calls.keys(), expected_keys)
+        }
+        self.assertEqual(set(pdc.calls), expected_keys)
 
     @mock_pdc
     def test_audit(self, pdc):
@@ -174,8 +174,8 @@ class TestRetiredComponents(BaseHandlerTest):
             mock_requests_session.return_value = mock_session_rv
             present, absent = self.handler.audit(pdc)
 
-        self.assertEquals(present, set())
-        self.assertEquals(absent, set())
+        self.assertEqual(present, set())
+        self.assertEqual(absent, set())
 
 
     @mock_pdc
@@ -231,8 +231,8 @@ class TestRetiredComponents(BaseHandlerTest):
             mock_requests_session.return_value = mock_session_rv
             present, absent = self.handler.audit(pdc)
 
-        self.assertEquals(present, {'rpm/obexftp#f26'})
-        self.assertEquals(absent, set())
+        self.assertEqual(present, {'rpm/obexftp#f26'})
+        self.assertEqual(absent, set())
 
     @mock_pdc
     def test_audit_retired_in_git_not_pdc(self, pdc):
@@ -287,8 +287,8 @@ class TestRetiredComponents(BaseHandlerTest):
             mock_requests_session.return_value = mock_session_rv
             present, absent = self.handler.audit(pdc)
 
-        self.assertEquals(present, set())
-        self.assertEquals(absent, {'rpm/obexftp#f26', 'module/python#f26'})
+        self.assertEqual(present, set())
+        self.assertEqual(absent, {'rpm/obexftp#f26', 'module/python#f26'})
 
     @mock_pdc
     def test_initialize(self, pdc):

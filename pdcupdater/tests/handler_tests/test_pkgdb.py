@@ -146,112 +146,112 @@ PKGDB_DATA = [
 PDC_DATA = [
     {
         'active': True,
-        'brew_package': u'guake',
-        #'bugzilla_component': u'guake',
-        'dist_git_branch': u'master',
-        'global_component': u'guake',
-        'name': u'guake',
-        'release': u'fedora-24',
+        'brew_package': 'guake',
+        #'bugzilla_component': 'guake',
+        'dist_git_branch': 'master',
+        'global_component': 'guake',
+        'name': 'guake',
+        'release': 'fedora-24',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'guake',
-        #'bugzilla_component': u'guake',
-        'dist_git_branch': u'el6',
-        'global_component': u'guake',
-        'name': u'guake',
-        'release': u'epel-6-updates',
+        'brew_package': 'guake',
+        #'bugzilla_component': 'guake',
+        'dist_git_branch': 'el6',
+        'global_component': 'guake',
+        'name': 'guake',
+        'release': 'epel-6-updates',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'guake',
-        #'bugzilla_component': u'guake',
-        'dist_git_branch': u'f20',
-        'global_component': u'guake',
-        'name': u'guake',
-        'release': u'fedora-20-updates',
+        'brew_package': 'guake',
+        #'bugzilla_component': 'guake',
+        'dist_git_branch': 'f20',
+        'global_component': 'guake',
+        'name': 'guake',
+        'release': 'fedora-20-updates',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'guake',
-        #'bugzilla_component': u'guake',
-        'dist_git_branch': u'epel7',
-        'global_component': u'guake',
-        'name': u'guake',
-        'release': u'epel-7-updates',
+        'brew_package': 'guake',
+        #'bugzilla_component': 'guake',
+        'dist_git_branch': 'epel7',
+        'global_component': 'guake',
+        'name': 'guake',
+        'release': 'epel-7-updates',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'guake',
-        #'bugzilla_component': u'guake',
-        'dist_git_branch': u'f21',
-        'global_component': u'guake',
-        'name': u'guake',
-        'release': u'fedora-21-updates',
+        'brew_package': 'guake',
+        #'bugzilla_component': 'guake',
+        'dist_git_branch': 'f21',
+        'global_component': 'guake',
+        'name': 'guake',
+        'release': 'fedora-21-updates',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'guake',
-        #'bugzilla_component': u'guake',
-        'dist_git_branch': u'f22',
-        'global_component': u'guake',
-        'name': u'guake',
-        'release': u'fedora-22-updates',
+        'brew_package': 'guake',
+        #'bugzilla_component': 'guake',
+        'dist_git_branch': 'f22',
+        'global_component': 'guake',
+        'name': 'guake',
+        'release': 'fedora-22-updates',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'guake',
-        #'bugzilla_component': u'guake',
-        'dist_git_branch': u'f23',
-        'global_component': u'guake',
-        'name': u'guake',
-        'release': u'fedora-23-updates',
+        'brew_package': 'guake',
+        #'bugzilla_component': 'guake',
+        'dist_git_branch': 'f23',
+        'global_component': 'guake',
+        'name': 'guake',
+        'release': 'fedora-23-updates',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'geany',
-        #'bugzilla_component': u'geany',
-        'dist_git_branch': u'master',
-        'global_component': u'geany',
-        'name': u'geany',
-        'release': u'fedora-24',
+        'brew_package': 'geany',
+        #'bugzilla_component': 'geany',
+        'dist_git_branch': 'master',
+        'global_component': 'geany',
+        'name': 'geany',
+        'release': 'fedora-24',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'geany',
-        #'bugzilla_component': u'geany',
-        'dist_git_branch': u'el6',
-        'global_component': u'geany',
-        'name': u'geany',
-        'release': u'epel-6-updates',
+        'brew_package': 'geany',
+        #'bugzilla_component': 'geany',
+        'dist_git_branch': 'el6',
+        'global_component': 'geany',
+        'name': 'geany',
+        'release': 'epel-6-updates',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'geany',
-        #'bugzilla_component': u'geany',
-        'dist_git_branch': u'epel7',
-        'global_component': u'geany',
-        'name': u'geany',
-        'release': u'epel-7-updates',
+        'brew_package': 'geany',
+        #'bugzilla_component': 'geany',
+        'dist_git_branch': 'epel7',
+        'global_component': 'geany',
+        'name': 'geany',
+        'release': 'epel-7-updates',
         'type': 'rpm'
     },
     {
         'active': True,
-        'brew_package': u'geany',
-        #'bugzilla_component': u'geany',
-        'dist_git_branch': u'f23',
-        'global_component': u'geany',
-        'name': u'geany',
-        'release': u'fedora-23-updates',
+        'brew_package': 'geany',
+        #'bugzilla_component': 'geany',
+        'dist_git_branch': 'f23',
+        'global_component': 'geany',
+        'name': 'geany',
+        'release': 'fedora-23-updates',
         'type': 'rpm'
     }
     ]
@@ -266,25 +266,25 @@ class TestNewPackage(BaseHandlerTest):
         idx = '2015-6c98c8e3-0dcb-497d-a0d8-0b3d026a4cfb'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, False)
+        self.assertEqual(result, False)
 
     def test_cannot_handle_bodhi(self):
         idx = '2015-9045593c-7376-43e8-af15-dc4c3fadc1f5'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, False)
+        self.assertEqual(result, False)
 
     def test_cannot_handle_pkgdb_new_branch(self):
         idx = '2015-fc7a1d4f-56d8-45d6-a780-b317f0033a16'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, False)
+        self.assertEqual(result, False)
 
     def test_can_handle_pkgdb_new_package(self):
         idx = '2015-5affaacc-1539-4e4f-9a5c-5b3f5c7caccf'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     @mock_pdc
     def test_handle_new_package(self, pdc):
@@ -293,22 +293,22 @@ class TestNewPackage(BaseHandlerTest):
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
             'releases/fedora-23-updates': [
-                ('GET', dict()),
+                ('GET', {}),
             ],
             'global-components': [
-                ('GET', dict(name=u'perl-Lingua-Translit')),
+                ('GET', {'name': 'perl-Lingua-Translit'}),
             ],
             'release-components': [
-                ('POST', dict(
-                    name=u'perl-Lingua-Translit',
-                    global_component=u'perl-Lingua-Translit',
-                    #bugzilla_component=u'perl-Lingua-Translit',
-                    brew_package=u'perl-Lingua-Translit',
-                    release='fedora-23-updates',
-                    dist_git_branch=u'f23',
-                    type='rpm',
-                    active=True,
-                )),
+                ('POST', {
+                    'name': 'perl-Lingua-Translit',
+                    'global_component': 'perl-Lingua-Translit',
+                    # 'bugzilla_component': 'perl-Lingua-Translit',
+                    'brew_package': 'perl-Lingua-Translit',
+                    'release': 'fedora-23-updates',
+                    'dist_git_branch': 'f23',
+                    'type': 'rpm',
+                    'active': True,
+                }),
             ],
         })
 
@@ -350,7 +350,7 @@ class TestNewPackage(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['guake']))
+        self.assertSetEqual(present, {'guake'})
         self.assertSetEqual(absent, set())
 
     @mock_pdc
@@ -379,7 +379,7 @@ class TestNewPackage(BaseHandlerTest):
 
         # Check the results.
         self.assertSetEqual(present, set())
-        self.assertSetEqual(absent, set(['gnome-terminal']))
+        self.assertSetEqual(absent, {'gnome-terminal'})
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')
@@ -407,8 +407,8 @@ class TestNewPackage(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['guake']))
-        self.assertSetEqual(absent, set([('gnome-terminal')]))
+        self.assertSetEqual(present, {'guake'})
+        self.assertSetEqual(absent, {'gnome-terminal'})
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')
@@ -422,12 +422,8 @@ class TestNewPackage(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'global-components': [
-                ('POST', dict(
-                    name='guake',
-                )),
-                ('POST', dict(
-                    name='geany',
-                )),
+                ('POST', {'name': 'guake'}),
+                ('POST', {'name': 'geany'}),
             ],
         })
 
@@ -440,13 +436,13 @@ class TestNewBranch(BaseHandlerTest):
         idx = '2015-fc7a1d4f-56d8-45d6-a780-b317f0033a16'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     def test_cannot_handle_pkgdb_new_package(self):
         idx = '2015-5affaacc-1539-4e4f-9a5c-5b3f5c7caccf'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, False)
+        self.assertEqual(result, False)
 
     @mock_pdc
     def test_handle_new_package_branch(self, pdc):
@@ -455,19 +451,19 @@ class TestNewBranch(BaseHandlerTest):
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
             'release-components': [
-                ('POST', dict(
-                    name=u'perl-Lingua-Translit',
-                    global_component=u'perl-Lingua-Translit',
-                    #bugzilla_component=u'perl-Lingua-Translit',
-                    brew_package=u'perl-Lingua-Translit',
-                    release='fedora-24',
-                    dist_git_branch=u'master',
-                    type='rpm',
-                    active=True,
-                )),
+                ('POST', {
+                    'name': 'perl-Lingua-Translit',
+                    'global_component': 'perl-Lingua-Translit',
+                    # 'bugzilla_component': 'perl-Lingua-Translit',
+                    'brew_package': 'perl-Lingua-Translit',
+                    'release': 'fedora-24',
+                    'dist_git_branch': 'master',
+                    'type': 'rpm',
+                    'active': True,
+                }),
             ],
             'releases/fedora-24': [('GET', {})],
-            'global-components': [('GET', {'name': u'perl-Lingua-Translit'}) ],
+            'global-components': [('GET', {'name': 'perl-Lingua-Translit'}) ],
         })
 
     @mock_pdc
@@ -508,7 +504,7 @@ class TestNewBranch(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([('guake', 'fedora-24', 'master')]))
+        self.assertSetEqual(present, {('guake', 'fedora-24', 'master')})
         self.assertSetEqual(absent, set())
 
     @mock_pdc
@@ -539,7 +535,7 @@ class TestNewBranch(BaseHandlerTest):
 
         # Check the results.
         self.assertSetEqual(present, set())
-        self.assertSetEqual(absent, set([('guake', 'fedora-18-updates', 'f18')]))
+        self.assertSetEqual(absent, {('guake', 'fedora-18-updates', 'f18')})
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')
@@ -569,8 +565,8 @@ class TestNewBranch(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([('guake', 'fedora-24', 'master')]))
-        self.assertSetEqual(absent, set([('guake', 'fedora-18-updates', 'f18')]))
+        self.assertSetEqual(present, {('guake', 'fedora-24', 'master')})
+        self.assertSetEqual(absent, {('guake', 'fedora-18-updates', 'f18')})
 
     @mock_pdc
     @mock.patch('pdcupdater.services.pkgdb_packages')

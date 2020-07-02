@@ -11,9 +11,8 @@ def load_handlers(config):
         yield handler
 
 
-class BaseHandler(object):
+class BaseHandler(object, metaclass=abc.ABCMeta):
     """ An abstract base class for handlers to enforce API. """
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, config):
         self.config = config
@@ -32,7 +31,8 @@ class BaseHandler(object):
                 for topic in self.topic_suffixes
             ]
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def topic_suffixes(self):
         pass
 

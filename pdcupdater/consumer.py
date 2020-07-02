@@ -26,7 +26,7 @@ import pdcupdater.handlers
 import logging
 log = logging.getLogger(__name__)
 
-from utils import get_token
+from .utils import get_token
 import pdc_client
 
 
@@ -40,7 +40,7 @@ class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
         self.pdc_config = config['pdcupdater.pdc']
 
         if not self.pdc_config.get('token') and config.get('pdcupdater.keytab'):
-            self.pdc_config['token'] = get_token(self.pdc_config.get('server'), 
+            self.pdc_config['token'] = get_token(self.pdc_config.get('server'),
                 config.get('pdcupdater.keytab'))
         elif not self.pdc_config.get('token'):
             raise ValueError("No token and keytab found")
@@ -69,7 +69,7 @@ class PDCUpdater(fedmsg.consumers.FedmsgConsumer):
         if 'message-id' in msg['headers']:
             msg['msg_id'] = msg['headers']['message-id']
 
-        self.log.debug("Received %r, %r" % (msg['msg_id'], topic))
+        self.log.debug("Received %r, %r", msg['msg_id'], topic)
 
         pdc = pdc_client.PDCClient(**self.pdc_config)
         pdcupdater.utils.handle_message(pdc, self.handlers, msg)

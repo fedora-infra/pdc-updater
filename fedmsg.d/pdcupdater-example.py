@@ -72,13 +72,13 @@ config = {
     'pdcupdater.ContainerRPMInclusionDepChainHandler.container_build_user': 'containerbuild',
 
     # Augment the base fedmsg logging config to also handle pdcupdater loggers.
-    'logging': dict(
-        loggers=dict(
-            pdcupdater={
+    'logging': {
+        'loggers': {
+            'pdcupdater': {
                 "level": "DEBUG",
                 "propagate": False,
                 "handlers": ["console"],
             },
-        )
-    )
+        },
+    },
 }

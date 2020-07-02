@@ -41,7 +41,7 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         idx = '2016-662e75d1-5830-4c84-9855-fd07a3018f7a'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     def test_construct_topic_fedora_message(self):
         config = {
@@ -70,13 +70,13 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         idx = '2016-662e75d1-5830-4c84-9855-fd07a3018f7a'
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
-        expected_keys = [
+        expected_keys = sorted([
             'release-component-relationships',
             'releases/fedora-24',
             'release-components',
             'global-components',
-        ]
-        self.assertEquals(pdc.calls.keys(), expected_keys)
+        ])
+        self.assertEqual(sorted(pdc.calls), expected_keys)
 
         self.assertEqual(len(pdc.calls['global-components']), 22)
         self.assertEqual(len(pdc.calls['release-components']), 22)
@@ -173,11 +173,11 @@ class TestBuildtimeDepIngestion(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([]))
-        self.assertSetEqual(absent, set([
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, {
             'guake/fedora-24 RPMBuildRequires buildtimelib1/fedora-24',
             'guake/fedora-24 RPMBuildRoot buildtimelib2/fedora-24',
-        ]))
+        })
 
 
 class TestRuntimeDepIngestionFedora(BaseHandlerTest):
@@ -220,8 +220,8 @@ class TestRuntimeDepIngestionFedora(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['guake/fedora-24 RPMRequires nethack/fedora-24']))
-        self.assertSetEqual(absent, set(['guake/fedora-24 RPMRequires runtimelib1/fedora-24']))
+        self.assertSetEqual(present, {'guake/fedora-24 RPMRequires nethack/fedora-24'})
+        self.assertSetEqual(absent, {'guake/fedora-24 RPMRequires runtimelib1/fedora-24'})
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
@@ -317,7 +317,7 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
     def test_handle_brew_message(self):
         msg = load_example_message('messagebus-example1.json')
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     def test_construct_topic_brew_message(self):
         config = {
@@ -342,7 +342,7 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
         except Exception as e:
             self.assertEqual(type(e), Exception)
             self.assertEqual(
-                e.message,
+                str(e),
                 'pdc-updater cannot support both STOMP and ZMQ being enabled'
             )
 
@@ -360,13 +360,13 @@ class TestRuntimeDepIngestionRedHat(BaseHandlerTest):
 
         msg = format_envelope(load_example_message('messagebus-example1.json'))
         self.handler.handle(pdc, msg)
-        expected_keys = [
+        expected_keys = sorted([
             'release-component-relationships',
             'releases/rhel-9000',
             'release-components',
             'global-components',
-        ]
-        self.assertEquals(pdc.calls.keys(), expected_keys)
+        ])
+        self.assertEqual(sorted(pdc.calls), expected_keys)
 
         self.assertEqual(len(pdc.calls['global-components']), 1)
         self.assertEqual(len(pdc.calls['release-components']), 1)

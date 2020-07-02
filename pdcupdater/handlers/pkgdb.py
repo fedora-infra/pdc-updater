@@ -51,19 +51,19 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
         collection = msg['msg']['package_listing']['collection']
         release_id = collection2release_id(pdc, collection)
         global_component = name
-        data = dict(
-            name=name,
-            release=release_id,
-            global_component=global_component,
-            dist_git_branch=branch,
-            #bugzilla_component=name,
-            brew_package=name,
-            active=True,
-            type='rpm',
-        )
+        data = {
+            'name': name,
+            'release': release_id,
+            'global_component': global_component,
+            'dist_git_branch': branch,
+            # 'bugzilla_component': name,
+            'brew_package': name,
+            'active': True,
+            'type': 'rpm',
+        }
         pdcupdater.utils.ensure_global_component_exists(pdc, name)
         # https://pdc.fedoraproject.org/rest_api/v1/release-components/
-        log.info("Creating release component %s for %s" % (name, release_id))
+        log.info("Creating release component %s for %s", name, release_id)
         pdc['release-components']._(data)
 
     def audit(self, pdc):
@@ -71,8 +71,8 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
         pdc_packages = pdc.get_paged(pdc['global-components']._)
 
         # normalize the two lists
-        pkgdb_packages = set([p['name'] for p in pkgdb_packages])
-        pdc_packages = set([p['name'] for p in pdc_packages])
+        pkgdb_packages = {p['name'] for p in pkgdb_packages}
+        pdc_packages = {p['name'] for p in pdc_packages}
 
         # use set operators to determine the difference
         present = pdc_packages - pkgdb_packages
@@ -82,14 +82,19 @@ class NewPackageHandler(pdcupdater.handlers.BaseHandler):
 
     def initialize(self, pdc):
         packages = pdcupdater.services.pkgdb_packages(self.pkgdb_url)
-        components = [dict(
-            name=package['name'],
-        ) for package in packages]
+        components = [{
+            'name': package['name'],
+        } for package in packages]
         for component in components:
             try:
                 pdc['global-components']._(component)
+<<<<<<< HEAD
             except beanbag.bbexcept.BeanBagException as e:
                 log.warn("global-component, %r %r" % (component, e.response))
+=======
+            except BeanBagException as e:
+                log.warn("global-component, %r %r", component, e.response)
+>>>>>>> d3973f1... FOO 11fa0b0c75d7d1683252edf4b621ba80464a9167
 
 
 class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
@@ -112,19 +117,19 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         collection = msg['msg']['package_listing']['collection']
         release_id = collection2release_id(pdc, collection)
         global_component = name
-        data = dict(
-            name=name,
-            release=release_id,
-            global_component=global_component,
-            dist_git_branch=branch,
-            #bugzilla_component=name,
-            brew_package=name,
-            active=True,
-            type='rpm',
-        )
+        data = {
+            'name': name,
+            'release': release_id,
+            'global_component': global_component,
+            'dist_git_branch': branch,
+            # 'bugzilla_component': name,
+            'brew_package': name,
+            'active': True,
+            'type': 'rpm',
+        }
         # https://pdc.fedoraproject.org/rest_api/v1/release-components/
         pdcupdater.utils.ensure_global_component_exists(pdc, name)
-        log.info("Creating release component %s for %s" % (name, release_id))
+        log.info("Creating release component %s for %s", name, release_id)
         pdc['release-components']._(data)
 
     def audit(self, pdc):
@@ -133,7 +138,7 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         pdc_packages = pdc.get_paged(pdc['release-components']._)
 
         # normalize the two lists
-        pkgdb_packages = set(
+        pkgdb_packages = {
             (
                 package['name'],
                 pdcupdater.utils.pkgdb2release(collection),
@@ -141,11 +146,11 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
             )
             for package in pkgdb_packages
             for collection in package['collections']
-        )
-        pdc_packages = set(
+        }
+        pdc_packages = {
             (p['name'], p['release']['release_id'], p['dist_git_branch'])
             for p in pdc_packages
-        )
+        }
 
         # use set operators to determine the difference
         present = pdc_packages - pkgdb_packages
@@ -157,22 +162,22 @@ class NewPackageBranchHandler(pdcupdater.handlers.BaseHandler):
         packages = pdcupdater.services.pkgdb_packages(
             self.pkgdb_url, extra=True)
         components = [
-            dict(
-                name=package['name'],
-                release=collection2release_id(pdc, collection),
-                global_component=package['name'],
-                dist_git_branch=collection['branchname'],
-                #bugzilla_component=package['name'],
-                brew_package=package['name'],
-                active=True,
-                type='rpm',
-            )
-        for package in packages
-        for collection in package['collections']
+            {
+                'name': package['name'],
+                'release': collection2release_id(pdc, collection),
+                'global_component': package['name'],
+                'dist_git_branch': collection['branchname'],
+                # 'bugzilla_component': package['name'],
+                'brew_package': package['name'],
+                'active': True,
+                'type': 'rpm',
+            }
+            for package in packages
+            for collection in package['collections']
         ]
 
         for component in components:
             try:
                 pdc['release-components']._(component)
             except beanbag.bbexcept.BeanBagException as e:
-                log.warn("release-component, %r %r" % (component, e.response))
+                log.warn("release-component, %r %r", component, e.response)

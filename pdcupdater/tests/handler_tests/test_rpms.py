@@ -105,31 +105,31 @@ class TestNewRPM(BaseHandlerTest):
         idx = '2015-6c98c8e3-0dcb-497d-a0d8-0b3d026a4cfb'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, False)
+        self.assertEqual(result, False)
 
     def test_cannot_handle_non_stable_or_rawhide_build(self):
         idx = '2015-bf628d37-11bf-4354-a628-b3abfea03ed7'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, False)
+        self.assertEqual(result, False)
 
     def test_cannot_handle_non_primary_rawhide_build(self):
         idx = '2015-e398ba94-827a-4c97-ac4b-39e5a6028818'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, False)
+        self.assertEqual(result, False)
 
     def test_can_handle_new_primary_rawhide_build(self):
         idx = '2015-c37d4607-e8de-4229-990a-981c40a9bb93'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     def test_can_handle_stable_update_tag(self):
         idx = '2015-19772dd8-21f4-4b25-a557-41d313a74a88'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     @mock_pdc
     @mock.patch('pdcupdater.services.koji_rpms_from_build')
@@ -342,7 +342,7 @@ class TestNewRPM(BaseHandlerTest):
 
         # Check the results.
         # We removed a build from koji, so it is erroneously "present" in PDC
-        self.assertSetEqual(present, set([json.dumps({
+        self.assertSetEqual(present, {json.dumps({
             "arch": "noarch",
             "epoch": 0,
             "linked_releases": [
@@ -353,7 +353,7 @@ class TestNewRPM(BaseHandlerTest):
             "release": "1.el7",
             "srpm_name": "rubygem-jmespath",
             "srpm_nevra": "rubygem-jmespath-1.1.3-1.el7",
-        }, sort_keys=True)]))
+        }, sort_keys=True)})
         self.assertSetEqual(absent, set())
 
     @mock_pdc
@@ -375,15 +375,15 @@ class TestNewRPM(BaseHandlerTest):
         # Check the results.
         self.assertSetEqual(present, set())
         # We added an extra koji build, so it is "absent" from PDC.
-        self.assertSetEqual(absent, set([json.dumps({
+        self.assertSetEqual(absent, {json.dumps({
             "arch": "noarch",
             "epoch": 0,
             "linked_releases": [
-                u'fedora-24',
+                'fedora-24',
             ],
             "name": "rubygem-jmespath-doc",
             "version": "1.1.3",
             "release": "1.fc24",
             "srpm_name": "rubygem-jmespath",
             "srpm_nevra": "rubygem-jmespath-1.1.3-1.fc24",
-        }, sort_keys=True)]))
+        }, sort_keys=True)})

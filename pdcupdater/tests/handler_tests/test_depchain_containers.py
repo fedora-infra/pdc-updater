@@ -19,7 +19,7 @@ class TestInclusionDepIngestion(BaseHandlerTest):
         idx = '2016-b78e670b-e8f7-4987-868e-1260cc0f3fbd'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     @mock_pdc
     @mock.patch('pdcupdater.utils.rawhide_tag')
@@ -59,13 +59,13 @@ class TestInclusionDepIngestion(BaseHandlerTest):
         idx = '2016-b78e670b-e8f7-4987-868e-1260cc0f3fbd'
         msg = pdcupdater.utils.get_fedmsg(idx)
         self.handler.handle(pdc, msg)
-        expected_keys = [
+        expected_keys = sorted([
             'release-component-relationships',
             'releases/fedora-24-updates',
             'release-components',
             'global-components',
-        ]
-        self.assertEquals(pdc.calls.keys(), expected_keys)
+        ])
+        self.assertEqual(sorted(pdc.calls), expected_keys)
 
         self.assertEqual(len(pdc.calls['global-components']), 1)
         self.assertEqual(len(pdc.calls['release-components']), 1)
@@ -194,7 +194,7 @@ class TestInclusionDepIngestion(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set([]))
-        self.assertSetEqual(absent, set([
+        self.assertSetEqual(present, set())
+        self.assertSetEqual(absent, {
             'cockpit/fedora-24-updates ContainerIncludesRPM guake/fedora-24-updates',
-        ]))
+        })
