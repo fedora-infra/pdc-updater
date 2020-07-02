@@ -1,9 +1,7 @@
-import mock
+from unittest.mock import patch
 
 import pdcupdater.utils
-from pdcupdater.tests.handler_tests import (
-    BaseHandlerTest, mock_pdc
-)
+from pdcupdater.tests.handler_tests import BaseHandlerTest, mock_pdc
 
 
 class TestNewPerson(BaseHandlerTest):
@@ -14,13 +12,13 @@ class TestNewPerson(BaseHandlerTest):
         idx = '2015-6c98c8e3-0dcb-497d-a0d8-0b3d026a4cfb'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, False)
+        self.assertEqual(result, False)
 
     def test_can_handle_fas_new_person(self):
         idx = '2015-b456fe4e-6dff-431a-9116-280064fe6087'
         msg = pdcupdater.utils.get_fedmsg(idx)
         result = self.handler.can_handle(None, msg)
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     @mock_pdc
     def test_handle_new_package(self, pdc):
@@ -29,15 +27,15 @@ class TestNewPerson(BaseHandlerTest):
         self.handler.handle(pdc, msg)
         self.assertDictEqual(pdc.calls, {
             'persons': [
-                ('POST', dict(
-                    username='alvicler',
-                    email='alvicler@fedoraproject.org',
-                )),
+                ('POST', {
+                    'username': 'alvicler',
+                    'email': 'alvicler@fedoraproject.org',
+                }),
             ],
         })
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.fas_persons')
+    @patch('pdcupdater.services.fas_persons')
     def test_initialize_from_fas(self, pdc, fas):
         # Mock out FAS results
         fas.return_value = [
@@ -51,19 +49,19 @@ class TestNewPerson(BaseHandlerTest):
         # Check the PDC calls..
         self.assertDictEqual(pdc.calls, {
             'persons': [
-                ('POST', dict(
-                    username='ralph',
-                    email='ralph@fedoraproject.org',
-                )),
-                ('POST', dict(
-                    username='lmacken',
-                    email='lmacken@fedoraproject.org',
-                )),
+                ('POST', {
+                    'username': 'ralph',
+                    'email': 'ralph@fedoraproject.org',
+                }),
+                ('POST', {
+                    'username': 'lmacken',
+                    'email': 'lmacken@fedoraproject.org',
+                }),
             ],
         })
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.fas_persons')
+    @patch('pdcupdater.services.fas_persons')
     def test_audit_simple(self, pdc, fas):
         # Mock out FAS results
         fas.return_value = [
@@ -86,7 +84,7 @@ class TestNewPerson(BaseHandlerTest):
         self.assertSetEqual(absent, set())
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.fas_persons')
+    @patch('pdcupdater.services.fas_persons')
     def test_audit_with_an_extra(self, pdc, fas):
         # Mock out FAS results
         fas.return_value = [
@@ -104,11 +102,11 @@ class TestNewPerson(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['lmacken']))
+        self.assertSetEqual(present, {'lmacken'})
         self.assertSetEqual(absent, set())
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.fas_persons')
+    @patch('pdcupdater.services.fas_persons')
     def test_audit_missing_one(self, pdc, fas):
         # Mock out FAS results
         fas.return_value = [
@@ -129,10 +127,10 @@ class TestNewPerson(BaseHandlerTest):
 
         # Check the results.
         self.assertSetEqual(present, set())
-        self.assertSetEqual(absent, set(['toshio']))
+        self.assertSetEqual(absent, {'toshio'})
 
     @mock_pdc
-    @mock.patch('pdcupdater.services.fas_persons')
+    @patch('pdcupdater.services.fas_persons')
     def test_audit_flipping_out(self, pdc, fas):
         # Mock out FAS results
         fas.return_value = [
@@ -150,5 +148,5 @@ class TestNewPerson(BaseHandlerTest):
         })
 
         # Check the results.
-        self.assertSetEqual(present, set(['lmacken', 'ralph']))
-        self.assertSetEqual(absent, set(['toshio']))
+        self.assertSetEqual(present, {'lmacken', 'ralph'})
+        self.assertSetEqual(absent, {'toshio'})

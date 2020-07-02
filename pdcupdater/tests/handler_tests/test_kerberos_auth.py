@@ -1,6 +1,5 @@
 import os
-
-from mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pdcupdater.utils
 

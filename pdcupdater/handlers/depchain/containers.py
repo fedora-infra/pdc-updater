@@ -34,16 +34,16 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
     child_type = 'rpm'
 
     def interesting_tags(self, pdc):
-        key = "pdcupdater.%s.interesting_tags" % type(self).__name__
+        key = f"pdcupdater.{type(self).__name__}.interesting_tags"
 
         if not self.config.get(key):
-            log.debug("config key %s has no value.  performing queries." % key)
+            log.debug("config key %s has no value.  performing queries.", key)
             if self.pdc_tag_mapping:
                 return pdcupdater.utils.all_tags_from_pdc(pdc)
             else:
                 return pdcupdater.utils.interesting_container_tags()
 
-        log.debug("using value from config key %s" % key)
+        log.debug("using value from config key %s", key)
         return self.config[key]
 
     def _yield_koji_relationships_from_tag(self, pdc, tag):
@@ -56,16 +56,16 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
         pdcupdater.utils.ensure_release_exists(pdc, release_id, release)
 
         # This may be None, or 'osbs' or 'containerbuild' in Fedora.
-        key = "pdcupdater.%s.container_build_user" % type(self).__name__
+        key = f"pdcupdater.{type(self).__name__}.container_build_user"
         owner = self.config.get(key)
-        log.debug("Found %r for config key %r" % (owner, key))
+        log.debug("Found %r for config key %r", owner, key)
 
         # Return builds in the tag owned by the user, if configured.
         builds = pdcupdater.services.koji_builds_in_tag(self.koji_url, tag, owner=owner)
 
         for i, build in enumerate(builds):
-            log.info("Considering container build idx=%r, (%i of %i)" % (
-                build['build_id'], i, len(builds)))
+            log.info("Considering container build idx=%r, (%i of %i)",
+                     build['build_id'], i, len(builds))
 
             relationships = list(self._yield_koji_relationships_from_build(
                 self.koji_url, build['build_id']))
@@ -86,7 +86,7 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
 
         build = pdcupdater.services.koji_get_build(koji_url, build_id)
         if not build:
-            raise ValueError("Unable to find build %r" % build_id)
+            raise ValueError(f"Unable to find build {build_id!r}")
         parent = build['name']
 
         artifacts = pdcupdater.services.koji_archives_from_build(
@@ -95,7 +95,7 @@ class ContainerRPMInclusionDepChainHandler(BaseKojiDepChainHandler):
         for artifact in artifacts:
             if artifact['type_name'] in ('ks', 'cfg', 'xml'):
                 continue
-            log.debug("Looking up installed rpms for %r" % artifact['filename'])
+            log.debug("Looking up installed rpms for %r", artifact['filename'])
             rpms = pdcupdater.services.koji_rpms_from_archive(self.koji_url, artifact)
             for entry in rpms:
                 child = entry['name']

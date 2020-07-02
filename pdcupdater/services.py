@@ -1,15 +1,19 @@
 import logging
 import operator
+from functools import reduce
 
 import bs4
-import requests
+
+import dogpile.cache
 
 import pdcupdater.handlers.compose
 import pdcupdater.utils
 
+import requests
+
+
 log = logging.getLogger(__name__)
 
-import dogpile.cache
 cache = dogpile.cache.make_region()
 cache.configure('dogpile.cache.memory', expiration_time=300)
 
@@ -19,7 +23,7 @@ def _scrape_links(session, url):
     log.debug('Scraping %s', url)
     response = session.get(url)
     if not bool(response):
-        raise IOError("Couldn't talk to %r, %r" % (url, response))
+        raise IOError("Couldn't talk to %r, %r", url, response)
     soup = bs4.BeautifulSoup(response.text, 'html.parser')
     pre = soup.find('pre')
     for link in pre.findAll('a'):
@@ -45,7 +49,7 @@ def old_composes(base_url):
         for compose, compose_link in compose_links:
             # Some of these are symlinks to others
             if compose.startswith('latest'):
-                log.debug("Skipping %s.  Just a symlink." % compose_link)
+                log.debug("Skipping %s.  Just a symlink.", compose_link)
                 continue
 
             # Some of these failed mid-way and didn't complete.
@@ -64,7 +68,7 @@ def old_composes(base_url):
                 continue
 
             # If we got this far, then return it
-            log.info("  found %s/%s" % (branch, compose))
+            log.info("  found %s/%s", branch, compose)
             yield branch, compose, compose_link
 
     # Finally, close the requests session.
@@ -78,7 +82,7 @@ def fas_persons(base_url, username, password):
     import fedora.client
     import fedora.client.fas2
 
-    log.info("Connecting to FAS at %r" % base_url)
+    log.info("Connecting to FAS at %r", base_url)
     fasclient = fedora.client.fas2.AccountSystem(
         base_url=base_url, username=username, password=password)
 
@@ -98,7 +102,7 @@ def koji_list_buildroot_for(url, filename, tries=3):
     rpminfo = session.getRPM(filename)
     if type(rpminfo) == list:
         if not tries:
-            raise TypeError("Got a list back from koji.getRPM(%r)" % filename)
+            raise TypeError("Got a list back from koji.getRPM(%r)", filename)
         # Try again.. this is weird behavior...
         return koji_list_buildroot_for(url, filename, tries-1)
     return session.listRPMs(componentBuildrootID=rpminfo['buildroot_id'])
@@ -120,7 +124,7 @@ def koji_yield_rpm_requires(url, nvra):
         rpm.RPMSENSE_GREATER: '>',
         rpm.RPMSENSE_EQUAL: '=',
     }
-    relevant_flags = reduce(operator.ior, header_lookup.keys())
+    relevant_flags = reduce(operator.ior, header_lookup)
 
     # Query koji and step over all the deps listed in the raw rpm headers.
     deps = session.getRPMDeps(nvra, koji.DEP_REQUIRE)
@@ -148,12 +152,12 @@ def koji_yield_rpm_requires(url, nvra):
 def koji_builds_in_tag(url, tag, owner=None):
     """ Return the list of koji builds in a tag. """
     import koji
-    log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
+    log.info("Listing rpms in koji(%s) tag %s", url, tag)
     session = koji.ClientSession(url)
     try:
         return session.listTagged(tag, latest=True, owner=owner)
     except koji.GenericError as e:
-        log.warn("Failed to get builds in tag %r: %r" % (tag, e))
+        log.warn("Failed to get builds in tag %r: %r", tag, e)
         return []
 
 
@@ -161,13 +165,13 @@ def koji_builds_in_tag(url, tag, owner=None):
 def koji_rpms_in_tag(url, tag):
     """ Return the list of koji rpms in a tag. """
     import koji
-    log.info("Listing rpms in koji(%s) tag %s" % (url, tag))
+    log.info("Listing rpms in koji(%s) tag %s", url, tag)
     session = koji.ClientSession(url)
 
     try:
         rpms, builds = session.listTaggedRPMS(tag, latest=True)
     except koji.GenericError as e:
-        log.exception("Failed to list rpms in tag %r" % tag)
+        log.exception("Failed to list rpms in tag %r", tag)
         # If the tag doesn't exist.. then there are no rpms in that tag.
         return []
 
@@ -187,7 +191,7 @@ def koji_get_build(url, build_id):
     session = koji.ClientSession(url)
     build = session.getBuild(build_id)
     if build:
-        assert build['id'] == build_id, "%r != %r" % (build['id'], build_id)
+        assert build['id'] == build_id, f"{build['id']!r} != {build_id!r}"
     return build
 
 
@@ -209,7 +213,7 @@ def koji_rpms_from_archive(url, artifact):
 @pdcupdater.utils.retry()
 def koji_rpms_from_build(url, build_id):
     import koji
-    log.info("Listing rpms in koji(%s) for %r" % (url, build_id))
+    log.info("Listing rpms in koji(%s) for %r", url, build_id)
     session = koji.ClientSession(url)
     build = koji_get_build(url, build_id)
 
@@ -218,26 +222,26 @@ def koji_rpms_from_build(url, build_id):
         rpms.add('{0}.{1}.rpm'.format(rpm['nvr'], rpm['arch']))
 
     # Dependable order for testing.
-    rpms = list(sorted(rpms))
+    rpms = sorted(rpms)
     return build, rpms
 
 
 def pkgdb_packages(base_url, extra=False):
     """ Return a generator over all the packages in pkgdb.  """
     import pkgdb2client
-    log.info("Connecting to pkgdb at %r" % base_url)
+    log.info("Connecting to pkgdb at %r", base_url)
     pkgdb = pkgdb2client.PkgDB(url=base_url)
     result = pkgdb.get_packages(page='all')
     packages = result['packages']
     if extra:
-        for i in range(len(packages)):
-            package = pkgdb.get_package(packages[i]['name'])
-            collections = [p['collection'] for p in package['packages']]
-            packages[i]['collections'] = collections
-            yield packages[i]
+        for package in packages:
+            pkgdb_package = pkgdb.get_package(package['name'])
+            collections = [p['collection'] for p in pkgdb_package['packages']]
+            package['collections'] = collections
+            yield package
     else:
-        for i in range(len(packages)):
-            yield packages[i]
+        for package in packages:
+            yield package
 
 
 
@@ -246,6 +250,5 @@ if __name__ == '__main__':
     # A little test by hand...
     logging.basicConfig(level=logging.DEBUG)
     composes = old_composes('https://kojipkgs.fedoraproject.org/compose/')
-    composes = list(composes)
     for compose in composes:
-        print compose
+        print(compose)

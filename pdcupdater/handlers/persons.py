@@ -1,5 +1,12 @@
-import pdcupdater.services
+import logging
+
+from beanbag.bbexcept import BeanBagException
+
 import pdcupdater.handlers
+import pdcupdater.services
+
+
+log = logging.getLogger(__name__)
 
 
 class NewPersonHandler(pdcupdater.handlers.BaseHandler):
@@ -18,8 +25,8 @@ class NewPersonHandler(pdcupdater.handlers.BaseHandler):
 
     def handle(self, pdc, msg):
         username = msg['msg']['user']
-        email = '%s@fedoraproject.org' % username
-        pdc['persons']._(dict(username=username, email=email))
+        email = f'{username}@fedoraproject.org'
+        pdc['persons']._({'username': username, 'email': email})
 
     def audit(self, pdc):
         # Query the data sources
@@ -27,8 +34,8 @@ class NewPersonHandler(pdcupdater.handlers.BaseHandler):
         pdc_persons = pdc.get_paged(pdc['persons']._)
 
         # normalize the two lists
-        fas_persons = set([p['username'] for p in fas_persons])
-        pdc_persons = set([p['username'] for p in pdc_persons])
+        fas_persons = {p['username'] for p in fas_persons}
+        pdc_persons = {p['username'] for p in pdc_persons}
 
         # use set operators to determine the difference
         present = pdc_persons - fas_persons
@@ -38,12 +45,12 @@ class NewPersonHandler(pdcupdater.handlers.BaseHandler):
 
     def initialize(self, pdc):
         fas_persons = pdcupdater.services.fas_persons(**self.fas_config)
-        persons = [dict(
-            username=person['username'],
-            email='%s@fedoraproject.org' % person['username'],
-        ) for person in fas_persons]
+        persons = [{
+            'username': person['username'],
+            'email': f"{person['username']}@fedoraproject.org",
+        } for person in fas_persons]
         for person in persons:
             try:
                 pdc['persons']._(person)
-            except beanbag.bbexcept.BeanBagException as e:
-                log.warn("persons, %r %r" % (component, e.response))
+            except BeanBagException as e:
+                log.warn("persons, %r %r", component, e.response)

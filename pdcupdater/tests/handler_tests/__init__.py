@@ -1,19 +1,22 @@
-from os.path import dirname, exists
 import functools
+import logging
 import tarfile
 import unittest
-import logging
+from os.path import dirname, exists
+from unittest.mock import patch
 
-import mock
-import vcr
+from beanbag.bbexcept import BeanBagException
 
 import fedmsg.utils
 
 from nose.tools import raises
 
+import pdc_client.test_helpers
+
 import pdcupdater.utils
 
-import pdc_client.test_helpers
+import vcr
+
 
 log = logging.getLogger(__name__)
 
@@ -22,16 +25,16 @@ base_dir = dirname(dirname(__file__))
 cassette_dir = base_dir + '/vcr-request-data/'
 
 def mock_404():
-    import beanbag.bbexcept
     class Mock404Response(object):
         status_code = 404
     response = Mock404Response()
-    raise beanbag.bbexcept.BeanBagException(response, "404, nope.")
+    raise BeanBagException(response, "404, nope.")
+
 
 def mock_pdc(function):
     # Mock the PDC client
     pdc = pdc_client.test_helpers.MockAPI()
-    pdc_patcher = mock.patch('pdc_client.PDCClient', return_value=pdc)
+    pdc_patcher = patch('pdc_client.PDCClient', return_value=pdc)
     pdc_patcher.start()
 
     @functools.wraps(function)
@@ -164,123 +167,123 @@ def mock_pdc(function):
             'results': [
               {'active': True,
                'id': 1,
-               'brew_package': u'guake',
-               'bugzilla_component': u'guake',
-               'dist_git_branch': u'master',
-               'global_component': u'guake',
-               'name': u'guake',
+               'brew_package': 'guake',
+               'bugzilla_component': 'guake',
+               'dist_git_branch': 'master',
+               'global_component': 'guake',
+               'name': 'guake',
                'release': {
-                    'release_id': u'fedora-24',
+                    'release_id': 'fedora-24',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 2,
-               'brew_package': u'guake',
-               'bugzilla_component': u'guake',
-               'dist_git_branch': u'el6',
-               'global_component': u'guake',
-               'name': u'guake',
+               'brew_package': 'guake',
+               'bugzilla_component': 'guake',
+               'dist_git_branch': 'el6',
+               'global_component': 'guake',
+               'name': 'guake',
                'release': {
-                    'release_id': u'epel-6-updates',
+                    'release_id': 'epel-6-updates',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 3,
-               'brew_package': u'guake',
-               'bugzilla_component': u'guake',
-               'dist_git_branch': u'f20',
-               'global_component': u'guake',
-               'name': u'guake',
+               'brew_package': 'guake',
+               'bugzilla_component': 'guake',
+               'dist_git_branch': 'f20',
+               'global_component': 'guake',
+               'name': 'guake',
                'release': {
-                    'release_id': u'fedora-20-updates',
+                    'release_id': 'fedora-20-updates',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 4,
-               'brew_package': u'guake',
-               'bugzilla_component': u'guake',
-               'dist_git_branch': u'epel7',
-               'global_component': u'guake',
-               'name': u'guake',
+               'brew_package': 'guake',
+               'bugzilla_component': 'guake',
+               'dist_git_branch': 'epel7',
+               'global_component': 'guake',
+               'name': 'guake',
                'release': {
-                    'release_id': u'epel-7-updates',
+                    'release_id': 'epel-7-updates',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 5,
-               'brew_package': u'guake',
-               'bugzilla_component': u'guake',
-               'dist_git_branch': u'f21',
-               'global_component': u'guake',
-               'name': u'guake',
+               'brew_package': 'guake',
+               'bugzilla_component': 'guake',
+               'dist_git_branch': 'f21',
+               'global_component': 'guake',
+               'name': 'guake',
                'release': {
-                    'release_id': u'fedora-21-updates',
+                    'release_id': 'fedora-21-updates',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 6,
-               'brew_package': u'guake',
-               'bugzilla_component': u'guake',
-               'dist_git_branch': u'f22',
-               'global_component': u'guake',
-               'name': u'guake',
+               'brew_package': 'guake',
+               'bugzilla_component': 'guake',
+               'dist_git_branch': 'f22',
+               'global_component': 'guake',
+               'name': 'guake',
                'release': {
-                    'release_id': u'fedora-22-updates',
+                    'release_id': 'fedora-22-updates',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 7,
-               'brew_package': u'guake',
-               'bugzilla_component': u'guake',
-               'dist_git_branch': u'f23',
-               'global_component': u'guake',
-               'name': u'guake',
+               'brew_package': 'guake',
+               'bugzilla_component': 'guake',
+               'dist_git_branch': 'f23',
+               'global_component': 'guake',
+               'name': 'guake',
                'release': {
-                    'release_id': u'fedora-23-updates',
+                    'release_id': 'fedora-23-updates',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 8,
-               'brew_package': u'geany',
-               'bugzilla_component': u'geany',
-               'dist_git_branch': u'master',
-               'global_component': u'geany',
-               'name': u'geany',
+               'brew_package': 'geany',
+               'bugzilla_component': 'geany',
+               'dist_git_branch': 'master',
+               'global_component': 'geany',
+               'name': 'geany',
                'release': {
-                    'release_id': u'fedora-24',
+                    'release_id': 'fedora-24',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 9,
-               'brew_package': u'geany',
-               'bugzilla_component': u'geany',
-               'dist_git_branch': u'el6',
-               'global_component': u'geany',
-               'name': u'geany',
+               'brew_package': 'geany',
+               'bugzilla_component': 'geany',
+               'dist_git_branch': 'el6',
+               'global_component': 'geany',
+               'name': 'geany',
                'release': {
-                    'release_id': u'epel-6-updates',
+                    'release_id': 'epel-6-updates',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 10,
-               'brew_package': u'geany',
-               'bugzilla_component': u'geany',
-               'dist_git_branch': u'epel7',
-               'global_component': u'geany',
-               'name': u'geany',
+               'brew_package': 'geany',
+               'bugzilla_component': 'geany',
+               'dist_git_branch': 'epel7',
+               'global_component': 'geany',
+               'name': 'geany',
                'release': {
-                    'release_id': u'epel-7-updates',
+                    'release_id': 'epel-7-updates',
                },
                'type': 'srpm'},
               {'active': True,
                'id': 11,
-               'brew_package': u'geany',
-               'bugzilla_component': u'geany',
-               'dist_git_branch': u'f23',
-               'global_component': u'geany',
-               'name': u'geany',
+               'brew_package': 'geany',
+               'bugzilla_component': 'geany',
+               'dist_git_branch': 'f23',
+               'global_component': 'geany',
+               'name': 'geany',
                'release': {
-                    'release_id': u'fedora-23-updates',
+                    'release_id': 'fedora-23-updates',
                },
                'type': 'srpm'},
             ]
@@ -291,8 +294,8 @@ def mock_pdc(function):
             'next': None,
             'previous': None,
             'results': [
-              {'name': u'geany'},
-              {'name': u'guake'},
+              {'name': 'geany'},
+              {'name': 'guake'},
             ]
         })
 
@@ -433,4 +436,4 @@ class TestBaseHarness(BaseHandlerTest):
     def test_get_fedmsg(self):
         idx = '2015-6c98c8e3-0dcb-497d-a0d8-0b3d026a4cfb'
         msg = pdcupdater.utils.get_fedmsg(idx)
-        self.assertEquals(msg['msg']['user']['username'], 'ralph')
+        self.assertEqual(msg['msg']['user']['username'], 'ralph')

@@ -12,22 +12,23 @@ RUN yum -y update && \
         gcc-c++ \
         krb5-devel \
         libffi-devel \
-        libyaml-devel \
+#        libyaml-devel \
         openssl-devel \
-        python27 \
-        python-devel \
-        python-pip \
+        python3 \
+        python3-devel \
+        python3-pip \
         redhat-rpm-config \
         swig \
         zeromq-devel \
         rpm-devel \
-        python2-koji \
+        python3-koji \
         libmodulemd && \
     yum clean all
 
 COPY . .
 
-RUN pip install --upgrade pip setuptools && \
-    python setup.py develop && pip install -r test-requirements.txt
+RUN pip3 install --upgrade pip setuptools && \
+    python3 setup.py develop && \
+    pip3 install -r test-requirements.txt
 
 CMD ["pytest", "-v", "pdcupdater/tests/"]

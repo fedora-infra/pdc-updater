@@ -1,9 +1,11 @@
 import logging
 from datetime import datetime
-import requests
 
 import pdcupdater.services
 import pdcupdater.utils
+
+import requests
+
 
 log = logging.getLogger(__name__)
 
@@ -67,7 +69,7 @@ class RetireComponentHandler(pdcupdater.handlers.BaseHandler):
                               'repo': repo,
                               'branch': branchname,
                               'file': 'dead.package'}
-        log.info('Checking for file: %s' % fileurl)
+        log.info('Checking for file: %s', fileurl)
         resp = requests.head(fileurl, timeout=15)
         if resp.status_code != 200:
             log.info('Seems not to actually be retired, possibly merge')

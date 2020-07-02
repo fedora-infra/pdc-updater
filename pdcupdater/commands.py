@@ -1,19 +1,20 @@
 import logging
 import logging.config
 import sys
+from itertools import islice
+
+from beanbag.bbexcept import BeanBagException
 
 import fedmsg.config
 import fedmsg.encoding
 
+import pdc_client
+
 import pdcupdater.handlers
 import pdcupdater.utils
 
-import beanbag.bbexcept
 
 log = logging.getLogger(__name__)
-
-# https://github.com/product-definition-center/pdc-client/issues/8
-import pdc_client
 
 
 def retry():
@@ -34,11 +35,11 @@ def retry():
 
 def _initialize_basics(pdc):
     """ Gotta have these before we can really do anything... """
-    arches = [dict(name=name) for name in ["armhfp", "i386", "x86_64"]]
+    arches = [{'name': name} for name in ["armhfp", "i386", "x86_64"]]
     pdc_arches = list(pdc.get_paged(pdc['arches']._))
     for arch in arches:
         if arch not in pdc_arches:
-            log.info("Creating arch %r." % arch['name'])
+            log.info("Creating arch %r.", arch['name'])
             pdc['arches']._(arch)
 
 
@@ -50,11 +51,11 @@ def initialize():
     _initialize_basics(pdc)
     handlers = pdcupdater.handlers.load_handlers(config)
     for handler in handlers:
-        log.info("Calling .initialize() on %r" % handler)
-        pdc.set_comment("Initialized via %r" % handler)
+        log.info("Calling .initialize() on %r", handler)
+        pdc.set_comment(f"Initialized via {handler!r}")
         try:
             handler.initialize(pdc)
-        except beanbag.bbexcept.BeanBagException as e:
+        except BeanBagException as e:
             log.exception(e.response.text)
             #raise  # TODO - eventually raise here.  While in dev, leave it out
     log.info("Done initializing.")
@@ -68,7 +69,7 @@ def audit():
     results = {}
     for handler in handlers:
         name = type(handler).__name__
-        log.info('Performing audit for %s' % name)
+        log.info('Performing audit for %s', name)
         results[name] = handler.audit(pdc)
 
     verbose = False
@@ -82,27 +83,27 @@ def _print_audit_report(results, verbose):
         fail = fail or present or absent
 
     if not fail:
-        print "Everything seems to be OK."
+        print("Everything seems to be OK.")
     else:
-        print "WARNING - audit script detected something is wrong."
+        print("WARNING - audit script detected something is wrong.")
 
-    print
-    print "Summary"
-    print "======="
-    print
+    print()
+    print("Summary")
+    print("=======")
+    print()
 
     for key, values in results.items():
         present, absent = values
         if not present and not absent:
-            print "- [x]", key
+            print(f"- [x] {key}")
         else:
-            print "- [!]", key
-            print "     ", len(present), "extra entries in PDC unaccounted for"
-            print "     ", len(absent), "entries absent from PDC"
+            print(f"- [!] {key}")
+            print(f"      {len(present)} extra entries in PDC unaccounted for")
+            print(f"      {len(absent)} entries absent from PDC")
 
-    print
-    print "Details"
-    print "======="
+    print()
+    print("Details")
+    print("=======")
 
     limit = 100
     for key, values in results.items():
@@ -110,47 +111,45 @@ def _print_audit_report(results, verbose):
         if not present and not absent:
             continue
 
-        print
-        print key
-        print "-" * len(key)
-        print
+        print()
+        print(key)
+        print("-" * len(key))
+        print()
 
         if not present:
-            print "No extra entries in PDC that do not appear in the source."
+            print("No extra entries in PDC that do not appear in the source.")
         else:
-            print "Values present in PDC but missing from the source:"
-            print
+            print("Values present in PDC but missing from the source:")
+            print()
             if verbose or len(present) < limit:
                 for value in present:
-                    print "-", value
+                    print(f"- {value}")
                     if isinstance(present, dict):
-                        print " ", present[value]
+                        print(f"  {present[value]}")
             else:
-                present = list(present)
-                for value in present[:limit]:
-                    print "-", value
+                for value in islice(present, limit):
+                    print(f"- {value}")
                     if isinstance(present, dict):
-                        print " ", present[value]
-                print "- (plus %i more... truncated.)" % (len(present) - limit)
-        print
+                        print(f"  {present[value]}")
+                print(f"- (plus {len(present) - limit} more... truncated.)")
+        print()
 
         if not absent:
-            print "No entries found in the source to be absent from from PDC."
+            print("No entries found in the source to be absent from from PDC.")
         else:
-            print "Values absent from PDC but present in the source:"
-            print
+            print("Values absent from PDC but present in the source:")
+            print()
             if verbose or len(absent) < limit:
                 for value in absent:
-                    print "-", value
+                    print(f"- {value}")
                     if isinstance(absent, dict):
-                        print " ", absent[value]
+                        print(f"  {absent[value]}")
             else:
-                absent = list(absent)
-                for value in absent[:limit]:
-                    print "-", value
+                for value in islice(absent, limit):
+                    print(f"- {value}")
                     if isinstance(absent, dict):
-                        print " ", absent[value]
-                print "- (plus %i more... truncated.)" % (len(absent) - limit)
+                        print(f"  {absent[value]}")
+                print(f"- (plus {len(absent) - limit} more... truncated.)")
 
     if not fail:
         return 0

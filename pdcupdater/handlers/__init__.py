@@ -1,4 +1,4 @@
-import abc
+from abc import ABCMeta, abstractmethod
 
 import fedmsg.utils
 
@@ -11,9 +11,8 @@ def load_handlers(config):
         yield handler
 
 
-class BaseHandler(object):
+class BaseHandler(object, metaclass=ABCMeta):
     """ An abstract base class for handlers to enforce API. """
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, config):
         self.config = config
@@ -32,21 +31,22 @@ class BaseHandler(object):
                 for topic in self.topic_suffixes
             ]
 
-    @abc.abstractproperty
+    @property
+    @abstractmethod
     def topic_suffixes(self):
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def can_handle(self, pdc, msg):
         """ Return True or False if this handler can handle this message. """
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def handle(self, pdc, msg):
         """ Handle a fedmsg and update PDC if necessary. """
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def audit(self, pdc):
         """ This is intended to be called from a cronjob once every few days
         and is meant to (in a read-only fashion) check that what PDC thinks is
@@ -61,7 +61,7 @@ class BaseHandler(object):
         """
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def initialize(self, pdc):
         """ This needs to be called only once when pdc-updater is first
         installed.  It should query the original data source and initialize PDC
